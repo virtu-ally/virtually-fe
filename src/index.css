@@ -12,6 +12,13 @@
   --font-kameron: "Kameron", sans-serif;
   background-color: #ffdab3;
   font-family: var(--font-kameron);
+  height: 100%;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
 }
 
 @layer base {

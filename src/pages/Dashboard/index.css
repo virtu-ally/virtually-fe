@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 .bookContainer,
 .bookContainer:before,
 .bookContainer:after {
@@ -17,22 +19,21 @@
 }
 
 .bookContainer {
-  height: 100%;
+  height: 100vh;
   width: 100%;
   overflow: hidden;
   background-color: #ffdab3;
   text-align: center;
   margin: auto;
   padding: 0;
-  position: absolute;
+  position: relative;
 }
 
 .book {
   width: 280px;
   height: 420px;
   position: relative;
-  top: 10%;
-  margin: auto;
+  margin: 5% auto;
   background: var(--primary-color-orange);
   border-radius: 20px 16px 12px 32px;
   background-image: linear-gradient(
@@ -44,6 +45,8 @@
   transform-style: preserve-3d;
   backface-visibility: visible;
   z-index: 1;
+  transform: translateY(0%);
+  transition: transform ease-in-out 1s;
 }
 
 .front {
@@ -97,45 +100,57 @@
   border-radius: 20px 16px 12px 32px;
 }
 
+.book.clicked {
+  transform: translateY(15%);
+  transition: transform ease-in-out 1s;
+}
+
+@media screen and (min-width: 600px) {
+  .book.clicked {
+    transform: translateY(0%);
+    transition: transform ease-in-out 1s;
+  }
+}
+
 .book.clicked .front {
-  transform: rotateY(-160deg) scale(1.3) translateY(2%);
+  transform: rotateY(-160deg) scale(1.3) translateY(5%);
   /* box-shadow: 0 1em 3em 0 rgba(0, 0, 0, 0.2); */
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
 }
 
 .book.clicked .page1 {
-  transform: rotateY(-150deg) scale(1.3) translateY(2%);
+  transform: rotateY(-150deg) scale(1.3) translateY(5%);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
 }
 
 .book.clicked .page2 {
-  transform: rotateY(-30deg) scale(1.3) translateY(2%);
+  transform: rotateY(-30deg) scale(1.3) translateY(5%);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
 }
 
 .book.clicked .page3 {
-  transform: rotateY(-140deg) scale(1.3) translateY(2%);
+  transform: rotateY(-140deg) scale(1.3) translateY(5%);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
 }
 
 .book.clicked .page4 {
-  transform: rotateY(-35deg) scale(1.3) translateY(2%);
+  transform: rotateY(-35deg) scale(1.3) translateY(5%);
   box-shadow: 0 1em 3em 0 rgba(0, 0, 0, 0.2);
 }
 
 .book.clicked .page5 {
-  transform: rotateY(-130deg) scale(1.3) translateY(2%);
+  transform: rotateY(-130deg) scale(1.3) translateY(5%);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
 }
 
 .book.clicked .page6 {
-  transform: rotateY(-42deg) scale(1.3) translateY(2%);
+  transform: rotateY(-38deg) scale(1.3) translateY(5%);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
   border-left: 1px solid lightgray;
 }
 
 .book.clicked .back {
-  transform: rotateY(-20deg) scale(1.3) translateY(2%);
+  transform: rotateY(-20deg) scale(1.3) translateY(5%);
 }
 
 .front:before {
@@ -227,9 +242,9 @@
 }
 
 .btn-primary {
-  padding: 1rem 2rem;
+  padding: 1rem;
   position: absolute;
-  left: 78%;
+  left: 80%;
   top: 35%;
   animation: pulsate infinite 2s ease-in-out, fade 2s ease-in-out;
   z-index: 10;
@@ -237,10 +252,17 @@
 }
 
 .btn-primary.close {
-  padding: 1rem 2rem;
+  padding: 1rem;
   position: absolute;
   left: 55%;
   top: 495px;
   animation: pulsate infinite 2s ease-in-out, fade 2s ease-in-out;
   z-index: 10;
+}
+
+.inputContainer {
+  animation: fade 2s ease-in-out;
+}
+.input {
+  @apply border-b border-gray-400 focus:outline-none focus:border-[var(--primary-color-orange)] m-4;
 }

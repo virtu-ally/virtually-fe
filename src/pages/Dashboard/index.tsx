@@ -1,62 +1,60 @@
 import "./index.css";
 
-import { MoveLeft, MoveRight } from "lucide-react";
-
+import Book from "./Book";
+import { CheckCheck } from "lucide-react";
 import { useState } from "react";
 
 const Dashboard = () => {
-  const [isClicked, setIsClicked] = useState(false);
-
-  const handleButtonClick = () => {
-    setIsClicked(!isClicked);
-  };
+  const [isBookOpen, setIsBookOpen] = useState(false);
 
   return (
     <>
       <div className="text-center">
         <h1 className="text-5xl pt-12">Your Story</h1>
       </div>
-      <div className={`bookContainer ${isClicked ? "clicked" : ""}`}>
-        {isClicked ? (
-          <button
-            className="btn-primary cursor-pointer close "
-            onClick={handleButtonClick}
-          >
-            <MoveRight
-              color="var(--primary-color-red)"
-              size={48}
-              strokeWidth={1}
-            />{" "}
-            <span className="relative bottom-4 text-[var(--primary-color-red)] font-bold">
-              Close
-            </span>
-          </button>
-        ) : null}
-        <div className={`book ${isClicked ? "clicked" : ""}`}>
-          {!isClicked ? (
-            <button
-              className="btn-primary cursor-pointer"
-              onClick={handleButtonClick}
-            >
-              <MoveLeft
-                color="var(--primary-color-red)"
-                size={48}
-                strokeWidth={1}
-              />{" "}
-              <span className="relative bottom-4 text-[var(--primary-color-red)] font-bold">
-                Open
-              </span>
-            </button>
-          ) : null}
-          <div className="back"></div>
-          <div className="page6"></div>
-          <div className="page5"></div>
-          <div className="page4"></div>
-          <div className="page3"></div>
-          <div className="page2"></div>
-          <div className="page1"></div>
-          <div className="front"></div>
-        </div>
+      <div className="flex flex-col text-center">
+        {isBookOpen && (
+          <div className="relative top-[100px] z-[2] h-[0]">
+            <div className="inputContainer">
+              <CheckCheck className="inline-flex align-middle" />
+              <input
+                type="text"
+                id="task1"
+                className="input"
+                placeholder="Find a fun site"
+                disabled
+              />
+            </div>
+            <div className="inputContainer">
+              <span className="text-gray-600">&#9634;</span>
+              <input
+                type="text"
+                id="task2"
+                className="input"
+                placeholder="Goal 2"
+              />
+            </div>
+            <div className="inputContainer">
+              <span className="text-gray-600">&#9634;</span>
+              <input
+                type="text"
+                id="task3"
+                className="input"
+                placeholder="Goal 3"
+              />
+            </div>
+            <div className="inputContainer">
+              <span className="text-gray-600">&#9634;</span>
+              <input
+                type="text"
+                id="task4"
+                className="input"
+                placeholder="Goal 4"
+              />
+            </div>
+          </div>
+        )}
+        <Book isBookOpen={isBookOpen} setIsBookOpen={setIsBookOpen} />
       </div>
     </>
   );
