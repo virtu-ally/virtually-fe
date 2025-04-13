@@ -1,0 +1,246 @@
+.bookContainer,
+.bookContainer:before,
+.bookContainer:after {
+  box-sizing: inherit;
+}
+
+.book:before,
+.book:after {
+  content: "";
+  position: absolute;
+}
+
+.front:before,
+.front:after {
+  content: "";
+  position: absolute;
+}
+
+.bookContainer {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: #ffdab3;
+  text-align: center;
+  margin: auto;
+  padding: 0;
+  position: absolute;
+}
+
+.book {
+  width: 280px;
+  height: 420px;
+  position: relative;
+  top: 10%;
+  margin: auto;
+  background: var(--primary-color-orange);
+  border-radius: 20px 16px 12px 32px;
+  background-image: linear-gradient(
+    to right,
+    #d11f2f 48px,
+    var(--primary-color-red) 50px,
+    transparent 50px
+  );
+  transform-style: preserve-3d;
+  backface-visibility: visible;
+  z-index: 1;
+}
+
+.front {
+  width: 280px;
+  height: 420px;
+  transform-style: preserve-3d;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: left center;
+  transition: transform 1s ease-in-out, box-shadow 0.5s ease-in-out;
+  border-radius: 20px 16px 12px 20px;
+  background: var(--primary-color-orange);
+  background-image: linear-gradient(
+    to right,
+    #d11f2f 48px,
+    var(--primary-color-red) 50px,
+    transparent 50px
+  );
+}
+
+.back,
+.page1,
+.page2,
+.page3,
+.page4,
+.page5,
+.page6 {
+  transform-style: preserve-3d;
+  position: absolute;
+  width: 280px;
+  height: 100%;
+  top: 0;
+  left: 0;
+  transform-origin: left center;
+  transition: transform 1s ease-in-out, box-shadow 0.35s ease-in-out;
+}
+
+.back {
+  background-color: var(--primary-color-orange);
+  border-radius: 20px 16px 12px 32px;
+}
+
+.page1,
+.page2,
+.page3,
+.page4,
+.page5,
+.page6 {
+  background: #efefef;
+  border-radius: 20px 16px 12px 32px;
+}
+
+.book.clicked .front {
+  transform: rotateY(-160deg) scale(1.3) translateY(2%);
+  /* box-shadow: 0 1em 3em 0 rgba(0, 0, 0, 0.2); */
+  box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
+}
+
+.book.clicked .page1 {
+  transform: rotateY(-150deg) scale(1.3) translateY(2%);
+  box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
+}
+
+.book.clicked .page2 {
+  transform: rotateY(-30deg) scale(1.3) translateY(2%);
+  box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
+}
+
+.book.clicked .page3 {
+  transform: rotateY(-140deg) scale(1.3) translateY(2%);
+  box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
+}
+
+.book.clicked .page4 {
+  transform: rotateY(-35deg) scale(1.3) translateY(2%);
+  box-shadow: 0 1em 3em 0 rgba(0, 0, 0, 0.2);
+}
+
+.book.clicked .page5 {
+  transform: rotateY(-130deg) scale(1.3) translateY(2%);
+  box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
+}
+
+.book.clicked .page6 {
+  transform: rotateY(-42deg) scale(1.3) translateY(2%);
+  box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
+  border-left: 1px solid lightgray;
+}
+
+.book.clicked .back {
+  transform: rotateY(-20deg) scale(1.3) translateY(2%);
+}
+
+.front:before {
+  height: 20px;
+  width: 160px;
+  right: 40px;
+  top: 72px;
+  background: #d11f2f;
+  border-radius: 20px;
+  box-shadow: 0px 36px #d11f2f;
+}
+
+.front:after {
+  height: 22px;
+  width: 274px;
+  bottom: 6px;
+  right: 0px;
+  background: white;
+  opacity: 100%;
+  border-radius: 32px 4px 4px 32px;
+  transition: opacity linear 0.5s;
+  box-shadow: inset 4px 6px 0px 0px #e4e0ce;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 6px,
+    #e4e0ce 8px,
+    transparent 8px,
+    transparent 12px,
+    #e4e0ce 12px,
+    transparent 14px,
+    transparent 18px,
+    #e4e0ce 18px,
+    transparent 20px,
+    transparent 24px,
+    #e4e0ce 24px,
+    transparent 26px,
+    transparent 30px,
+    #e4e0ce 30px,
+    transparent 32px,
+    transparent 36px,
+    #e4e0ce 36px,
+    transparent 38px,
+    transparent 42px,
+    #e4e0ce 42px,
+    transparent 44px,
+    transparent 48px,
+    #e4e0ce 48px,
+    transparent 50px
+  );
+}
+
+.book.clicked .front:after {
+  height: 22px;
+  width: 274px;
+  bottom: 6px;
+  right: 0px;
+  opacity: 0%;
+  background: white;
+  border-radius: 32px 4px 4px 32px;
+  transition: opacity linear 0.5s;
+  box-shadow: inset 4px 6px 0px 0px #e4e0ce;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 6px,
+    #e4e0ce 8px,
+    transparent 8px,
+    transparent 12px,
+    #e4e0ce 12px,
+    transparent 14px,
+    transparent 18px,
+    #e4e0ce 18px,
+    transparent 20px,
+    transparent 24px,
+    #e4e0ce 24px,
+    transparent 26px,
+    transparent 30px,
+    #e4e0ce 30px,
+    transparent 32px,
+    transparent 36px,
+    #e4e0ce 36px,
+    transparent 38px,
+    transparent 42px,
+    #e4e0ce 42px,
+    transparent 44px,
+    transparent 48px,
+    #e4e0ce 48px,
+    transparent 50px
+  );
+}
+
+.btn-primary {
+  padding: 1rem 2rem;
+  position: absolute;
+  left: 78%;
+  top: 35%;
+  animation: pulsate infinite 2s ease-in-out, fade 2s ease-in-out;
+  z-index: 10;
+  transition: fade linear 0.5s;
+}
+
+.btn-primary.close {
+  padding: 1rem 2rem;
+  position: absolute;
+  left: 55%;
+  top: 495px;
+  animation: pulsate infinite 2s ease-in-out, fade 2s ease-in-out;
+  z-index: 10;
+}
