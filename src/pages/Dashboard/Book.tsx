@@ -7,8 +7,6 @@ const Book = ({ isBookOpen, setIsBookOpen }) => {
 
   return (
     <>
-      {/* {isBookOpen && <p>list</p>} */}
-
       <div className={`bookContainer ${isBookOpen ? "clicked" : ""}`}>
         {isBookOpen ? (
           <button
@@ -42,18 +40,6 @@ const Book = ({ isBookOpen, setIsBookOpen }) => {
             </button>
           ) : null}
           <div className="back"></div>
-          {/* {isBookOpen && (
-            <p
-              className="absolute z-30 text-lg text-black"
-              style={{
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-              }}
-            >
-              list
-            </p>
-          )} */}
           <div className="page6" style={{ zIndex: 1 }}></div>
           <div className="page5" style={{ zIndex: 1 }}></div>
           <div className="page4" style={{ zIndex: 1 }}></div>
