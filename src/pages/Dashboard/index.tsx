@@ -14,14 +14,15 @@ const Dashboard = () => {
       </div>
       <div className="flex flex-col text-center">
         {isBookOpen && (
-          <div className="relative top-[100px] z-[2] h-[0]">
+          <div className="relative top-[100px] z-[2] h-[0] left-[0.8rem]">
             <div className="inputContainer">
               <CheckCheck className="inline-flex align-middle" />
               <input
                 type="text"
                 id="task1"
-                className="input"
+                className="input text-black"
                 placeholder="Find a fun site"
+                value="Find a fun site"
                 disabled
               />
             </div>
@@ -31,7 +32,7 @@ const Dashboard = () => {
                 type="text"
                 id="task2"
                 className="input"
-                placeholder="Goal 2"
+                placeholder="Input Goal 2"
               />
             </div>
             <div className="inputContainer">
@@ -40,7 +41,7 @@ const Dashboard = () => {
                 type="text"
                 id="task3"
                 className="input"
-                placeholder="Goal 3"
+                placeholder="Input Goal 3"
               />
             </div>
             <div className="inputContainer">
@@ -49,7 +50,7 @@ const Dashboard = () => {
                 type="text"
                 id="task4"
                 className="input"
-                placeholder="Goal 4"
+                placeholder="Input Goal 4"
               />
             </div>
           </div>

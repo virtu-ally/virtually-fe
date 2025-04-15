@@ -45,7 +45,7 @@
   transform-style: preserve-3d;
   backface-visibility: visible;
   z-index: 1;
-  transform: translateY(0%);
+  transform: translateY(2%);
   transition: transform ease-in-out 1s;
 }
 
@@ -261,7 +261,7 @@
 }
 
 .inputContainer {
-  animation: fade 2s ease-in-out;
+  animation: fade 2s 1 ease-in-out;
 }
 .input {
   @apply border-b border-gray-400 focus:outline-none focus:border-[var(--primary-color-orange)] m-4;

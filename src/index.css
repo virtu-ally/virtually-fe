@@ -1,6 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap");
 @import "tailwindcss";
-/* @import "tailwindcss/preflight"; */
 
 #root {
   --primary-color-peach: #ffdab3;
@@ -13,6 +12,7 @@
   background-color: #ffdab3;
   font-family: var(--font-kameron);
   height: 100%;
+  overflow: hidden;
 }
 
 html,
