@@ -96,7 +96,7 @@
 .page4,
 .page5,
 .page6 {
-  background: #efefef;
+  background: #fff;
   border-radius: 20px 16px 12px 32px;
 }
 
@@ -246,9 +246,9 @@
   position: absolute;
   left: 80%;
   top: 35%;
-  animation: pulsate infinite 2s ease-in-out, fade 2s ease-in-out;
+  animation: pulsate infinite 2s ease-in-out, fadeIn 2s ease-in-out;
   z-index: 10;
-  transition: fade linear 0.5s;
+  transition: fadeIn linear 0.5s;
 }
 
 .btn-primary.close {
@@ -256,13 +256,27 @@
   position: absolute;
   left: 55%;
   top: 495px;
-  animation: pulsate infinite 2s ease-in-out, fade 2s ease-in-out;
+  animation: pulsate infinite 2s ease-in-out, fadeIn 2s ease-in-out;
   z-index: 10;
 }
 
-.inputContainer {
-  animation: fade 2s 1 ease-in-out;
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 2s 1 ease-in-out forwards;
 }
+
 .input {
   @apply border-b border-gray-400 focus:outline-none focus:border-[var(--primary-color-orange)] m-4;
+}
+
+.fadeOutContent {
+  animation: fadeOut 1s ease-in-out;
+}
+
+.submit-button {
+  @apply bg-[var(--primary-color-teal)] text-white rounded py-[0.5rem] px-[1rem] cursor-pointer;
+}
+
+.submit-button:hover {
+  @apply bg-[var(--primary-color-orange)] hover:shadow-lg transition-all duration-300;
 }

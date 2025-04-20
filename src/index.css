@@ -8,11 +8,11 @@
   --primary-color-purple-lighter: #c8aaaa;
   --primary-color-orange: #f55d3e;
   --primary-color-red: #d11f2f;
+  --primary-color-teal: #07707a;
   --font-kameron: "Kameron", sans-serif;
   background-color: #ffdab3;
   font-family: var(--font-kameron);
   height: 100%;
-  overflow: hidden;
 }
 
 html,
@@ -37,5 +37,17 @@ body {
   }
   h5 {
     font-size: var(--text-sm);
+  }
+}
+
+@layer utilities {
+  .animation-delay-75 {
+    animation-delay: 75ms;
+  }
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+  .animation-delay-1000 {
+    animation-delay: 1s;
   }
 }

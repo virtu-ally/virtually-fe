@@ -10,14 +10,31 @@
   }
 }
 
-@keyframes fade {
-  0% {
+@keyframes fadeIn {
+  from {
     opacity: 0%;
   }
-  50% {
-    opacity: 0%;
-  }
-  100% {
+
+  to {
     opacity: 100%;
   }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 100%;
+  }
+
+  to {
+    opacity: 0%;
+  }
+}
+
+.background {
+  transition: transform 2s ease-in-out;
+  overflow: hidden;
+}
+
+.grow-fade {
+  transform: scale(40);
 }

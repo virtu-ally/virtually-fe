@@ -1,6 +1,8 @@
+import "./index.css";
+
 import { MoveLeft, MoveRight } from "lucide-react";
 
-const Book = ({ isBookOpen, setIsBookOpen }) => {
+const Book = ({ isBookOpen, setIsBookOpen, isNavigateClicked }) => {
   const handleButtonClick = () => {
     setIsBookOpen(!isBookOpen);
   };
@@ -40,7 +42,10 @@ const Book = ({ isBookOpen, setIsBookOpen }) => {
             </button>
           ) : null}
           <div className="back"></div>
-          <div className="page6" style={{ zIndex: 1 }}></div>
+          <div
+            className={`page6 ${isNavigateClicked ? "fadeOutContent" : ""}`}
+            style={{ zIndex: 1 }}
+          ></div>
           <div className="page5" style={{ zIndex: 1 }}></div>
           <div className="page4" style={{ zIndex: 1 }}></div>
           <div className="page3" style={{ zIndex: 1 }}></div>

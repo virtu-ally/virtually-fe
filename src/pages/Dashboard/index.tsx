@@ -2,10 +2,23 @@ import "./index.css";
 
 import Book from "./Book";
 import { CheckCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
-const Dashboard = () => {
+const Dashboard = ({ onNavigate }) => {
   const [isBookOpen, setIsBookOpen] = useState(false);
+  const [isNavigateClicked, setIsNavigateClicked] = useState(false);
+  const [goal, setGoal] = useState("");
+
+  const handleNavigate = (e) => {
+    setIsNavigateClicked(true);
+    e.preventDefault();
+    onNavigate("/template", { state: { goal } });
+  };
+
+  const handleChange = (e) => {
+    setGoal(e.target.value);
+  };
 
   return (
     <>
@@ -14,8 +27,8 @@ const Dashboard = () => {
       </div>
       <div className="flex flex-col text-center">
         {isBookOpen && (
-          <div className="relative top-[100px] z-[2] h-[0] left-[0.8rem]">
-            <div className="inputContainer">
+          <div className="relative top-[70px] z-[2] h-[0] left-[0.8rem] animation-delay-1000 fade-in">
+            <div className="animation-delay-1000 fade-in">
               <CheckCheck className="inline-flex align-middle" />
               <input
                 type="text"
@@ -26,36 +39,65 @@ const Dashboard = () => {
                 disabled
               />
             </div>
-            <div className="inputContainer">
+            <div className="fade-in">
               <span className="text-gray-600">&#9634;</span>
               <input
                 type="text"
                 id="task2"
                 className="input"
-                placeholder="Input Goal 2"
+                placeholder="Input Goal 2..."
+                onChange={handleChange}
               />
             </div>
-            <div className="inputContainer">
+            {/* <div className="fade-in">
               <span className="text-gray-600">&#9634;</span>
               <input
                 type="text"
                 id="task3"
                 className="input"
-                placeholder="Input Goal 3"
+                placeholder="Input Goal 3..."
               />
             </div>
-            <div className="inputContainer">
+            <div className="fade-in">
               <span className="text-gray-600">&#9634;</span>
               <input
                 type="text"
                 id="task4"
                 className="input"
-                placeholder="Input Goal 4"
+                placeholder="Input Goal 4..."
               />
+            </div> */}
+            <div className="fade-in my-4">
+              <Link
+                to="/template"
+                viewTransition
+                onClick={handleNavigate}
+                className="submit-button"
+              >
+                Create plan
+              </Link>
+            </div>
+
+            <div
+              className={`max-w-[245px] inline-block pt-4 fade-in ${
+                isNavigateClicked ? "fadeOutContent" : ""
+              }`}
+            >
+              <p>What are your goals? </p>
+              <br />
+              <ul className="pt-4">
+                <li> Would you like to become healthy,</li>
+                <li> more knowledgable about plants </li>
+                <li>or determined to read an hour every day?</li>
+              </ul>
             </div>
           </div>
         )}
-        <Book isBookOpen={isBookOpen} setIsBookOpen={setIsBookOpen} />
+        <Book
+          isBookOpen={isBookOpen}
+          setIsBookOpen={setIsBookOpen}
+          isNavigateClicked={isNavigateClicked}
+        />
       </div>
     </>
   );
