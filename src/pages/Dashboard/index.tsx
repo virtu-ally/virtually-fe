@@ -27,7 +27,11 @@ const Dashboard = ({ onNavigate }) => {
       </div>
       <div className="flex flex-col text-center">
         {isBookOpen && (
-          <div className="relative top-[70px] z-[2] h-[0] left-[0.8rem] animation-delay-1000 fade-in">
+          <div
+            className={`relative top-[85px] z-[2] h-[0] left-[-1.5rem] animation-delay-1000 fade-in  ${
+              isNavigateClicked ? "fadeOutContent" : ""
+            }`}
+          >
             <div className="animation-delay-1000 fade-in">
               <CheckCheck className="inline-flex align-middle" />
               <input
@@ -45,7 +49,7 @@ const Dashboard = ({ onNavigate }) => {
                 type="text"
                 id="task2"
                 className="input"
-                placeholder="Input Goal 2..."
+                placeholder="Type Goal 2..."
                 onChange={handleChange}
               />
             </div>
@@ -79,7 +83,7 @@ const Dashboard = ({ onNavigate }) => {
             </div>
 
             <div
-              className={`max-w-[245px] inline-block pt-4 fade-in ${
+              className={`max-w-[230px] inline-block pt-4 fade-in ${
                 isNavigateClicked ? "fadeOutContent" : ""
               }`}
             >

@@ -9,7 +9,11 @@ const Book = ({ isBookOpen, setIsBookOpen, isNavigateClicked }) => {
 
   return (
     <>
-      <div className={`bookContainer ${isBookOpen ? "clicked" : ""}`}>
+      <div
+        className={`bookContainer ${isBookOpen ? "clicked" : ""} ${
+          isNavigateClicked ? "fadeOutContent" : ""
+        }`}
+      >
         {isBookOpen ? (
           <button
             className="btn-primary cursor-pointer close "
@@ -46,9 +50,7 @@ const Book = ({ isBookOpen, setIsBookOpen, isNavigateClicked }) => {
             className={`page6 ${isNavigateClicked ? "fadeOutContent" : ""}`}
             style={{ zIndex: 1 }}
           ></div>
-          <div className="page5" style={{ zIndex: 1 }}></div>
           <div className="page4" style={{ zIndex: 1 }}></div>
-          <div className="page3" style={{ zIndex: 1 }}></div>
           <div className="page2" style={{ zIndex: 1 }}></div>
           <div className="page1" style={{ zIndex: 1 }}></div>
           <div className="front" style={{ zIndex: 1 }}></div>

@@ -24,7 +24,7 @@ function App() {
     <div
       className={`${location.pathname === "/" ? "background" : ""} 
       ${location.pathname === "/template" ? "bg-white" : ""}
-      ${transitioning ? "grow-fade" : ""}`}
+      `}
     >
       <Routes location={location}>
         <Route path="/" element={<Dashboard onNavigate={handleTransition} />} />

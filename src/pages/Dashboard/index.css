@@ -4,6 +4,7 @@
 .bookContainer:before,
 .bookContainer:after {
   box-sizing: inherit;
+  transform: translateZ(0);
 }
 
 .book:before,
@@ -27,31 +28,28 @@
   margin: auto;
   padding: 0;
   position: relative;
+  will-change: transform;
+  transform: translateZ(0);
+  margin-top: 2rem;
 }
 
 .book {
-  width: 280px;
-  height: 420px;
+  width: 330px;
+  height: 480px;
   position: relative;
   margin: 5% auto;
-  background: var(--primary-color-orange);
   border-radius: 20px 16px 12px 32px;
-  background-image: linear-gradient(
-    to right,
-    #d11f2f 48px,
-    var(--primary-color-red) 50px,
-    transparent 50px
-  );
   transform-style: preserve-3d;
   backface-visibility: visible;
   z-index: 1;
-  transform: translateY(2%);
   transition: transform ease-in-out 1s;
+  transform: translateZ(0);
+  contain: layout style;
 }
 
 .front {
-  width: 280px;
-  height: 420px;
+  width: 330px;
+  height: 480px;
   transform-style: preserve-3d;
   position: absolute;
   top: 0;
@@ -66,6 +64,8 @@
     var(--primary-color-red) 50px,
     transparent 50px
   );
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .back,
@@ -77,12 +77,14 @@
 .page6 {
   transform-style: preserve-3d;
   position: absolute;
-  width: 280px;
+  width: 330px;
   height: 100%;
   top: 0;
   left: 0;
   transform-origin: left center;
   transition: transform 1s ease-in-out, box-shadow 0.35s ease-in-out;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .back {
@@ -101,7 +103,7 @@
 }
 
 .book.clicked {
-  transform: translateY(15%);
+  /* transform: translateY(15%); */
   transition: transform ease-in-out 1s;
 }
 
@@ -110,53 +112,64 @@
     transform: translateY(0%);
     transition: transform ease-in-out 1s;
   }
+  .bookContainer {
+    padding-left: 20px;
+    margin-top: 0;
+  }
 }
 
 .book.clicked .front {
-  transform: rotateY(-160deg) scale(1.3) translateY(5%);
+  /* transform: rotateY(-160deg) scale(1.3) translateY(5%); */
+  transform: rotateY(-160deg);
   /* box-shadow: 0 1em 3em 0 rgba(0, 0, 0, 0.2); */
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
 }
 
 .book.clicked .page1 {
-  transform: rotateY(-150deg) scale(1.3) translateY(5%);
+  /* transform: rotateY(-150deg) scale(1.3) translateY(5%); */
+  transform: rotateY(-150deg);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
 }
 
 .book.clicked .page2 {
-  transform: rotateY(-30deg) scale(1.3) translateY(5%);
+  transform: rotateY(-30deg);
+  /* transform: rotateY(-30deg) scale(1.3) translateY(5%); */
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
 }
 
-.book.clicked .page3 {
+/* .book.clicked .page3 {
+  transform: rotateY(-140deg);
   transform: rotateY(-140deg) scale(1.3) translateY(5%);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
-}
+} */
 
 .book.clicked .page4 {
-  transform: rotateY(-35deg) scale(1.3) translateY(5%);
+  transform: rotateY(-35deg);
+  /* transform: rotateY(-35deg) scale(1.3) translateY(5%); */
   box-shadow: 0 1em 3em 0 rgba(0, 0, 0, 0.2);
 }
 
-.book.clicked .page5 {
-  transform: rotateY(-130deg) scale(1.3) translateY(5%);
+/* .book.clicked .page5 {
+  transform: rotateY(-130deg);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
-}
+} */
 
 .book.clicked .page6 {
-  transform: rotateY(-38deg) scale(1.3) translateY(5%);
+  /* transform: rotateY(-38deg) scale(1.3) translateY(5%); */
+  transform: rotateY(-38deg);
   box-shadow: 0 0em 1em 0px rgba(0, 0, 0, 0.2);
   border-left: 1px solid lightgray;
 }
 
 .book.clicked .back {
-  transform: rotateY(-20deg) scale(1.3) translateY(5%);
+  transform: rotateY(-20deg);
+  /* transform: rotateY(-20deg) scale(1.3) translateY(5%); */
 }
 
 .front:before {
   height: 20px;
-  width: 160px;
-  right: 40px;
+  width: 175px;
+  right: 60px;
   top: 72px;
   background: #d11f2f;
   border-radius: 20px;
@@ -165,7 +178,7 @@
 
 .front:after {
   height: 22px;
-  width: 274px;
+  width: 320px;
   bottom: 6px;
   right: 0px;
   background: white;
@@ -204,8 +217,9 @@
 
 .book.clicked .front:after {
   height: 22px;
-  width: 274px;
+  width: 320px;
   bottom: 6px;
+  right: 0px;
   right: 0px;
   opacity: 0%;
   background: white;
@@ -244,7 +258,7 @@
 .btn-primary {
   padding: 1rem;
   position: absolute;
-  left: 80%;
+  left: 83%;
   top: 35%;
   animation: pulsate infinite 2s ease-in-out, fadeIn 2s ease-in-out;
   z-index: 10;
@@ -255,7 +269,7 @@
   padding: 1rem;
   position: absolute;
   left: 55%;
-  top: 495px;
+  top: 430px;
   animation: pulsate infinite 2s ease-in-out, fadeIn 2s ease-in-out;
   z-index: 10;
 }
@@ -270,7 +284,18 @@
 }
 
 .fadeOutContent {
-  animation: fadeOut 1s ease-in-out;
+  animation: scaleBig 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+
+@keyframes scaleBig {
+  0% {
+    transform: scale(1) translateZ(0);
+  }
+  100% {
+    transform: scale(20) translateZ(0);
+  }
 }
 
 .submit-button {
@@ -280,3 +305,6 @@
 .submit-button:hover {
   @apply bg-[var(--primary-color-orange)] hover:shadow-lg transition-all duration-300;
 }
+/* .grow-fade {
+  transform: scale(10);
+} */

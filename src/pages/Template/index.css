@@ -10,22 +10,28 @@
   cursor: pointer;
   border: 1px solid var(--primary-color-teal);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, background-color, box-shadow;
 }
 
 .save-button:hover {
   background-color: var(--primary-color-orange);
   border-color: white;
   box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color-orange);
+  transform: translateZ(0);
 }
 
 .save-button:focus {
   outline: none;
   box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color-orange);
+  transform: translateZ(0);
 }
 
 .save-button:active {
-  transform: translateY(1px);
+  transform: translateY(1px) translateZ(0);
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
