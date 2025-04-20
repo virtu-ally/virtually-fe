@@ -47,7 +47,9 @@ const Book = ({ isBookOpen, setIsBookOpen, isNavigateClicked }) => {
           ) : null}
           <div className="back"></div>
           <div
-            className={`page6 ${isNavigateClicked ? "fadeOutContent" : ""}`}
+            className={`page6 ${
+              isNavigateClicked ? "translate-z-128 opacity-0" : ""
+            }`}
             style={{ zIndex: 1 }}
           ></div>
           <div className="page4" style={{ zIndex: 1 }}></div>

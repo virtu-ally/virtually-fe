@@ -22,17 +22,27 @@ const Dashboard = ({ onNavigate }) => {
 
   return (
     <>
-      <div className="text-center">
-        <h1 className="text-5xl pt-12">Your Story</h1>
+      <div className={`text-center `}>
+        <h1
+          className={`text-5xl pt-12 " ${
+            isNavigateClicked ? "fadeOutTitle-delayed" : ""
+          }`}
+        >
+          Your Story
+        </h1>
       </div>
-      <div className="flex flex-col text-center">
+      <div className={`flex flex-col text-center`}>
         {isBookOpen && (
           <div
-            className={`relative top-[85px] z-[2] h-[0] left-[-1.5rem] animation-delay-1000 fade-in  ${
-              isNavigateClicked ? "fadeOutContent" : ""
-            }`}
+            className={`relative top-[85px] z-[2] h-[0] left-[-1.5rem] animation-delay-1000 fade-in  
+            ${isNavigateClicked ? "fadeOutContent-delayed" : ""}
+            `}
           >
-            <div className="animation-delay-1000 fade-in">
+            <div
+              className={`animation-delay-1000 fade-in    ${
+                isNavigateClicked ? "fadeOutContent-delayed2" : ""
+              }`}
+            >
               <CheckCheck className="inline-flex align-middle" />
               <input
                 type="text"
@@ -43,7 +53,11 @@ const Dashboard = ({ onNavigate }) => {
                 disabled
               />
             </div>
-            <div className="fade-in">
+            <div
+              className={`animation-delay-1000 fade-in    ${
+                isNavigateClicked ? "fadeOutContent-delayed2" : ""
+              }`}
+            >
               <span className="text-gray-600">&#9634;</span>
               <input
                 type="text"
@@ -76,7 +90,7 @@ const Dashboard = ({ onNavigate }) => {
                 to="/template"
                 viewTransition
                 onClick={handleNavigate}
-                className="submit-button"
+                className="submit-button "
               >
                 Create plan
               </Link>
@@ -84,7 +98,7 @@ const Dashboard = ({ onNavigate }) => {
 
             <div
               className={`max-w-[230px] inline-block pt-4 fade-in ${
-                isNavigateClicked ? "fadeOutContent" : ""
+                isNavigateClicked ? "fadeOutContent-delayed" : ""
               }`}
             >
               <p>What are your goals? </p>

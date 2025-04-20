@@ -284,17 +284,67 @@
 }
 
 .fadeOutContent {
-  animation: scaleBig 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: scaleBig 1.5s ease-in-out forwards;
   will-change: transform, opacity;
   transform-origin: center center;
+  opacity: 1;
+}
+
+.fadeOutContent-delayed {
+  animation: scaleText 1.5s ease-in 0.1s forwards, fadeOut 1.5s ease-in forwards;
+  will-change: transform, opacity;
+  transform-origin: center center;
+  opacity: 1;
+}
+
+.fadeOutContent-delayed2 {
+  animation: scaleText2 1.5s ease-in forwards, fadeOut 1.5s ease-in forwards;
+  will-change: transform, opacity;
+  transform-origin: center center;
+  opacity: 1;
+}
+
+.fadeOutTitle-delayed {
+  animation: fadeOut 0.5s ease-in 1s forwards,
+    bgFadeIn 0.5s ease-in 0.5s forwards;
+  will-change: transform, opacity, background-color;
+  transform-origin: center center;
+  opacity: 1;
+}
+
+@keyframes bgFadeIn {
+  0% {
+    background-color: var(--primary-color-peach);
+  }
+  100% {
+    background-color: white;
+  }
 }
 
 @keyframes scaleBig {
   0% {
-    transform: scale(1) translateZ(0);
+    transform: scale(1) translate3d(0, 0, 0);
   }
   100% {
-    transform: scale(20) translateZ(0);
+    transform: scale(3) translate3d(0, 20%, 200px);
+  }
+}
+
+@keyframes scaleText {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(3) translate3d(0, 40%, 200px);
+  }
+}
+
+@keyframes scaleText2 {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(3) translate3d(0, -30%, 200px);
   }
 }
 

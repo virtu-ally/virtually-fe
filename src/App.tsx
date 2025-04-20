@@ -16,7 +16,7 @@ function App() {
     setTimeout(() => {
       setTransitioning(false);
       navigate(newLocation, state);
-    }, 1000);
+    }, 1500);
   };
 
   console.log(location.pathname, "location.pathname");
