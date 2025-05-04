@@ -3,6 +3,7 @@ import "./App.css";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
 import Template from "./pages/Template";
 import { useState } from "react";
 
@@ -27,8 +28,12 @@ function App() {
       `}
     >
       <Routes location={location}>
-        <Route path="/" element={<Dashboard onNavigate={handleTransition} />} />
+        <Route
+          path="/dashboard"
+          element={<Dashboard onNavigate={handleTransition} />}
+        />
         <Route path="/template" element={<Template />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </div>
   );
