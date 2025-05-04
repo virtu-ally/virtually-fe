@@ -24,7 +24,7 @@ const Template = () => {
   return (
     <div className="min-h-screen bg-[var(--primary-color-orange)] text-black fade-in flex flex-col items-center">
       <h1 className="text-3xl font-bold mb-6 pt-8 px-4 w-full text-center">
-        Goal: {location.state.goal}
+        Goal: {location.state?.goal}
       </h1>
       <div className="flex flex-wrap md:gap-16 gap-4 w-full md:p-16 p-4">
         <div className="bg-white rounded-lg p-6 text-black mb-6 flex-auto w-[500px]">

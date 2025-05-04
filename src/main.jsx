@@ -10,7 +10,7 @@ import { createRoot } from "react-dom/client";
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/virtually-fe">
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
