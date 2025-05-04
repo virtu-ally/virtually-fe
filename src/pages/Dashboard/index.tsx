@@ -1,19 +1,23 @@
 import "./index.css";
 
+import { Link, useNavigate } from "react-router-dom";
+
 import Book from "./Book";
 import { CheckCheck } from "lucide-react";
-import { Link } from "react-router-dom";
 import { useState } from "react";
 
-const Dashboard = ({ onNavigate }) => {
+const Dashboard = () => {
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isNavigateClicked, setIsNavigateClicked] = useState(false);
   const [goal, setGoal] = useState("");
+  const navigate = useNavigate();
 
   const handleNavigate = (e) => {
     setIsNavigateClicked(true);
     e.preventDefault();
-    onNavigate("/template", { state: { goal } });
+    setTimeout(() => {
+      navigate("/template", { state: { goal } });
+    }, 1500);
   };
 
   const handleChange = (e) => {
@@ -58,7 +62,7 @@ const Dashboard = ({ onNavigate }) => {
                 isNavigateClicked ? "fadeOutContent-delayed2" : ""
               }`}
             >
-              <span className="text-gray-600">&#9634;</span>
+              {/* <span className="text-gray-600">&#9634;</span> */}
               <input
                 type="text"
                 id="task2"
