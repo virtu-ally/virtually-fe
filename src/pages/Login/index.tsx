@@ -36,13 +36,14 @@ const Login = () => {
         },
       });
     } else {
-      loginMutation.mutate({ id: 1 });
+      loginMutation.mutate({ id: "b46e48a3-51f5-424a-a332-0bc57abfcdfc" });
     }
   };
 
+  // https://auth0.com/docs/quickstart/spa/react/01-login
   return (
-    <div className="login-container">
-      <div className="flex items-center justify-center gap-4 mb-6">
+    <div className="login-container bg-[var(--bg-color)] text-[var(--text-color)] mt-8">
+      <div className="flex items-center justify-center gap-4 mb-4">
         <button
           className={`login-title tab-btn ${tab === "signup" ? "active" : ""}`}
           onClick={() => setTab("signup")}
@@ -58,34 +59,40 @@ const Login = () => {
         </button>
       </div>
       <div className="login-form-container">
-        <form className="login-form" onSubmit={handleSubmit}>
-          {tab === "signup" && (
-            <>
-              <label>
-                First Name
-                <input
-                  name="first_name"
-                  value={form.first_name}
-                  onChange={handleChange}
-                  required
-                  className="login-input"
-                  placeholder="Enter your first name"
-                />
-              </label>
-              <label>
-                Last Name
-                <input
-                  name="last_name"
-                  value={form.last_name}
-                  onChange={handleChange}
-                  required
-                  className="login-input"
-                  placeholder="Enter your last name"
-                />
-              </label>
-            </>
-          )}
-          <label>
+        <form
+          className={`login-form ${tab !== "signup" ? "login " : "signup"}`}
+          onSubmit={handleSubmit}
+        >
+          <div
+            // className={`flex flex-col gap-4 h-full transition-all duration-500 ease-in-out ${
+            className={`flex flex-col gap-4 h-full transition-all duration-500 linear delay-75 signup-fields ${
+              tab !== "signup" ? "hide" : ""
+            }`}
+          >
+            <label className="text-lg">
+              First Name
+              <input
+                name="first_name"
+                value={form.first_name}
+                onChange={handleChange}
+                required
+                className="login-input"
+                placeholder="Enter your first name"
+              />
+            </label>
+            <label className="text-lg">
+              Last Name
+              <input
+                name="last_name"
+                value={form.last_name}
+                onChange={handleChange}
+                required
+                className="login-input"
+                placeholder="Enter your last name"
+              />
+            </label>
+          </div>
+          <label className="text-lg">
             Email
             <input
               name="email"
@@ -93,13 +100,13 @@ const Login = () => {
               value={form.email}
               onChange={handleChange}
               required
-              className="login-input"
+              className="login-input z-[1]"
               placeholder="Enter your email"
             />
           </label>
           <button
             type="submit"
-            className="login-button"
+            className="login-button btn text-[var(--bg-color)]"
             disabled={signupMutation.isPending || loginMutation.isPending}
           >
             {tab === "signup"

@@ -1,10 +1,11 @@
 .login-container {
   min-height: 100vh;
-  background: var(--primary-color-orange, #f55d3e);
+  background: var(--bg-color);
+  color: var(--text-color);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .login-form-container {
@@ -19,7 +20,7 @@
   font-weight: bold;
   margin-bottom: 2rem;
   text-align: center;
-  color: #222;
+  color: var(--text-color);
   transition: font-size 500ms;
 }
 
@@ -32,16 +33,29 @@
   flex-direction: column;
   gap: 1.25rem;
   min-width: 320px;
+  height: auto;
   overflow: hidden;
-  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: height 0.2s linear, opacity 0.5s linear;
+}
+
+.hide {
+  height: 0;
+  opacity: 0;
+  transition: height 0.2s linear, opacity 0.2s linear;
+}
+
+.signup-fields {
+  animation: fadeIn 0.5s linear;
 }
 
 .login-form.signup {
-  height: 600px;
+  height: 425px;
+  opacity: 100%;
+  transition: height 0.2s linear, opacity 0.8s linear;
 }
 
 .login-form.login {
-  height: 300px;
+  height: 280px;
 }
 
 .login-form label {
@@ -57,32 +71,32 @@
   border-radius: 0.375rem;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
-  margin-top: 0.25rem;
   transition: border-color 0.2s;
 }
 
 .login-input:focus {
-  border-color: var(--primary-color-teal, #034c53);
+  border-color: var(--accent-color);
   outline: none;
 }
 
 .login-button {
-  background: var(--primary-color-teal, #034c53);
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
   padding: 0.75rem;
   font-weight: bold;
   font-size: 1.1rem;
   cursor: pointer;
   margin-top: 1rem;
-  transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  background: none;
+  border: 2px solid var(--bg-color);
+  transition: all 0.2s ease-in-out;
+  z-index: 1;
 }
 
 .login-button:hover,
 .login-button:focus {
-  background: var(--primary-color-orange, #f55d3e);
+  color: var(--text-color);
+  transition: all 0.2s ease-in-out;
+  background: var(--bg-color);
+  box-shadow: inset 0 -3.25em 0 0 var(--bg-color);
 }
 
 .login-success {

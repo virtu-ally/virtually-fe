@@ -11,6 +11,8 @@ import {
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Template from "./pages/Template";
+import { ThemeProvider } from "./context/ThemeContext";
+import ThemeSelector from "./components/themeSelector";
 import { useState } from "react";
 
 function App() {
@@ -19,21 +21,22 @@ function App() {
 
   console.log(location.pathname, "location.pathname");
   return (
-    <div
-      className={`${location.pathname === "/" ? "background" : ""} 
-      ${location.pathname === "/template" ? "bg-white" : ""}
-      `}
-    >
-      <Routes location={location}>
-        <Route
-          path="/"
-          element={loggedIn ? <Navigate to="/dashboard" replace /> : <Login />}
-        />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/template" element={<Template />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </div>
+    <ThemeProvider>
+      <div className={`bg-[var(--bg-color)] text-[var(--text-color)]`}>
+        <ThemeSelector />
+        <Routes location={location}>
+          <Route
+            path="/"
+            element={
+              loggedIn ? <Navigate to="/dashboard" replace /> : <Login />
+            }
+          />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/template" element={<Template />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </div>
+    </ThemeProvider>
   );
 }
 

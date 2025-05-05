@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap");
 @import "tailwindcss";
 
-#root {
+:root {
   --primary-color-peach: #ffdab3;
   --primary-color-purple: #574964;
   --primary-color-purple-light: #9f8383;
@@ -11,7 +11,51 @@
   --primary-color-teal: #07707a;
   --primary-color-yellow: #f5b83e;
   --font-kameron: "Kameron", sans-serif;
-  background-color: #ffdab3;
+}
+[data-theme="modern"] {
+  --bg-color: #f55d3e;
+  --text-color: #1a1a1a;
+  --primary-color: #8b5cf6;
+  --secondary-color: #50505b;
+  --accent-color: #fb923c;
+  --accent-color-light: #fdba74;
+  --btn-color: var(--primary-color-teal);
+}
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --primary-color: #8b5cf6;
+  --secondary-color: #4b5563;
+  --accent-color: #fb923c;
+  --accent-color-light: #fdba74;
+  --btn-color: #077a5b;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bg-color: #c1f9c6;
+  --text-color: #1a1a1a;
+  --primary-color: #8b5cf6;
+  --secondary-color: #4b5563;
+  --accent-color: #fb923c;
+  --accent-color-light: #fdba74;
+  --btn-color: #f55d3e;
+}
+
+/* Blue Theme */
+[data-theme="blue"] {
+  --bg-color: #1e40af;
+  --text-color: #ffffff;
+  --primary-color: #3b82f6;
+  --secondary-color: #60a5fa;
+  --accent-color: #38bdf8;
+  --accent-color-light: #7dd3fc;
+  --btn-color: #193283;
+}
+
+#root {
+  background-color: var(--bg-color);
   font-family: var(--font-kameron);
   height: 100%;
 }
@@ -50,5 +94,11 @@ body {
   }
   .animation-delay-1000 {
     animation-delay: 1s;
+  }
+  .btn {
+    @apply bg-[var(--bg-color)] rounded;
+  }
+  [data-theme="light"] .login-button {
+    color: #1a1a1a;
   }
 }
