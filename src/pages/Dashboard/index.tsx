@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import Book from "./Book";
 import { CheckCheck } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
 
 const Dashboard = () => {
@@ -11,6 +12,7 @@ const Dashboard = () => {
   const [isNavigateClicked, setIsNavigateClicked] = useState(false);
   const [goal, setGoal] = useState("");
   const navigate = useNavigate();
+  const { logout, user } = useAuth0();
 
   const handleNavigate = (e) => {
     setIsNavigateClicked(true);
@@ -121,6 +123,14 @@ const Dashboard = () => {
           isNavigateClicked={isNavigateClicked}
         />
       </div>
+      <button
+        onClick={() =>
+          logout({ logoutParams: { returnTo: window.location.origin } })
+        }
+        className="login-button btn text-[var(--bg-color)]"
+      >
+        Log Out
+      </button>
     </>
   );
 };

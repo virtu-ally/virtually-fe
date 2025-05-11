@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
 const themeBgColors: Record<"modern" | "dark" | "light" | "blue", string> = {
-  modern: "#f55d3e",
   dark: "#1a1a1a",
+  modern: "#f55d3e",
   light: "#e0f9e2",
   blue: "#1e40af",
 };
@@ -36,8 +36,8 @@ const ThemeSelector = () => {
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
+          width="36"
+          height="36"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

@@ -1,15 +1,15 @@
 import "./App.css";
 
-import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
+import Header from "./components/Header";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Logout from "./pages/Logout";
+import { PrivateRoute } from "./components/PrivateRoute";
+import Profile from "./pages/Profile";
 import Template from "./pages/Template";
 import { ThemeProvider } from "./context/ThemeContext";
 import ThemeSelector from "./components/themeSelector";
@@ -17,26 +17,64 @@ import { useState } from "react";
 
 function App() {
   const location = useLocation();
-  const [loggedIn, setLoggedIn] = useState(true);
+  const { isAuthenticated, logout, loginWithRedirect } = useAuth0();
 
-  console.log(location.pathname, "location.pathname");
+  console.log(location.pathname, "location.pathname", isAuthenticated);
   return (
-    <ThemeProvider>
-      <div className={`bg-[var(--bg-color)] text-[var(--text-color)]`}>
-        <ThemeSelector />
-        <Routes location={location}>
-          <Route
-            path="/"
-            element={
-              loggedIn ? <Navigate to="/dashboard" replace /> : <Login />
-            }
-          />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/template" element={<Template />} />
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </div>
-    </ThemeProvider>
+    <Auth0Provider
+      domain={import.meta.env.VITE_AUTH0_DOMAIN}
+      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
+      authorizationParams={{
+        redirect_uri: window.location.origin,
+        audience: `https://${import.meta.env.VITE_AUTH0_DOMAIN}/api/v2/`,
+        scope: "openid profile email",
+      }}
+      onRedirectCallback={(appState) => {
+        window.history.replaceState(
+          {},
+          document.title,
+          appState?.returnTo || "/dashboard"
+        );
+      }}
+    >
+      <ThemeProvider>
+        <div
+          className={`bg-[var(--bg-color)] text-[var(--text-color)] relative`}
+        >
+          <Header />
+
+          <Routes location={location}>
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/template"
+              element={
+                <PrivateRoute>
+                  <Template />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </ThemeProvider>
+    </Auth0Provider>
   );
 }
 

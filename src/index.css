@@ -9,12 +9,14 @@
   --primary-color-orange: #f55d3e;
   --primary-color-red: #d11f2f;
   --primary-color-teal: #07707a;
+  --primary-color-green: #077a5b;
   --primary-color-yellow: #f5b83e;
   --font-kameron: "Kameron", sans-serif;
 }
 [data-theme="modern"] {
   --bg-color: #f55d3e;
   --text-color: #1a1a1a;
+  --secondary-text-color: #1a1a1a;
   --primary-color: #8b5cf6;
   --secondary-color: #50505b;
   --accent-color: #fb923c;
@@ -25,9 +27,10 @@
 [data-theme="dark"] {
   --bg-color: #1a1a1a;
   --text-color: #ffffff;
+  --secondary-text-color: #1a1a1a;
   --primary-color: #8b5cf6;
   --secondary-color: #4b5563;
-  --accent-color: #fb923c;
+  --accent-color: #b396f7;
   --accent-color-light: #fdba74;
   --btn-color: #077a5b;
 }
@@ -36,22 +39,24 @@
 [data-theme="light"] {
   --bg-color: #c1f9c6;
   --text-color: #1a1a1a;
+  --secondary-text-color: #1a1a1a;
   --primary-color: #8b5cf6;
   --secondary-color: #4b5563;
   --accent-color: #fb923c;
   --accent-color-light: #fdba74;
-  --btn-color: #f55d3e;
+  --btn-color: #077a5b;
 }
 
 /* Blue Theme */
 [data-theme="blue"] {
   --bg-color: #1e40af;
   --text-color: #ffffff;
+  --secondary-text-color: #1a1a1a;
   --primary-color: #3b82f6;
   --secondary-color: #60a5fa;
-  --accent-color: #38bdf8;
+  --accent-color: #65d82b;
   --accent-color-light: #7dd3fc;
-  --btn-color: #193283;
+  --btn-color: #3b82f6;
 }
 
 #root {

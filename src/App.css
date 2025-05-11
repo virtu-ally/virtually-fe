@@ -38,3 +38,10 @@
 .grow-fade {
   transform: scale(40);
 }
+
+.logout-btn-topright {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 20;
+}
