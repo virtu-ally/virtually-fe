@@ -24,12 +24,12 @@ function App() {
       domain={import.meta.env.VITE_AUTH0_DOMAIN}
       clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
       authorizationParams={{
-        redirect_uri: `${window.location.origin}/virtually-fe/#/dashboard`,
+        redirect_uri: `${window.location.origin}/virtually-fe/`,
         audience: `https://${import.meta.env.VITE_AUTH0_DOMAIN}/api/v2/`,
         scope: "openid profile email",
       }}
       onRedirectCallback={(appState) => {
-        navigate(appState?.returnTo || "/dashboard", { replace: true });
+        navigate(appState?.returnTo || "/", { replace: true });
       }}
     >
       <ThemeProvider>
