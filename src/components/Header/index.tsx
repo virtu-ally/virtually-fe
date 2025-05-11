@@ -25,7 +25,9 @@ const Header = () => {
             className="logout-button cursor-pointer px-6 py-2 text-base font-semibold border-2 border-[var(--btn-color)] hover:bg-[var(--btn-color)] hover:text-[var(--text-color)] transition-all duration-300"
             onClick={() =>
               logout({
-                logoutParams: { returnTo: window.location.origin },
+                logoutParams: {
+                  returnTo: `${window.location.origin}/virtually-fe`,
+                },
               })
             }
           >
