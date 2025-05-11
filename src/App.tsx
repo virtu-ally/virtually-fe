@@ -1,7 +1,7 @@
 import "./App.css";
 
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
 import Header from "./components/Header";
@@ -12,29 +12,24 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
 import Template from "./pages/Template";
 import { ThemeProvider } from "./context/ThemeContext";
-import ThemeSelector from "./components/themeSelector";
-import { useState } from "react";
 
 function App() {
   const location = useLocation();
-  const { isAuthenticated, logout, loginWithRedirect } = useAuth0();
+  const { isAuthenticated } = useAuth0();
+  const navigate = useNavigate();
 
-  console.log(location.pathname, "location.pathname", isAuthenticated);
+  console.log("isAuthenticated", isAuthenticated);
   return (
     <Auth0Provider
       domain={import.meta.env.VITE_AUTH0_DOMAIN}
       clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
       authorizationParams={{
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/virtually-fe`,
         audience: `https://${import.meta.env.VITE_AUTH0_DOMAIN}/api/v2/`,
         scope: "openid profile email",
       }}
       onRedirectCallback={(appState) => {
-        window.history.replaceState(
-          {},
-          document.title,
-          appState?.returnTo || "/dashboard"
-        );
+        navigate(appState?.returnTo || "/virtually-fe", { replace: true });
       }}
     >
       <ThemeProvider>
