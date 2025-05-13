@@ -11,12 +11,14 @@
   --primary-color-teal: #07707a;
   --primary-color-green: #077a5b;
   --primary-color-yellow: #f5b83e;
+  --primary-color-dark: #1a1a1a;
   --font-kameron: "Kameron", sans-serif;
 }
 [data-theme="modern"] {
   --bg-color: #f55d3e;
   --text-color: #1a1a1a;
   --secondary-text-color: #1a1a1a;
+  --inverse-text-color: #ffffff;
   --primary-color: #8b5cf6;
   --secondary-color: #50505b;
   --accent-color: #fb923c;
@@ -28,6 +30,7 @@
   --bg-color: #1a1a1a;
   --text-color: #ffffff;
   --secondary-text-color: #1a1a1a;
+  --inverse-text-color: #1a1a1a;
   --primary-color: #8b5cf6;
   --secondary-color: #4b5563;
   --accent-color: #b396f7;
@@ -35,11 +38,34 @@
   --btn-color: #077a5b;
 }
 
+[data-theme="rainbow"] {
+  --bg-color: transparent;
+  --text-color: #ffffff;
+  --secondary-text-color: #1a1a1a;
+  --inverse-text-color: #1a1a1a;
+  --primary-color: #8b5cf6;
+  --secondary-color: #4b5563;
+  --accent-color: #b396f7;
+  --accent-color-light: #fdba74;
+  --btn-color: #077a5b;
+  background: linear-gradient(
+    315deg,
+    rgba(101, 0, 94, 1) 3%,
+    rgb(33, 76, 119) 38%,
+    rgb(19, 99, 93) 68%,
+    rgb(166, 20, 20) 98%
+  );
+  animation: gradient 50s ease infinite;
+  background-size: 400% 400%;
+  background-attachment: fixed;
+}
+
 /* Light Theme */
 [data-theme="light"] {
   --bg-color: #c1f9c6;
   --text-color: #1a1a1a;
   --secondary-text-color: #1a1a1a;
+  --inverse-text-color: #ffffff;
   --primary-color: #8b5cf6;
   --secondary-color: #4b5563;
   --accent-color: #fb923c;
@@ -52,6 +78,7 @@
   --bg-color: #1e40af;
   --text-color: #ffffff;
   --secondary-text-color: #1a1a1a;
+  --inverse-text-color: #1a1a1a;
   --primary-color: #3b82f6;
   --secondary-color: #60a5fa;
   --accent-color: #65d82b;
@@ -72,21 +99,20 @@ body {
 }
 
 @layer base {
-  h1 {
-    font-family: var(--font-kameron);
-    font-size: var(--text-5xl);
+  :root h1 {
+    @apply text-5xl;
   }
-  h2 {
-    font-size: var(--text-4xl);
+  :root h2 {
+    @apply text-4xl;
   }
-  h3 {
-    font-size: var(--text-xl);
+  :root h3 {
+    @apply text-xl;
   }
-  h4 {
-    font-size: var(--text-base);
+  :root h4 {
+    @apply text-base;
   }
-  h5 {
-    font-size: var(--text-sm);
+  :root h5 {
+    @apply text-sm;
   }
 }
 
@@ -105,5 +131,64 @@ body {
   }
   [data-theme="light"] .login-button {
     color: #1a1a1a;
+  }
+}
+@keyframes gradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.wave {
+  background: rgb(255 255 255 / 25%);
+  border-radius: 1000% 1000% 0 0;
+  position: fixed;
+  width: 200%;
+  height: 12em;
+  animation: wave 10s -3s linear infinite;
+  transform: translate3d(0, 0, 0);
+  opacity: 0.8;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.wave:nth-of-type(2) {
+  bottom: -1.25em;
+  animation: wave 18s linear reverse infinite;
+  opacity: 0.8;
+}
+
+.wave:nth-of-type(3) {
+  bottom: -2.5em;
+  animation: wave 20s -1s reverse infinite;
+  opacity: 0.9;
+}
+
+@keyframes wave {
+  2% {
+    transform: translateX(1);
+  }
+
+  25% {
+    transform: translateX(-25%);
+  }
+
+  50% {
+    transform: translateX(-50%);
+  }
+
+  75% {
+    transform: translateX(-25%);
+  }
+
+  100% {
+    transform: translateX(1);
   }
 }

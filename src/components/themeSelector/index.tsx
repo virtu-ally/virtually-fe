@@ -4,12 +4,24 @@ import { GithubPicker } from "react-color";
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
-const themeBgColors: Record<"modern" | "dark" | "light" | "blue", string> = {
+const themeBgColors: Record<
+  "modern" | "dark" | "light" | "blue" | "rainbow",
+  string
+> = {
   dark: "#1a1a1a",
   modern: "#f55d3e",
   light: "#e0f9e2",
   blue: "#1e40af",
+  rainbow: "#ff1493",
 };
+
+const themes = [
+  { name: "Dark", value: "dark" },
+  { name: "Modern", value: "modern" },
+  { name: "Light", value: "light" },
+  { name: "Blue", value: "blue" },
+  { name: "Rainbow", value: "rainbow" },
+];
 
 const ThemeSelector = () => {
   const { setTheme } = useTheme();
@@ -17,13 +29,22 @@ const ThemeSelector = () => {
 
   const swatchColors = Object.values(themeBgColors);
 
-  // When a swatch is picked, find the theme by color and set it
   const handleSwatchChange = (color: { hex: string }) => {
+    console.log("Selected color:", color.hex);
+    if (color.hex.toLowerCase() === "#ff1493") {
+      setTheme("rainbow");
+      setShowPalette(false);
+      return;
+    }
+
     const foundTheme = (
       Object.entries(themeBgColors) as [string, string][]
     ).find(([, value]) => value.toLowerCase() === color.hex.toLowerCase());
     if (foundTheme) {
-      setTheme(foundTheme[0] as "modern" | "dark" | "light" | "blue");
+      console.log("Setting theme to:", foundTheme[0]);
+      setTheme(
+        foundTheme[0] as "modern" | "dark" | "light" | "blue" | "rainbow"
+      );
     }
     setShowPalette(false);
   };
@@ -31,8 +52,21 @@ const ThemeSelector = () => {
   return (
     <div className="w-fit p-4 h-16">
       <button
-        className="mb-2 cursor-pointer group"
+        className="mb-2 cursor-pointer group focus:outline-none"
         onClick={() => setShowPalette(!showPalette)}
+        onBlur={(e) => {
+          // Only hide if clicking outside both the button and the color picker
+          const relatedTarget = e.relatedTarget as Node;
+          const button = e.currentTarget;
+          const colorPicker = document.querySelector(".github-picker");
+
+          if (
+            !button.contains(relatedTarget) &&
+            !colorPicker?.contains(relatedTarget)
+          ) {
+            setShowPalette(false);
+          }
+        }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +112,10 @@ const ThemeSelector = () => {
         </svg>
       </button>
       {showPalette && (
-        <div onBlur={() => setShowPalette(false)}>
+        <div
+          className="absolute fit-content z-10"
+          onBlur={() => setShowPalette(false)}
+        >
           <GithubPicker
             onChange={handleSwatchChange}
             colors={swatchColors}

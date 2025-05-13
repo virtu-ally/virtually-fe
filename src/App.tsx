@@ -3,11 +3,11 @@ import "./App.css";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
-import Dashboard from "./pages/Dashboard";
 import Header from "./components/Header";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Logout from "./pages/Logout";
+import NewDashboard from "./pages/NewDashboard";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
 import Template from "./pages/Template";
@@ -46,7 +46,7 @@ function App() {
               path="/dashboard"
               element={
                 <PrivateRoute>
-                  <Dashboard />
+                  <NewDashboard />
                 </PrivateRoute>
               }
             />

@@ -1,14 +1,29 @@
 @import "tailwindcss";
 
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease-in-out forwards;
+}
+
 .save-button {
   width: 100%;
-  background-color: var(--primary-color-teal);
-  color: white;
+  background-color: var(--btn-color);
+  color: var(--text-color);
   border-radius: 0.5rem;
   padding: 0.75rem;
   font-weight: bold;
   cursor: pointer;
-  border: 1px solid var(--primary-color-teal);
+  border: 2px solid var(--btn-color);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateZ(0);
@@ -18,15 +33,15 @@
 }
 
 .save-button:hover {
-  background-color: var(--primary-color-orange);
-  border-color: white;
-  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color-orange);
+  background-color: var(--accent-color);
+  border-color: var(--text-color);
+  box-shadow: 0 0 0 2px var(--text-color), 0 0 0 4px var(--accent-color);
   transform: translateZ(0);
 }
 
 .save-button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color-orange);
+  box-shadow: 0 0 0 2px var(--text-color), 0 0 0 4px var(--accent-color);
   transform: translateZ(0);
 }
 
@@ -36,7 +51,7 @@
 }
 
 .save-button:disabled {
-  background-color: #9ca3af;
+  background-color: var(--secondary-color);
   cursor: not-allowed;
-  border-color: #9ca3af;
+  border-color: var(--secondary-color);
 }

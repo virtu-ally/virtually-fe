@@ -1,7 +1,7 @@
 import { useTheme } from "../../context/ThemeContext";
 
 const logoColors: Record<
-  "modern" | "dark" | "light" | "blue",
+  "modern" | "dark" | "light" | "blue" | "rainbow",
   { primary: string; secondary: string }
 > = {
   modern: {
@@ -25,6 +25,10 @@ const logoColors: Record<
     //     --accent-color: #fb923c;
     //     --accent-color-light: #fdba74;
     //     --btn-color: #077a5b;
+  },
+  rainbow: {
+    primary: "#ff1493",
+    secondary: "#8b5cf6",
   },
 };
 

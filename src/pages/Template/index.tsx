@@ -1,39 +1,44 @@
 import "./index.css";
 
 import { PencilLine, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-import { useState } from "react";
 
 const Template = () => {
   const [chatInput, setChatInput] = useState("");
   const [tasks, setTasks] = useState(["", "", ""]);
+  const [isEntering, setIsEntering] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleTaskChange = (index, value) => {
+  const handleTaskChange = (index: number, value: string) => {
     const newTasks = [...tasks];
     newTasks[index] = value;
     setTasks(newTasks);
   };
+  console.log(location.state);
 
   const handleAddTask = () => {
     setTasks([...tasks, ""]);
   };
 
   return (
-    <div className="min-h-screen bg-[var(--primary-color-orange)] text-black fade-in flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-6 pt-8 px-4 w-full text-center">
-        Goal: {location.state?.goal}
+    <div
+      className={`min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] fade-in flex flex-col items-center ${
+        isEntering ? "slide-in" : ""
+      }`}
+    >
+      <h1 className="text-3xl font-bold mb-6 pt-8 px-4 w-full text-center capitalize">
+        {location.state?.goal}
       </h1>
       <div className="flex flex-wrap md:gap-16 gap-4 w-full md:p-16 p-4">
-        <div className="bg-white rounded-lg p-6 text-black mb-6 flex-auto w-[500px]">
+        <div className="bg-white rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 flex-auto w-[500px]">
           <h2 className="text-lg mb-4 w-auto">Your habits to track</h2>
           {tasks.map((task, index) => (
             <div key={index} className="mb-4">
               <input
                 type="text"
-                className="w-full border-b border-gray-300 focus:outline-none focus:border-[var(--primary-color-orange)] pb-2"
+                className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
                 placeholder="Enter your habit"
                 value={task}
                 onChange={(e) => handleTaskChange(index, e.target.value)}
@@ -42,9 +47,9 @@ const Template = () => {
           ))}
           <button
             onClick={handleAddTask}
-            className="text-[var(--primary-color-teal)] text-2xl font-bold cursor-pointer"
+            className="text-[var(--btn-color)] text-2xl font-bold cursor-pointer"
           >
-            <Plus className="hover:stroke-[var(--primary-color-orange)]" />
+            <Plus className="hover:stroke-[var(--accent-color)]" />
           </button>
         </div>
 
@@ -54,7 +59,7 @@ const Template = () => {
             <PencilLine className="inline-block" />
           </h2>
           <textarea
-            className="w-full h-48 border rounded-lg p-3 text-black focus:outline-2 focus:outline-offset-1 focus:outline-[#2626268a] bg-white"
+            className="w-full h-48 border rounded-lg p-3 text-[var(--secondary-text-color)] focus:outline-2 focus:outline-offset-1 focus:outline-[var(--accent-color)] bg-white"
             placeholder="Type your message here..."
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
