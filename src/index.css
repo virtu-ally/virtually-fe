@@ -15,7 +15,7 @@
   --font-kameron: "Kameron", sans-serif;
 }
 [data-theme="modern"] {
-  --bg-color: #f55d3e;
+  --bg-color: transparent;
   --text-color: #1a1a1a;
   --secondary-text-color: #1a1a1a;
   --inverse-text-color: #ffffff;
@@ -23,7 +23,15 @@
   --secondary-color: #50505b;
   --accent-color: #fb923c;
   --accent-color-light: #fdba74;
-  --btn-color: var(--primary-color-teal);
+  --btn-color: var(--primary-color-orange);
+  background: linear-gradient(
+    10deg,
+    #f55d3e 10%,
+    #fb923c 38%,
+    #fdba74 60%,
+    #ffbc80 90%
+  );
+  background-attachment: fixed;
 }
 /* Dark Theme */
 [data-theme="dark"] {
@@ -70,7 +78,7 @@
   --secondary-color: #4b5563;
   --accent-color: #fb923c;
   --accent-color-light: #fdba74;
-  --btn-color: #077a5b;
+  --btn-color: #16c395;
 }
 
 /* Blue Theme */
@@ -81,9 +89,21 @@
   --inverse-text-color: #1a1a1a;
   --primary-color: #3b82f6;
   --secondary-color: #60a5fa;
-  --accent-color: #65d82b;
+  --accent-color: #d1a71f;
   --accent-color-light: #7dd3fc;
   --btn-color: #3b82f6;
+}
+
+[data-theme="neon"] {
+  --bg-color: #000018;
+  --text-color: #00fff7;
+  --secondary-text-color: #000018;
+  --inverse-text-color: #000018;
+  --primary-color: #00fff7;
+  --secondary-color: #000018;
+  --accent-color: #000018;
+  --accent-color-light: #7dd3fc;
+  --btn-color: #00fff7;
 }
 
 #root {

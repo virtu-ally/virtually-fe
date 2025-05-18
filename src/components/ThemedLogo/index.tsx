@@ -1,7 +1,7 @@
 import { useTheme } from "../../context/ThemeContext";
 
 const logoColors: Record<
-  "modern" | "dark" | "light" | "blue" | "rainbow",
+  "modern" | "dark" | "light" | "blue" | "rainbow" | "neon",
   { primary: string; secondary: string }
 > = {
   modern: {
@@ -16,15 +16,19 @@ const logoColors: Record<
   },
   light: {
     primary: "#f55d3e",
-    secondary: "#077a5b",
+    secondary: "#1a1a1a",
   },
   blue: {
     primary: "#FFFFFF",
-    secondary: "#65d82b",
+    secondary: "#d1a71f",
     //     --secondary-color: #4b5563;
     //     --accent-color: #fb923c;
     //     --accent-color-light: #fdba74;
     //     --btn-color: #077a5b;
+  },
+  neon: {
+    primary: "#FFFFFF",
+    secondary: "#00fff7",
   },
   rainbow: {
     primary: "#ff1493",

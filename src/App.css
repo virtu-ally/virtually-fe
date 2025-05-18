@@ -30,6 +30,10 @@
   }
 }
 
+.app-container {
+  transition: background 1s ease;
+}
+
 .background {
   transition: transform 2s ease-in-out;
   overflow: hidden;
@@ -37,11 +41,4 @@
 
 .grow-fade {
   transform: scale(40);
-}
-
-.logout-btn-topright {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  z-index: 20;
 }

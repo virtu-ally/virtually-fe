@@ -80,7 +80,7 @@ const Home = () => {
             key={f.title}
             className={`feature-card ${f.bg} rounded-xl shadow-md flex flex-col items-center text-center gap-3 p-4 md:p-6 transition-transform hover:scale-[1.025] min-w-[220px] max-w-xs flex-1`}
           >
-            <div className="mb-2">{f.icon}</div>
+            <div className="mb-2 bg-white">{f.icon}</div>
             <h2 className="font-semibold text-lg md:text-xl mb-1">{f.title}</h2>
             <p className="text-sm md:text-base">{f.desc}</p>
           </div>

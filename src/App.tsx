@@ -15,10 +15,8 @@ import { ThemeProvider } from "./context/ThemeContext";
 
 function App() {
   const location = useLocation();
-  const { isAuthenticated } = useAuth0();
   const navigate = useNavigate();
 
-  console.log("isAuthenticated", isAuthenticated);
   return (
     <Auth0Provider
       domain={import.meta.env.VITE_AUTH0_DOMAIN}
@@ -34,14 +32,14 @@ function App() {
     >
       <ThemeProvider>
         <div
-          className={`bg-[var(--bg-color)] text-[var(--text-color)] relative`}
+          className={`bg-[var(--bg-color)] text-[var(--text-color)] relative app-container`}
         >
           <Header />
 
           <Routes location={location}>
             <Route path="/logout" element={<Logout />} />
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
+
             <Route
               path="/dashboard"
               element={
@@ -66,6 +64,7 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </div>
       </ThemeProvider>

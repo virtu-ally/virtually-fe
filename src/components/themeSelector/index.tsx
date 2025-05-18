@@ -5,23 +5,16 @@ import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
 const themeBgColors: Record<
-  "modern" | "dark" | "light" | "blue" | "rainbow",
+  "modern" | "dark" | "light" | "blue" | "rainbow" | "neon",
   string
 > = {
   dark: "#1a1a1a",
-  modern: "#f55d3e",
+  modern: "#ffa861",
   light: "#e0f9e2",
   blue: "#1e40af",
-  rainbow: "#ff1493",
+  rainbow: "#dd14ff",
+  neon: "#00fff7",
 };
-
-const themes = [
-  { name: "Dark", value: "dark" },
-  { name: "Modern", value: "modern" },
-  { name: "Light", value: "light" },
-  { name: "Blue", value: "blue" },
-  { name: "Rainbow", value: "rainbow" },
-];
 
 const ThemeSelector = () => {
   const { setTheme } = useTheme();
@@ -31,7 +24,7 @@ const ThemeSelector = () => {
 
   const handleSwatchChange = (color: { hex: string }) => {
     console.log("Selected color:", color.hex);
-    if (color.hex.toLowerCase() === "#ff1493") {
+    if (color.hex.toLowerCase() === "#dd14ff") {
       setTheme("rainbow");
       setShowPalette(false);
       return;
@@ -43,7 +36,13 @@ const ThemeSelector = () => {
     if (foundTheme) {
       console.log("Setting theme to:", foundTheme[0]);
       setTheme(
-        foundTheme[0] as "modern" | "dark" | "light" | "blue" | "rainbow"
+        foundTheme[0] as
+          | "modern"
+          | "dark"
+          | "light"
+          | "blue"
+          | "rainbow"
+          | "neon"
       );
     }
     setShowPalette(false);
