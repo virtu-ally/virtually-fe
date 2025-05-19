@@ -15,7 +15,7 @@ import { suggestHabits } from "../../api/habits";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { useQuiz } from "../../context/Quizcontext";
+import { useQuiz } from "../../context/QuizContext";
 
 const NewDashboard = () => {
   const navigate = useNavigate();

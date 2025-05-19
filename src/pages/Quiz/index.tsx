@@ -1,6 +1,6 @@
 import "./index.css";
 
-import { QuizState, useQuiz } from "../../context/Quizcontext";
+import { QuizState, useQuiz } from "../../context/QuizContext";
 
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
