@@ -10,6 +10,7 @@ import Logout from "./pages/Logout";
 import NewDashboard from "./pages/NewDashboard";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
+import { QuizProvider } from "./context/Quizcontext";
 import Template from "./pages/Template";
 import { ThemeProvider } from "./context/ThemeContext";
 
@@ -28,6 +29,11 @@ function App() {
       }}
       onRedirectCallback={(appState) => {
         navigate(appState?.returnTo || "/", { replace: true });
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
       }}
     >
       <ThemeProvider>
@@ -44,7 +50,9 @@ function App() {
               path="/dashboard"
               element={
                 <PrivateRoute>
-                  <NewDashboard />
+                  <QuizProvider>
+                    <NewDashboard />
+                  </QuizProvider>
                 </PrivateRoute>
               }
             />
