@@ -10,12 +10,9 @@ import Logout from "./pages/Logout";
 import NewDashboard from "./pages/NewDashboard";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
+import { QuizProvider } from "./context/QuizContext";
 import Template from "./pages/Template";
 import { ThemeProvider } from "./context/ThemeContext";
-
-// import { QuizProvider } from "./context/QuizContext";
-
-
 
 function App() {
   const location = useLocation();
