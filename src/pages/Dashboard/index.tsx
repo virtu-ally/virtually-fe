@@ -64,7 +64,6 @@ const Dashboard = () => {
                 isNavigateClicked ? "fadeOutContent-delayed2" : ""
               }`}
             >
-              {/* <span className="text-gray-600">&#9634;</span> */}
               <input
                 type="text"
                 id="task2"
@@ -73,24 +72,7 @@ const Dashboard = () => {
                 onChange={handleChange}
               />
             </div>
-            {/* <div className="fade-in">
-              <span className="text-gray-600">&#9634;</span>
-              <input
-                type="text"
-                id="task3"
-                className="input"
-                placeholder="Input Goal 3..."
-              />
-            </div>
-            <div className="fade-in">
-              <span className="text-gray-600">&#9634;</span>
-              <input
-                type="text"
-                id="task4"
-                className="input"
-                placeholder="Input Goal 4..."
-              />
-            </div> */}
+
             <div className="fade-in my-4">
               <Link
                 to="/template"
