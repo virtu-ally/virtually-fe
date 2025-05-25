@@ -1,3 +1,5 @@
+import { getBaseUrl } from "./getBaseUrl";
+
 interface SuggestHabitsRequest {
   customerId: string;
   goal: string;
@@ -14,7 +16,7 @@ export const suggestHabits = async ({
   goal,
 }: SuggestHabitsRequest) => {
   const res = await fetch(
-    `http://localhost:8081/customers/${customerId}/suggest-habits`,
+    `${getBaseUrl()}/customers/${customerId}/suggest-habits`,
     {
       method: "POST",
       headers: {
@@ -33,20 +35,17 @@ export const createGoal = async ({
   description,
   habits,
 }: CreateGoalRequest) => {
-  const res = await fetch(
-    `http://localhost:8081/customers/${customerId}/goals`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        goal_description: description,
-        finalised_habits: habits,
-      }),
-    }
-  );
+  const res = await fetch(`${getBaseUrl()}/customers/${customerId}/goals`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      goal_description: description,
+      finalised_habits: habits,
+    }),
+  });
   if (!res.ok) throw new Error("Goal creation failed");
   return res.json();
 };

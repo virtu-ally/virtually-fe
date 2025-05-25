@@ -1,9 +1,11 @@
+import { getBaseUrl } from "./getBaseUrl";
+
 export const signup = async (form: {
   first_name: string;
   last_name: string;
   email: string;
 }) => {
-  const res = await fetch("http://localhost:8080/customers", {
+  const res = await fetch(`${getBaseUrl()}/customers`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -16,7 +18,7 @@ export const signup = async (form: {
 };
 
 export const login = async ({ id }) => {
-  const res = await fetch(`http://localhost:8080/customers/${id}`, {
+  const res = await fetch(`${getBaseUrl()}/customers/${id}`, {
     method: "GET",
     headers: { Accept: "application/json" },
   });
