@@ -27,6 +27,7 @@ jobs:
       - name: Build the project
         run: npm run build
         env:
+          MODE: production
           VITE_ENV: production
           VITE_AUTH0_DOMAIN: ${{ secrets.VITE_AUTH0_DOMAIN }}
           VITE_AUTH0_CLIENT_ID: ${{ secrets.VITE_AUTH0_CLIENT_ID }}

@@ -1,4 +1,11 @@
 export const getBaseUrl = () => {
   const isProd = import.meta.env.MODE === "production";
-  return isProd ? import.meta.env.VITE_API_URL : "http://localhost:8080";
+  const prodUrl = import.meta.env.VITE_API_URL;
+
+  if (isProd && !prodUrl) {
+    console.error("Production API URL is not defined");
+    return "http://130.162.178.62";
+  }
+
+  return isProd ? prodUrl : "http://localhost:8080";
 };
