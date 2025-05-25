@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -12,7 +12,7 @@
   --primary-color-green: #077a5b;
   --primary-color-yellow: #f5b83e;
   --primary-color-dark: #1a1a1a;
-  --font-kameron: "Kameron", sans-serif;
+  --font-inter: "Inter", sans-serif;
 }
 [data-theme="modern"] {
   --bg-color: transparent;
@@ -84,15 +84,15 @@
 
 /* Blue Theme */
 [data-theme="blue"] {
-  --bg-color: #1e40af;
-  --text-color: #ffffff;
-  --secondary-text-color: #1a1a1a;
-  --inverse-text-color: #1a1a1a;
-  --primary-color: #3b82f6;
-  --secondary-color: #60a5fa;
+  --bg-color: #0f172a;
+  --text-color: #f59e0b;
+  --secondary-text-color: #0f172a;
+  --inverse-text-color: #0f172a;
+  --primary-color: #f59e0b;
+  --secondary-color: #f59e0b4d;
   --accent-color: #d1a71f;
-  --accent-color-light: #7dd3fc;
-  --btn-color: #3b82f6;
+  --accent-color-light: #ffffff;
+  --btn-color: rgb(245, 158, 11);
 }
 
 [data-theme="neon"] {
@@ -109,7 +109,7 @@
 
 #root {
   background-color: var(--bg-color);
-  font-family: var(--font-kameron);
+  font-family: var(--font-inter);
   height: 100%;
 }
 

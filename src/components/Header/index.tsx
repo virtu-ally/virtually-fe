@@ -6,6 +6,11 @@ import { useAuth0 } from "@auth0/auth0-react";
 const Header = () => {
   const { isAuthenticated, logout, loginWithRedirect } = useAuth0();
 
+  const isProd = import.meta.env.VITE_ENV === "production";
+  const logoutReturnTo = isProd
+    ? import.meta.env.VITE_AUTH0_PROD_REDIRECT_URI
+    : `${window.location.origin}/virtually-fe`;
+
   return (
     <header className="header-container w-full flex justify-between items-center p-4 bg-[var(--bg-color)] text-[var(--text-color)]">
       <ThemeSelector />
@@ -28,7 +33,7 @@ const Header = () => {
             onClick={() =>
               logout({
                 logoutParams: {
-                  returnTo: `${window.location.origin}/virtually-fe`,
+                  returnTo: logoutReturnTo,
                 },
               })
             }

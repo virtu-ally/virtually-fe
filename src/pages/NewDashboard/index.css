@@ -33,7 +33,8 @@
   flex-direction: row;
 }
 
-[data-theme="neon"] .card.quiz-card {
+[data-theme="neon"] .card.quiz-card,
+[data-theme="blue"] .card.quiz-card {
   color: var(--bg-color);
 
   h2 {

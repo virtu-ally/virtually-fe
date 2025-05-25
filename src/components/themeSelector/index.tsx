@@ -5,13 +5,12 @@ import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
 const themeBgColors: Record<
-  "modern" | "dark" | "light" | "blue" | "rainbow" | "neon",
+  "modern" | "light" | "blue" | "rainbow" | "neon",
   string
 > = {
-  dark: "#1a1a1a",
   modern: "#ffa861",
   light: "#e0f9e2",
-  blue: "#1e40af",
+  blue: "#0f172a",
   rainbow: "#dd14ff",
   neon: "#00fff7",
 };
@@ -36,13 +35,7 @@ const ThemeSelector = () => {
     if (foundTheme) {
       console.log("Setting theme to:", foundTheme[0]);
       setTheme(
-        foundTheme[0] as
-          | "modern"
-          | "dark"
-          | "light"
-          | "blue"
-          | "rainbow"
-          | "neon"
+        foundTheme[0] as "modern" | "light" | "blue" | "rainbow" | "neon"
       );
     }
     setShowPalette(false);

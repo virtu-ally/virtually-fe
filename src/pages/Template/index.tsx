@@ -65,7 +65,7 @@ const Template = () => {
         isEntering ? "slide-in" : ""
       }`}
     >
-      <h1 className="text-3xl font-bold mb-6 pt-8 px-4 w-full text-center capitalize">
+      <h1 className="title text-3xl font-bold mb-6 pt-8 px-4 w-full text-center capitalize ">
         {location.state?.goal}
       </h1>
       <div className="flex flex-wrap md:gap-16 gap-4 w-full md:p-16 p-4">
@@ -100,7 +100,7 @@ const Template = () => {
             <PencilLine className="inline-block" />
           </h2>
           <textarea
-            className="w-full h-48 border rounded-lg p-3 text-[var(--secondary-text-color)] focus:outline-2 focus:outline-offset-1 focus:outline-[var(--accent-color)] bg-white"
+            className="w-full h-48 rounded-lg p-3 text-[var(--secondary-text-color)] focus:outline-2 focus:outline-offset-1 focus:outline-[var(--accent-color)] bg-white"
             placeholder="Type your message here..."
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}

@@ -4,10 +4,15 @@ import { useEffect } from "react";
 const Logout = () => {
   const { logout } = useAuth0();
 
+  const isProd = import.meta.env.VITE_ENV === "production";
+  const logoutReturnTo = isProd
+    ? import.meta.env.VITE_AUTH0_PROD_REDIRECT_URI
+    : window.location.origin;
+
   useEffect(() => {
     logout({
       logoutParams: {
-        returnTo: window.location.origin,
+        returnTo: logoutReturnTo,
       },
     });
     // eslint-disable-next-line

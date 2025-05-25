@@ -20,7 +20,7 @@ const logoColors: Record<
   },
   blue: {
     primary: "#FFFFFF",
-    secondary: "#d1a71f",
+    secondary: "#f59e0b",
     //     --secondary-color: #4b5563;
     //     --accent-color: #fb923c;
     //     --accent-color-light: #fdba74;
