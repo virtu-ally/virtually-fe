@@ -1,120 +1,108 @@
 import "./index.css";
 
-import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  ChevronRight,
+  GraduationCap,
+  Heart,
+  LifeBuoy,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
-import Book from "./Book";
-import { CheckCheck } from "lucide-react";
+import Quiz from "../Quiz";
+import { signup } from "../../api/customer";
+import { suggestHabits } from "../../api/habits";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useState } from "react";
+import { useCustomer } from "../../context/CustomerContext";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { useQuiz } from "../../context/QuizContext";
 
-const Dashboard = () => {
-  const [isBookOpen, setIsBookOpen] = useState(false);
-  const [isNavigateClicked, setIsNavigateClicked] = useState(false);
-  const [goal, setGoal] = useState("");
+const NewDashboard = () => {
   const navigate = useNavigate();
-  const { logout, user } = useAuth0();
+  const [isExiting, setIsExiting] = useState(false);
+  const signupMutation = useMutation({ mutationFn: signup });
+  const { state, dispatch } = useQuiz();
+  const [showQuiz, setShowQuiz] = useState(false);
+  const { user } = useAuth0();
+  const { setProfile, profile } = useCustomer();
 
-  const handleNavigate = (e) => {
-    setIsNavigateClicked(true);
-    e.preventDefault();
+  useEffect(() => {
+    if (user) {
+      const form = {
+        first_name: user?.given_name || "",
+        last_name: user?.family_name || "",
+        email: user?.email || "",
+      };
+      signupMutation.mutate(form, {
+        onSuccess: (data) => {
+          setProfile({
+            auth0Id: user.sub || "",
+            name: user.name || "",
+            email: user.email || "",
+            customerId: data.id,
+          });
+        },
+        onError: () => {
+          console.log("error");
+        },
+      });
+    }
+  }, [user]);
+
+  const handleCardClick = (type: string) => {
+    setIsExiting(true);
+
     setTimeout(() => {
-      navigate("/template", { state: { goal } });
-    }, 1500);
-  };
-
-  const handleChange = (e) => {
-    setGoal(e.target.value);
+      navigate("/goal", { state: { goal: type } });
+    }, 800);
   };
 
   return (
-    <>
-      <div className={`text-center `}>
-        <h1
-          className={`text-5xl pt-12 " ${
-            isNavigateClicked ? "fadeOutTitle-delayed" : ""
-          }`}
-        >
-          Your Story
-        </h1>
-      </div>
-      <div className={`flex flex-col text-center`}>
-        {isBookOpen && (
+    <div className="container mx-auto px-4 py-12">
+      {!showQuiz && (
+        <div className="grid grid-cols-1 gap-6 justify-items-center card-container">
           <div
-            className={`relative top-[85px] z-[2] h-[0] left-[-1.5rem] animation-delay-1000 fade-in  
-            ${isNavigateClicked ? "fadeOutContent-delayed" : ""}
-            `}
+            onClick={() => handleCardClick("life")}
+            className={`card ${isExiting ? "slide-out" : ""}`}
+            style={{ animationDelay: "0s" }}
           >
-            <div
-              className={`animation-delay-1000 fade-in    ${
-                isNavigateClicked ? "fadeOutContent-delayed2" : ""
-              }`}
-            >
-              <CheckCheck className="inline-flex align-middle" />
-              <input
-                type="text"
-                id="task1"
-                className="input text-black"
-                placeholder="Find a fun site"
-                value="Find a fun site"
-                disabled
-              />
-            </div>
-            <div
-              className={`animation-delay-1000 fade-in    ${
-                isNavigateClicked ? "fadeOutContent-delayed2" : ""
-              }`}
-            >
-              <input
-                type="text"
-                id="task2"
-                className="input"
-                placeholder="Type Goal 2..."
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="fade-in my-4">
-              <Link
-                to="/template"
-                viewTransition
-                onClick={handleNavigate}
-                className="submit-button "
-              >
-                Create plan
-              </Link>
-            </div>
-
-            <div
-              className={`max-w-[230px] inline-block pt-4 fade-in ${
-                isNavigateClicked ? "fadeOutContent-delayed" : ""
-              }`}
-            >
-              <p>What are your goals? </p>
-              <br />
-              <ul className="pt-4">
-                <li> Would you like to become healthy,</li>
-                <li> more knowledgable about plants </li>
-                <li>or determined to read an hour every day?</li>
-              </ul>
-            </div>
+            <LifeBuoy className="w-12 h-12 text-[var(--btn-color)] mb-4" />
+            <h2 className="text-xl font-semibold">Life</h2>
           </div>
-        )}
-        <Book
-          isBookOpen={isBookOpen}
-          setIsBookOpen={setIsBookOpen}
-          isNavigateClicked={isNavigateClicked}
-        />
-      </div>
-      <button
-        onClick={() =>
-          logout({ logoutParams: { returnTo: window.location.origin } })
-        }
-        className="login-button btn text-[var(--bg-color)]"
-      >
-        Log Out
-      </button>
-    </>
+
+          <div
+            onClick={() => handleCardClick("health")}
+            className={`card ${isExiting ? "slide-out" : ""}`}
+            style={{ animationDelay: "0.2s" }}
+          >
+            <Heart className="w-12 h-12 text-[var(--btn-color)] mb-4" />
+            <h2 className="text-xl font-semibold">Health</h2>
+          </div>
+
+          <div
+            onClick={() => handleCardClick("education")}
+            className={`card ${isExiting ? "slide-out" : ""}`}
+            style={{ animationDelay: "0.4s" }}
+          >
+            <GraduationCap className="w-12 h-12 text-[var(--btn-color)] mb-4" />
+            <h2 className="text-xl font-semibold">Education</h2>
+          </div>
+          <div
+            onClick={() => setShowQuiz(true)}
+            className={`card quiz-card ${isExiting ? "slide-out" : ""}`}
+            style={{ animationDelay: "0.4s" }}
+          >
+            <h2 className="text-sm font-semibold ">
+              Take our quiz for personalised recommendations
+            </h2>
+            <ChevronRight className="w-8 h-8 min-w-6 min-h-6" />
+          </div>
+        </div>
+      )}
+      {showQuiz && <Quiz setShowQuiz={setShowQuiz} />}
+    </div>
   );
 };
 
-export default Dashboard;
+export default NewDashboard;

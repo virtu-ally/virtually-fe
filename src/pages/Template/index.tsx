@@ -5,14 +5,22 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { createGoal } from "../../api/habits";
+import { suggestHabits } from "../../api/habits";
+import { useCustomer } from "../../context/CustomerContext";
 import { useMutation } from "@tanstack/react-query";
 
-const Template = () => {
+const Template = ({
+  setActiveTab,
+}: {
+  setActiveTab: (tab: string) => void;
+}) => {
   const [chatInput, setChatInput] = useState("");
-
+  const [goalDescription, setGoalDescription] = useState("");
+  const [timeDescription, setTimeDescription] = useState("");
   const [isEntering, setIsEntering] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { profile, addGoal } = useCustomer();
   const [tasks, setTasks] = useState(() => {
     const suggestedHabits = location.state?.suggestedHabits || ["", "", ""];
     return suggestedHabits;
@@ -34,6 +42,32 @@ const Template = () => {
     setTasks([...tasks, ""]);
   };
 
+  const handleGoalSaveClick = () => {
+    if (!profile?.customerId) return;
+
+    createGoalMutation.mutate(
+      {
+        customerId: profile.customerId,
+        description: goalDescription,
+        habits: tasks,
+      },
+      {
+        onSuccess: (data) => {
+          addGoal({
+            id: data.id,
+            description: goalDescription,
+            timeframe: timeDescription,
+            habits: tasks,
+          });
+          setActiveTab("progress");
+        },
+        onError: (error) => {
+          console.error("Error creating goal:", error);
+        },
+      }
+    );
+  };
+
   const handleSave = () => {
     createGoalMutation.mutate(
       {
@@ -44,16 +78,9 @@ const Template = () => {
       {
         onSuccess: (data) => {
           console.log(data, "response goal");
-          // navigate("/template", {
-          //   state: {
-          //     goal: type,
-          //     suggestedHabits: data,
-          //   },
-          // });
         },
         onError: (error) => {
           console.error("Error creating goal:", error);
-          // navigate("/template", { state: { goal: type } });
         },
       }
     );
@@ -61,14 +88,37 @@ const Template = () => {
 
   return (
     <div
-      className={`min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] fade-in flex flex-col items-center ${
-        isEntering ? "slide-in" : ""
-      }`}
+      className={`min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] fade-in flex flex-col items-center `}
     >
-      <h1 className="title text-3xl font-bold mb-6 pt-8 px-4 w-full text-center capitalize ">
+      <h1 className="title text-3xl mb-6 pt-8 px-4 w-full text-center capitalize ">
         {location.state?.goal}
       </h1>
       <div className="flex flex-wrap md:gap-16 gap-4 w-full md:p-16 p-4">
+        <div className="bg-white rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 flex-auto w-[500px]">
+          <h2 className="text-lg mb-4 w-auto">Describe your overall goal</h2>
+          <input
+            className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
+            placeholder="I want to..."
+            value={goalDescription}
+            onChange={(e) => setGoalDescription(e.target.value)}
+          />
+
+          <h2 className="text-lg mt-4 mb-4 w-auto">
+            What is the time frame for this goal?
+          </h2>
+          <input
+            className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
+            placeholder="12 months..."
+            value={timeDescription}
+            onChange={(e) => setTimeDescription(e.target.value)}
+          />
+          <button
+            onClick={handleGoalSaveClick}
+            className="goal-save-button text-[var(--btn-color)] border-2 border-[var(--btn-color)] mt-4 p-2 rounded-md text-lg font-bold cursor-pointer bg-color-[var(--btn-color)]"
+          >
+            Save
+          </button>
+        </div>
         <div className="bg-white rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 flex-auto w-[500px]">
           <h2 className="text-lg mb-4 w-auto">Your habits to track</h2>
           {tasks.map((task, index) => (
