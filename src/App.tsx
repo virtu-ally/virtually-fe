@@ -1,18 +1,16 @@
 import "./App.css";
 
-import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
+import { Auth0Provider } from "@auth0/auth0-react";
 import { CustomerProvider } from "./context/CustomerContext";
 import Goal from "./pages/Goal";
 import Header from "./components/Header";
 import Home from "./pages/Home";
-import Logout from "./pages/Logout";
 import NewDashboard from "./pages/Dashboard";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
 import { QuizProvider } from "./context/QuizContext";
-import Template from "./pages/Template";
 import { ThemeProvider } from "./context/ThemeContext";
 
 function App() {
@@ -45,7 +43,6 @@ function App() {
             <Header />
 
             <Routes location={location}>
-              <Route path="/logout" element={<Logout />} />
               <Route path="/" element={<Home />} />
 
               <Route
