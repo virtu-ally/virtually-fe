@@ -25,3 +25,13 @@ export const login = async ({ id }) => {
   if (!res.ok) throw new Error("Login failed");
   return res.json();
 };
+
+export const getCustomerByEmail = async (email: string) => {
+  const res = await fetch(`${getBaseUrl()}/customers/by-email/${email}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Customer not found");
+  return res.json();
+};

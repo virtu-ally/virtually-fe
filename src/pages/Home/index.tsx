@@ -47,7 +47,7 @@ const Home = () => {
             Virtually
             <span className="home-title-underline" />
           </h1>
-          <h2 className="text-3xl ">Your Goals, A Shared Journey.</h2>
+          <h2 className="text-3xl ">A Shared Journey to Your Goals.</h2>
 
           <button
             className="start-button"

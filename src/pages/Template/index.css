@@ -11,8 +11,8 @@
   }
 }
 
-.goal-save-button:hover,
-.goal-save-button:focus {
+.goal-save-button:hover:not(:disabled),
+.goal-save-button:focus:not(:disabled) {
   color: white;
   transition: all 0.2s ease-in-out;
   background: var(--secondary-color);
@@ -58,12 +58,12 @@
   color: var(--bg-color);
 }
 
-.plus:hover,
-.minus:hover,
-.plus:active,
-.minus:active,
-.plus:focus,
-.minus:focus {
+.plus:hover:not(:disabled),
+.minus:hover:not(:disabled),
+.plus:active:not(:disabled),
+.minus:active:not(:disabled),
+.plus:focus:not(:disabled),
+.minus:focus:not(:disabled) {
   transform: perspective(500px) translate3d(0px, 0, 100px);
 }
 
@@ -76,8 +76,8 @@
   border-color: white;
 }
 
-[data-theme="neon"] .save-button:hover,
-[data-theme="blue"] .save-button:hover {
+[data-theme="neon"] .save-button:hover:not(:disabled),
+[data-theme="blue"] .save-button:hover:not(:disabled) {
   outline: none;
   background-color: var(--text-color);
   border-color: var(--text-color);
@@ -85,14 +85,14 @@
   transform: translateZ(0);
 }
 
-[data-theme="neon"] .save-button:focus,
-[data-theme="blue"] .save-button:focus {
+[data-theme="neon"] .save-button:focus:not(:disabled),
+[data-theme="blue"] .save-button:focus:not(:disabled) {
   outline: none;
   transform: translateZ(0);
 }
 
-[data-theme="neon"] .save-button:active,
-[data-theme="blue"] .save-button:active {
+[data-theme="neon"] .save-button:active:not(:disabled),
+[data-theme="blue"] .save-button:active:not(:disabled) {
   outline: none;
 }
 
