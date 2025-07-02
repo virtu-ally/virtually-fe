@@ -1,11 +1,53 @@
 import "./index.css";
 
 import { login, signup } from "../../api/customer";
+import { useRef, useState } from "react";
 
 import { useAuth } from "../../context/FirebaseAuthContext";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+
+// Function to convert Firebase error codes to user-friendly messages
+const getFirebaseErrorMessage = (errorCode: string): string => {
+  switch (errorCode) {
+    case "auth/email-already-in-use":
+    case "EMAIL_EXISTS":
+      return "An account with this email already exists. Please try logging in instead.";
+    case "auth/user-not-found":
+      return "No account found with this email. Please check your email or sign up.";
+    case "auth/wrong-password":
+      return "Incorrect password. Please try again.";
+    case "auth/invalid-email":
+      return "Please enter a valid email address.";
+    case "auth/weak-password":
+      return "Password should be at least 6 characters long.";
+    case "auth/too-many-requests":
+      return "Too many failed attempts. Please try again later.";
+    case "auth/popup-closed-by-user":
+      return "Google sign-in was cancelled. Please try again.";
+    case "auth/popup-blocked":
+      return "Google sign-in popup was blocked. Please allow popups and try again.";
+    case "auth/network-request-failed":
+      return "Network error. Please check your internet connection and try again.";
+    default:
+      return "An error occurred. Please try again.";
+  }
+};
+
+const Toast = ({
+  message,
+  onClose,
+}: {
+  message: string;
+  onClose: () => void;
+}) => (
+  <div className="login-toast">
+    <span>{message}</span>
+    <button className="toast-close" onClick={onClose} aria-label="Close">
+      &times;
+    </button>
+  </div>
+);
 
 const Login = () => {
   const [tab, setTab] = useState<"signup" | "login">("signup");
@@ -17,12 +59,19 @@ const Login = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const toastTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const navigate = useNavigate();
 
   //   const signupMutation = useMutation({ mutationFn: signup });
   //   const loginMutation = useMutation({ mutationFn: login });
   const { login, signup, loginWithGoogle, loading } = useAuth();
+
+  const showToast = (msg: string) => {
+    setError(msg);
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    toastTimeout.current = setTimeout(() => setError(""), 4000);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -36,12 +85,12 @@ const Login = () => {
     if (tab === "signup") {
       // Validation for signup
       if (form.password !== form.confirmPassword) {
-        setError("Passwords do not match.");
+        showToast("Passwords do not match.");
         return;
       }
 
       if (form.password.length < 6) {
-        setError("Password must be at least 6 characters long.");
+        showToast("Password must be at least 6 characters long.");
         return;
       }
 
@@ -56,7 +105,9 @@ const Login = () => {
         });
         navigate("/dashboard");
       } catch (err: any) {
-        setError(err.message || "Signup failed. Please try again.");
+        const code = err.code || err.message;
+        const errorMessage = getFirebaseErrorMessage(code);
+        showToast(errorMessage);
       }
     } else {
       // Login
@@ -71,7 +122,9 @@ const Login = () => {
         });
         navigate("/dashboard");
       } catch (err: any) {
-        setError(err.message || "Login failed. Please check your credentials.");
+        const code = err.code || err.message;
+        const errorMessage = getFirebaseErrorMessage(code);
+        showToast(errorMessage);
       }
     }
   };
@@ -82,7 +135,9 @@ const Login = () => {
       await loginWithGoogle();
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Google login failed.");
+      const code = err.code || err.message;
+      const errorMessage = getFirebaseErrorMessage(code);
+      showToast(errorMessage);
     }
   };
 
@@ -100,7 +155,8 @@ const Login = () => {
 
   return (
     <div className="login-container bg-[var(--bg-color)] text-[var(--text-color)] mt-8">
-      <div className="flex items-center justify-center gap-4 mb-4">
+      {error && <Toast message={error} onClose={() => setError("")} />}
+      <div className="flex items-center justify-center gap-4">
         <button
           className={`login-title tab-btn ${tab === "signup" ? "active" : ""}`}
           onClick={() => handleTabChange("signup")}
@@ -121,7 +177,7 @@ const Login = () => {
           onSubmit={handleSubmit}
         >
           <div
-            className={`flex flex-col gap-4 h-full transition-all duration-500 linear delay-75 signup-fields ${
+            className={`flex flex-col gap-4 h-full transition-all duration-500 ease-in-out delay-75 signup-fields ${
               tab !== "signup" ? "hide" : ""
             }`}
           >
@@ -208,8 +264,6 @@ const Login = () => {
           >
             {loading ? "Please wait..." : "Sign in with Google"}
           </button>
-
-          {error && <div className="login-error">{error}</div>}
         </form>
       </div>
     </div>
