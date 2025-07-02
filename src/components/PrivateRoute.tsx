@@ -1,11 +1,11 @@
 import { Loader } from "lucide-react";
 import { Navigate } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from "../context/FirebaseAuthContext";
 
 export const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { user, loading } = useAuth();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader className="animate-spin" />
@@ -13,5 +13,5 @@ export const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return isAuthenticated ? children : <Navigate to="/" />;
+  return user ? children : <Navigate to="/" />;
 };

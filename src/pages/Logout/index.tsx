@@ -1,17 +1,17 @@
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from "../../context/FirebaseAuthContext";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Logout = () => {
-  const { logout } = useAuth0();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    logout({
-      logoutParams: {
-        returnTo: window.location.origin,
-      },
+    logout().then(() => {
+      navigate("/");
     });
     // eslint-disable-next-line
-  }, [logout]);
+  }, [logout, navigate]);
 
   return null;
 };

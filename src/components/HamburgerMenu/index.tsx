@@ -2,27 +2,24 @@ import "./index.css";
 
 import { Menu, X } from "lucide-react";
 
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from "../../context/FirebaseAuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth0();
+  const { logout } = useAuth();
 
   const handleNavigation = (path: string) => {
     setIsOpen(false);
     navigate(path);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsOpen(false);
-    logout({
-      logoutParams: {
-        returnTo: `${window.location.origin}/virtually-fe`,
-      },
-    });
+    await logout();
+    navigate("/");
   };
 
   return (

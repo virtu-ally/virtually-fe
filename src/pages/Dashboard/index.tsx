@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import Quiz from "../Quiz";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from "../../context/FirebaseAuthContext";
 import { useCustomer } from "../../context/CustomerContext";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../../context/QuizContext";
@@ -14,10 +14,12 @@ import { useQuiz } from "../../context/QuizContext";
 const NewDashboard = () => {
   const navigate = useNavigate();
   const [isExiting, setIsExiting] = useState(false);
+  const quiz = useQuiz();
+  const state = quiz?.state;
+  const dispatch = quiz?.dispatch;
   const signupMutation = useMutation({ mutationFn: signup });
-  const { state, dispatch } = useQuiz();
   const [showQuiz, setShowQuiz] = useState(false);
-  const { user } = useAuth0();
+  const { user } = useAuth();
   const { setProfile, profile } = useCustomer();
 
   const customerQuery = useQuery({
@@ -31,23 +33,23 @@ const NewDashboard = () => {
       if (customerQuery.data) {
         // Customer exists, update profile
         setProfile({
-          auth0Id: user.sub || "",
-          name: user.name || "",
+          auth0Id: user.uid || "",
+          name: user.displayName || user.email || "",
           email: user.email || "",
           customerId: customerQuery.data.id,
         });
       } else if (customerQuery.isError) {
         // Customer doesn't exist, create new one
         const form = {
-          first_name: user?.given_name || "",
-          last_name: user?.family_name || "",
+          first_name: user.displayName?.split(" ")[0] || "",
+          last_name: user.displayName?.split(" ")[1] || "",
           email: user?.email || "",
         };
         signupMutation.mutate(form, {
           onSuccess: (data) => {
             setProfile({
-              auth0Id: user.sub || "",
-              name: user.name || "",
+              auth0Id: user.uid || "",
+              name: user.displayName || user.email || "",
               email: user.email || "",
               customerId: data.id,
             });

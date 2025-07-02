@@ -3,7 +3,7 @@ import "./index.css";
 import { CheckCircle2, LineChart, Smile, Target } from "lucide-react";
 
 import ThemedLogo from "../../components/ThemedLogo";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from "../../context/FirebaseAuthContext";
 import { useNavigate } from "react-router-dom";
 
 const features = [
@@ -34,8 +34,9 @@ const features = [
 ];
 
 const Home = () => {
-  const { isAuthenticated, loginWithRedirect } = useAuth0();
+  const { user } = useAuth();
   const navigate = useNavigate();
+
   return (
     <div
       className={`home-container bg-[var(--bg-color)] text-[var(--text-color)] min-h-screen flex flex-col items-center justify-center px-4`}
@@ -49,20 +50,18 @@ const Home = () => {
           </h1>
           <h2 className="text-3xl ">A Shared Journey to Your Goals.</h2>
 
-          <button
-            className="start-button"
-            onClick={() => {
-              if (isAuthenticated) {
-                navigate("/dashboard");
-              } else {
-                loginWithRedirect({
-                  appState: { returnTo: "/dashboard" },
-                });
-              }
-            }}
-          >
-            Get Started
-          </button>
+          {user ? (
+            <button
+              className="start-button"
+              onClick={() => navigate("/dashboard")}
+            >
+              Go to Dashboard
+            </button>
+          ) : (
+            <button className="start-button" onClick={() => navigate("/login")}>
+              Get Started
+            </button>
+          )}
         </div>
       </div>
       <div className="m-4 sm:m-10 self-start text-center sm:text-left">

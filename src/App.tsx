@@ -2,11 +2,12 @@ import "./App.css";
 
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
-import { Auth0Provider } from "@auth0/auth0-react";
+import { AuthProvider } from "./context/FirebaseAuthContext";
 import { CustomerProvider } from "./context/CustomerContext";
 import Goal from "./pages/Goal";
 import Header from "./components/Header";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
 import NewDashboard from "./pages/Dashboard";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
@@ -15,26 +16,9 @@ import { ThemeProvider } from "./context/ThemeContext";
 
 function App() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   return (
-    <Auth0Provider
-      domain={import.meta.env.VITE_AUTH0_DOMAIN}
-      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
-      authorizationParams={{
-        redirect_uri: `${window.location.origin}/virtually-fe/`,
-        audience: `https://${import.meta.env.VITE_AUTH0_DOMAIN}/api/v2/`,
-        scope: "openid profile email",
-      }}
-      onRedirectCallback={(appState) => {
-        navigate(appState?.returnTo || "/", { replace: true });
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-      }}
-    >
+    <AuthProvider>
       <CustomerProvider>
         <ThemeProvider>
           <div
@@ -44,6 +28,7 @@ function App() {
 
             <Routes location={location}>
               <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
 
               <Route
                 path="/dashboard"
@@ -79,7 +64,7 @@ function App() {
           </div>
         </ThemeProvider>
       </CustomerProvider>
-    </Auth0Provider>
+    </AuthProvider>
   );
 }
 
