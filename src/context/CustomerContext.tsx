@@ -1,7 +1,7 @@
-import { ReactNode, createContext, useContext, useState } from "react";
+import React, { ReactNode, createContext, useContext, useState } from "react";
 
 interface CustomerProfile {
-  auth0Id: string;
+  firebaseId: string;
   name: string;
   email: string;
   customerId: string;
@@ -19,17 +19,27 @@ interface CustomerContextType {
   addGoal: (goal: NonNullable<CustomerProfile["goals"]>[number]) => void;
 }
 
-const CustomerContext = createContext<CustomerContextType>({
-  profile: null,
-  setProfile: () => {},
-  addGoal: () => {},
-});
+const CustomerContext = createContext<CustomerContextType | undefined>(
+  undefined
+);
 
-export const CustomerProvider = ({ children }: { children: ReactNode }) => {
-  const [profile, setProfile] = useState<CustomerProfile | null>(null);
+export const CustomerProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  // Load profile from sessionStorage on initialization
+  const [profile, setProfileState] = useState<CustomerProfile | null>(() => {
+    const savedProfile = sessionStorage.getItem("customerProfile");
+    return savedProfile ? JSON.parse(savedProfile) : null;
+  });
+
+  const setProfile = (newProfile: CustomerProfile) => {
+    setProfileState(newProfile);
+    // Save to sessionStorage whenever profile is updated
+    sessionStorage.setItem("customerProfile", JSON.stringify(newProfile));
+  };
 
   const addGoal = (goal: NonNullable<CustomerProfile["goals"]>[number]) => {
-    setProfile((prev) => {
+    setProfileState((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
@@ -45,4 +55,10 @@ export const CustomerProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useCustomer = () => useContext(CustomerContext);
+export const useCustomer = () => {
+  const context = useContext(CustomerContext);
+  if (context === undefined) {
+    throw new Error("useCustomer must be used within a CustomerProvider");
+  }
+  return context;
+};

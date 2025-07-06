@@ -33,7 +33,7 @@ const NewDashboard = () => {
       if (customerQuery.data) {
         // Customer exists, update profile
         setProfile({
-          auth0Id: user.uid || "",
+          firebaseId: user.uid || "",
           name: user.displayName || user.email || "",
           email: user.email || "",
           customerId: customerQuery.data.id,
@@ -48,7 +48,7 @@ const NewDashboard = () => {
         signupMutation.mutate(form, {
           onSuccess: (data) => {
             setProfile({
-              auth0Id: user.uid || "",
+              firebaseId: user.uid || "",
               name: user.displayName || user.email || "",
               email: user.email || "",
               customerId: data.id,
@@ -108,7 +108,7 @@ const NewDashboard = () => {
           <div
             onClick={() => setShowQuiz(true)}
             className={`card quiz-card ${isExiting ? "slide-out" : ""}`}
-            style={{ animationDelay: "0.4s" }}
+            style={{ animationDelay: "0.6s" }}
           >
             <h2 className="text-sm font-semibold ">
               Take our quiz for personalised recommendations

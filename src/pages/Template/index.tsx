@@ -87,34 +87,17 @@ const Template = ({
         },
       }
     );
-
-    // createGoalMutation.mutate(
-    //   {
-    //     customerId: profile.customerId,
-    //     description: goalDescription,
-    //     habits: tasks,
-    //   },
-    //   {
-    //     onSuccess: (data) => {
-    //       addGoal({
-    //         id: data.id,
-    //         description: goalDescription,
-    //         timeframe: timeDescription,
-    //         habits: tasks,
-    //       });
-    //       setActiveTab("progress");
-    //     },
-    //     onError: (error) => {
-    //       console.error("Error creating goal:", error);
-    //     },
-    //   }
-    // );
   };
 
   const handleSave = () => {
+    if (!profile?.customerId) {
+      console.error("No customer ID available");
+      return;
+    }
+
     createGoalMutation.mutate(
       {
-        customerId: location.state?.customerId,
+        customerId: profile.customerId,
         description: chatInput,
         habits: tasks,
       },
@@ -171,61 +154,41 @@ const Template = ({
             )}
           </button>
         </div>
-        <div className="bg-white rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 flex-auto w-[500px]">
-          <h2 className="text-lg mb-4 w-auto">Your habits to track</h2>
-          {createHabitsMutation.isPending ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader className="animate-spin" size={24} />
-              <span className="ml-2">Generating habits...</span>
-            </div>
-          ) : (
-            <>
-              {tasks.map((task, index) => (
-                <div key={index} className="mb-4 task-container">
-                  {editingIndex === index ? (
-                    <div className="flex gap-2 w-full">
-                      <textarea
-                        rows={2}
-                        className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent md:min-h-[36px] min-h-[120px]"
-                        name={`habit-${index}`}
-                        placeholder="Enter your habit"
-                        value={task}
-                        onChange={(e) =>
-                          handleTaskChange(index, e.target.value)
-                        }
-                        onBlur={() => handleTaskSave(index)}
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => handleTaskSave(index)}
-                        className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2 w-full">
-                      <button
-                        onClick={() => {
-                          if (goalFilledIn) {
-                            handleTaskEdit(index);
+        {goalFilledIn && (
+          <div className="bg-white rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 flex-auto w-[500px]">
+            <h2 className="text-lg mb-4 w-auto">Your habits to track</h2>
+            {createHabitsMutation.isPending ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader className="animate-spin" size={24} />
+                <span className="ml-2">Generating habits...</span>
+              </div>
+            ) : (
+              <>
+                {tasks.map((task, index) => (
+                  <div key={index} className="mb-4 task-container">
+                    {editingIndex === index ? (
+                      <div className="flex gap-2 w-full">
+                        <textarea
+                          rows={2}
+                          className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent md:min-h-[36px] min-h-[120px]"
+                          name={`habit-${index}`}
+                          placeholder="Enter your habit"
+                          value={task}
+                          onChange={(e) =>
+                            handleTaskChange(index, e.target.value)
                           }
-                        }}
-                        className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
-                      >
-                        <PencilLine size={16} />
-                      </button>
-                      <p
-                        className="w-full md:min-h-[36px] min-h-[100px] border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
-                        onClick={() => {
-                          if (goalFilledIn) {
-                            handleTaskEdit(index);
-                          }
-                        }}
-                      >
-                        {task}
-                      </p>
-                      <div className="flex gap-2">
+                          onBlur={() => handleTaskSave(index)}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleTaskSave(index)}
+                          className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 w-full">
                         <button
                           onClick={() => {
                             if (goalFilledIn) {
@@ -234,23 +197,45 @@ const Template = ({
                           }}
                           className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
                         >
-                          <Minus size={16} />
+                          <PencilLine size={16} />
                         </button>
+                        <p
+                          className="w-full md:min-h-[36px] min-h-[100px] border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
+                          onClick={() => {
+                            if (goalFilledIn) {
+                              handleTaskEdit(index);
+                            }
+                          }}
+                        >
+                          {task}
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              if (goalFilledIn) {
+                                handleTaskEdit(index);
+                              }
+                            }}
+                            className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
+                          >
+                            <Minus size={16} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={handleAddTask}
-                disabled={!goalFilledIn}
-                className="text-[var(--btn-color)] text-2xl font-bold cursor-pointer"
-              >
-                <Plus className="hover:stroke-[var(--accent-color)] plus" />
-              </button>
-            </>
-          )}
-        </div>
+                    )}
+                  </div>
+                ))}
+                <button
+                  onClick={handleAddTask}
+                  disabled={!goalFilledIn}
+                  className="text-[var(--btn-color)] text-2xl font-bold cursor-pointer"
+                >
+                  <Plus className="hover:stroke-[var(--accent-color)] plus" />
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         <div className="mb-6 flex-auto w-[400px]">
           <h2 className="text-lg mb-2 text-center">

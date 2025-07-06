@@ -2,14 +2,26 @@ import "./index.css";
 
 import { QuizState, useQuiz } from "../../context/QuizContext";
 
+import { useCustomer } from "../../context/CustomerContext";
 import { useNavigate } from "react-router-dom";
+import { useSaveCustomerQuiz } from "../../api/hooks/useCustomerQuiz";
 import { useState } from "react";
 
 const Quiz = ({ setShowQuiz }: { setShowQuiz: (show: boolean) => void }) => {
-  const { state, dispatch } = useQuiz();
+  const quizContext = useQuiz();
+  const { profile } = useCustomer();
   const navigate = useNavigate();
   const [customGoal, setCustomGoal] = useState("");
   const [isExiting, setIsExiting] = useState(false);
+
+  const saveQuizMutation = useSaveCustomerQuiz();
+
+  // Add null checks for quizContext
+  if (!quizContext) {
+    return <div>Loading quiz...</div>;
+  }
+
+  const { state, dispatch } = quizContext;
 
   const questions = [
     {
@@ -50,6 +62,30 @@ const Quiz = ({ setShowQuiz }: { setShowQuiz: (show: boolean) => void }) => {
     },
   ];
 
+  const saveQuizData = () => {
+    console.log("Profile:", profile);
+    console.log("Customer ID:", profile?.customerId);
+
+    if (profile?.customerId) {
+      const quizData = {
+        age: state.age,
+        educationLevel: state.educationLevel,
+        weight: state.weight,
+        height: state.height,
+        goals: state.goals,
+      };
+
+      console.log("Sending quiz data:", quizData);
+
+      saveQuizMutation.mutate({
+        customerId: profile.customerId,
+        quizData,
+      });
+    } else {
+      console.error("No customer ID available, profile:", profile);
+    }
+  };
+
   const handleNext = () => {
     if (state.currentQuestion < questions.length - 1) {
       dispatch({ type: "NEXT_QUESTION" });
@@ -57,6 +93,7 @@ const Quiz = ({ setShowQuiz }: { setShowQuiz: (show: boolean) => void }) => {
       setIsExiting(true);
       setTimeout(() => {
         localStorage.setItem("quizResults", JSON.stringify(state));
+        saveQuizData();
         setShowQuiz(false);
       }, 700);
     }
@@ -69,6 +106,7 @@ const Quiz = ({ setShowQuiz }: { setShowQuiz: (show: boolean) => void }) => {
       setIsExiting(true);
       setTimeout(() => {
         localStorage.setItem("quizResults", JSON.stringify(state));
+        saveQuizData();
         navigate("/dashboard", { replace: true });
       }, 500);
     }
