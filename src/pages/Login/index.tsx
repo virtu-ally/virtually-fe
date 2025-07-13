@@ -1,6 +1,10 @@
 import "./index.css";
 
-import { login, signup } from "../../api/customer";
+import {
+  login as apiLogin,
+  signup as apiSignup,
+  getCustomerByEmail,
+} from "../../api/customer";
 import { useRef, useState } from "react";
 
 import { useAuth } from "../../context/FirebaseAuthContext";
@@ -73,6 +77,31 @@ const Login = () => {
     toastTimeout.current = setTimeout(() => setError(""), 4000);
   };
 
+  const handleUserInDatabase = async (
+    email: string,
+    firstName?: string,
+    lastName?: string
+  ) => {
+    try {
+      // Check if user exists in database
+      await getCustomerByEmail(email);
+      // User exists, no need to create account
+    } catch (error) {
+      // User doesn't exist, create account in database
+      try {
+        await apiSignup({
+          first_name: firstName || "",
+          last_name: lastName || "",
+          email: email,
+        });
+      } catch (signupError) {
+        console.error("Failed to create user in database:", signupError);
+        // Don't throw error here - user is authenticated with Firebase
+        // This is just for database consistency
+      }
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
@@ -95,7 +124,13 @@ const Login = () => {
       }
 
       try {
-        await signup(form.email, form.password);
+        const user = await signup(form.email, form.password);
+        // After successful Firebase signup, ensure user exists in database
+        await handleUserInDatabase(
+          user.email || form.email,
+          form.first_name,
+          form.last_name
+        );
         setForm({
           first_name: "",
           last_name: "",
@@ -112,7 +147,9 @@ const Login = () => {
     } else {
       // Login
       try {
-        await login(form.email, form.password);
+        const user = await login(form.email, form.password);
+        // After successful Firebase login, ensure user exists in database
+        await handleUserInDatabase(user.email || form.email);
         setForm({
           first_name: "",
           last_name: "",
@@ -132,7 +169,12 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     setError("");
     try {
-      await loginWithGoogle();
+      const user = await loginWithGoogle();
+      // Extract first and last name from displayName
+      const firstName = user.displayName?.split(" ")[0] || "";
+      const lastName = user.displayName?.split(" ")[1] || "";
+      // After successful Google login, ensure user exists in database
+      await handleUserInDatabase(user.email || "", firstName, lastName);
       navigate("/dashboard");
     } catch (err: any) {
       const code = err.code || err.message;
