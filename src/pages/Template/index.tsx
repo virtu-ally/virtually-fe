@@ -4,8 +4,7 @@ import { Loader, Minus, PencilLine, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { createGoal } from "../../api/habits";
-import { suggestHabits } from "../../api/habits";
+import { createGoal, suggestHabits, pollForResults } from "../../api/habits";
 import { useCustomer } from "../../context/CustomerContext";
 import { useMutation } from "@tanstack/react-query";
 
@@ -50,7 +49,7 @@ const Template = ({
     setTasks([...tasks, ""]);
   };
 
-  const handleGoalSaveClick = () => {
+  const handleGoalSaveClick = async () => {
     if (!profile?.customerId) return;
 
     createHabitsMutation.mutate(
@@ -59,31 +58,43 @@ const Template = ({
         goal: goalDescription + " within the timeframe of " + timeDescription,
       },
       {
-        onSuccess: (data) => {
-          console.log(data, "response habits");
-          const mockData = [
-            "• Start by dedicating 25 minutes daily to listening to French podcasts or radio shows",
-            "• Practice speaking by watching French TV shows and movies with English subtitles nightly",
-            "• Immerse yourself in French conversations by having dinner at a French restaurant every other week",
-            "• Use language exchange apps like Tandem and HelloTalk for 1 hour daily",
-            "• Listen to French language audiobooks or pods on topics you're interested in",
-          ];
-          addGoal({
-            id: data.id,
-            description: goalDescription,
-            timeframe: timeDescription,
-            habits: data,
-          });
-          if (!goalFilledIn) {
-            setTasks([...data]);
-          } else {
-            setTasks([...tasks, ...data]);
+        onSuccess: async (result) => {
+          if (result.isError) {
+            console.error("Error starting habit suggestion process:", result.message);
+            return;
           }
-          setGoalFilledIn(true);
-          console.log(data, "response habits");
+
+          if (!result.data) {
+            console.error("No data received from habit suggestion process");
+            return;
+          }
+
+          console.log(result.data, "process started");
+          try {
+            // Poll for results using suggestion_id
+            const habits = await pollForResults(result.data.suggestion_id);
+            console.log(habits, "received habits");
+            
+            addGoal({
+              id: result.data.suggestion_id,
+              description: goalDescription,
+              timeframe: timeDescription,
+              habits: habits,
+            });
+            
+            if (!goalFilledIn) {
+              setTasks([...habits]);
+            } else {
+              setTasks([...tasks, ...habits]);
+            }
+            setGoalFilledIn(true);
+          } catch (pollError) {
+            console.error("Error polling for results:", pollError);
+            // Handle polling error - maybe show a fallback UI
+          }
         },
         onError: (error) => {
-          console.error("Error creating habits:", error);
+          console.error("Error in mutation:", error);
         },
       }
     );
