@@ -27,7 +27,7 @@ export const login = async ({ id }) => {
 };
 
 export const getCustomerByEmail = async (email: string) => {
-  const res = await fetch(`${getBaseUrl()}/customers/by-email/${email}`, {
+  const res = await fetch(`${getBaseUrl()}/customers/${email}?byEmail=true`, {
     method: "GET",
     headers: { Accept: "application/json" },
     credentials: "include",
