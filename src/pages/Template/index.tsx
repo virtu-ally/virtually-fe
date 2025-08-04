@@ -1,6 +1,6 @@
 import "./index.css";
 
-import { Loader, Minus, PencilLine, Plus } from "lucide-react";
+import { Loader, Minus, PencilLine, Plus, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -23,6 +23,7 @@ const Template = ({
   const createGoalMutation = useMutation({ mutationFn: createGoal });
   const createHabitsMutation = useMutation({ mutationFn: suggestHabits });
   const [goalFilledIn, setGoalFilledIn] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
 
   const handleTaskChange = (index: number, value: string) => {
     const newTasks = [...tasks];
@@ -71,6 +72,7 @@ const Template = ({
 
           console.log(result.data, "process started");
           try {
+            setIsPolling(true);
             // Poll for results using suggestion_id
             const habits = await pollForResults(result.data.suggestion_id);
             console.log(habits, "received habits");
@@ -91,6 +93,8 @@ const Template = ({
           } catch (pollError) {
             console.error("Error polling for results:", pollError);
             // Handle polling error - maybe show a fallback UI
+          } finally {
+            setIsPolling(false);
           }
         },
         onError: (error) => {
@@ -125,8 +129,38 @@ const Template = ({
 
   return (
     <div
-      className={`min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] fade-in flex flex-col items-center `}
+      className={`min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] fade-in flex flex-col items-center relative`}
     >
+      {/* Loading Overlay */}
+      {isPolling && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl transform animate-pulse-scale">
+            <div className="relative mb-6">
+              <div className="loading-spinner-container">
+                <Sparkles className="animate-sparkle-1 absolute top-0 left-0 text-[var(--accent-color)]" size={24} />
+                <Loader className="animate-spin text-[var(--btn-color)] mx-auto" size={48} />
+                <Sparkles className="animate-sparkle-2 absolute bottom-0 right-0 text-[var(--secondary-color)]" size={20} />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-[var(--secondary-text-color)] mb-2">
+              Getting your habit suggestions...
+            </h3>
+            <p className="text-[var(--secondary-text-color)] opacity-70">
+              Our AI is crafting personalized habits just for you
+            </p>
+            <div className="mt-4 flex justify-center">
+              <div className="progress-dots">
+                <span className="animate-bounce-1">•</span>
+                <span className="animate-bounce-2">•</span>
+                <span className="animate-bounce-3">•</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Main Content - Disabled when polling */}
+      <div className={isPolling ? 'pointer-events-none opacity-75' : ''}>
       <h1 className="title text-3xl mb-6 pt-8 px-4 w-full text-center capitalize ">
         {location.state?.goal}
       </h1>
@@ -152,7 +186,7 @@ const Template = ({
 
           <button
             onClick={handleGoalSaveClick}
-            disabled={createHabitsMutation.isPending}
+            disabled={createHabitsMutation.isPending || isPolling}
             className="goal-save-button text-[var(--btn-color)] border-2 border-[var(--btn-color)] mt-4 p-2 rounded-md text-lg font-bold cursor-pointer bg-color-[var(--btn-color)] flex items-center justify-center gap-2"
           >
             {createHabitsMutation.isPending ? (
@@ -262,7 +296,7 @@ const Template = ({
 
           <button
             onClick={handleSave}
-            disabled={!goalFilledIn || createGoalMutation.isPending}
+            disabled={!goalFilledIn || createGoalMutation.isPending || isPolling}
             className="save-button mt-4 flex items-center justify-center gap-2"
           >
             {createGoalMutation.isPending ? (
@@ -275,6 +309,7 @@ const Template = ({
             )}
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
