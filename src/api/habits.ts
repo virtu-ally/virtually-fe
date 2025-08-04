@@ -200,12 +200,15 @@ export const pollForResults = async (
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const result = await getSuggestions(suggestionId);
     
-    if (result.status === 202) {
+    // Continue polling for temporary conditions (202, 404)
+    if (result.status === 202 || result.status === 404) {
+      console.log(`Attempt ${attempt + 1}/${maxAttempts}: Status ${result.status}, waiting ${intervalMs}ms...`);
       await new Promise(resolve => setTimeout(resolve, intervalMs));
       continue;
     }
     
-    if (result.isError) {
+    // Throw immediately for permanent errors (500, etc)
+    if (result.status >= 500) {
       throw new Error(`Failed to get suggestions: ${result.message}`);
     }
     
