@@ -1,5 +1,5 @@
-import { saveCustomerQuiz } from "../customer";
-import { useMutation } from "@tanstack/react-query";
+import { getCustomerQuiz, saveCustomerQuiz } from "../customer";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useSaveCustomerQuiz = () => {
   return useMutation({
@@ -13,5 +13,13 @@ export const useSaveCustomerQuiz = () => {
     onError: (error) => {
       console.error("Failed to save quiz data:", error);
     },
+  });
+};
+
+export const useGetCustomerQuiz = (customerId: string | undefined) => {
+  return useQuery({
+    queryKey: ["customerQuiz", customerId],
+    queryFn: () => getCustomerQuiz(customerId as string),
+    enabled: !!customerId,
   });
 };

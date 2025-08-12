@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Quiz from "../Quiz";
 import { useAuth } from "../../context/FirebaseAuthContext";
 import { useCustomer } from "../../context/CustomerContext";
+import { useGetCustomerQuiz } from "../../api/hooks/useCustomerQuiz";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../../context/QuizContext";
 
@@ -27,6 +28,8 @@ const NewDashboard = () => {
     queryFn: () => getCustomerByEmail(user?.email || ""),
     enabled: !!user?.email,
   });
+
+  const quizQuery = useGetCustomerQuiz(profile?.customerId);
 
   useEffect(() => {
     if (user && !customerQuery.isLoading) {
@@ -75,6 +78,21 @@ const NewDashboard = () => {
     }, 800);
   };
 
+  const handleQuizClick = () => {
+    // Check if quiz has already been completed
+    if (quizQuery.data) {
+      // Quiz completed, navigate to goals or show a message
+      alert(
+        "You've already completed the quiz! Check your progress in the Goals section."
+      );
+      return;
+    }
+    setShowQuiz(true);
+  };
+
+  // Only show quiz option if quiz hasn't been completed
+  const shouldShowQuizOption = !quizQuery.data && !quizQuery.isLoading;
+
   return (
     <div className="container mx-auto px-4 py-12">
       {!showQuiz && (
@@ -105,16 +123,32 @@ const NewDashboard = () => {
             <GraduationCap className="w-12 h-12 text-[var(--btn-color)] mb-4" />
             <h2 className="text-xl font-semibold">Education</h2>
           </div>
-          <div
-            onClick={() => setShowQuiz(true)}
-            className={`card quiz-card ${isExiting ? "slide-out" : ""}`}
-            style={{ animationDelay: "0.6s" }}
-          >
-            <h2 className="text-sm font-semibold ">
-              Take our quiz for personalised recommendations
-            </h2>
-            <ChevronRight className="w-8 h-8 min-w-6 min-h-6" />
-          </div>
+
+          {shouldShowQuizOption && (
+            <div
+              onClick={handleQuizClick}
+              className={`card quiz-card ${isExiting ? "slide-out" : ""}`}
+              style={{ animationDelay: "0.6s" }}
+            >
+              <h2 className="text-sm font-semibold ">
+                Take our quiz for personalised recommendations
+              </h2>
+              <ChevronRight className="w-8 h-8 min-w-6 min-h-6" />
+            </div>
+          )}
+
+          {quizQuery.data && (
+            <div
+              className={`card quiz-completed-card ${
+                isExiting ? "slide-out" : ""
+              }`}
+              style={{ animationDelay: "0.6s" }}
+            >
+              <h2 className="text-sm font-semibold text-green-600 cursor-default">
+                ✓ Quiz completed!
+              </h2>
+            </div>
+          )}
         </div>
       )}
       {showQuiz && <Quiz setShowQuiz={setShowQuiz} />}

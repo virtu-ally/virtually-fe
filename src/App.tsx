@@ -13,6 +13,7 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
 import { QuizProvider } from "./context/QuizContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import VerifyEmailModal from "./components/VerifyEmailModal";
 
 function App() {
   const location = useLocation();
@@ -25,6 +26,7 @@ function App() {
             className={`bg-[var(--bg-color)] text-[var(--text-color)] relative app-container`}
           >
             <Header />
+            <VerifyEmailModal />
 
             <Routes location={location}>
               <Route path="/" element={<Home />} />

@@ -62,3 +62,32 @@ export const saveCustomerQuiz = async (
 
   return response.json();
 };
+
+export const getCustomerQuiz = async (
+  customerId: string
+): Promise<CustomerQuiz | null> => {
+  const response = await fetch(`${getBaseUrl()}/customers/${customerId}/quiz`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    credentials: "include",
+  });
+
+  if (response.status === 404) {
+    // Quiz not found - customer hasn't completed it yet
+    return null;
+  }
+
+  if (response.status === 400) {
+    throw new Error("Invalid customer identifier");
+  }
+
+  if (response.status === 500) {
+    throw new Error("Internal server error");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch quiz data: ${response.statusText}`);
+  }
+
+  return response.json();
+};
