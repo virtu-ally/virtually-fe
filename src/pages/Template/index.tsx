@@ -8,12 +8,7 @@ import { useLocation } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
-const Template = ({
-  setActiveTab,
-}: {
-  setActiveTab: (tab: string) => void;
-}) => {
-  // const [chatInput, setChatInput] = useState("");
+const Template = () => {
   const [goalDescription, setGoalDescription] = useState("");
   const [timeDescription, setTimeDescription] = useState("");
   const location = useLocation();
@@ -180,7 +175,9 @@ const Template = ({
         </h1>
         <div className="flex flex-col gap-4 w-full md:p-16 p-4 items-center">
           <div className="bg-white rounded-lg p-6 text-[var(--secondary-text-color)] mb-4 md:w-[500px] flex-auto justify-center items-center">
-            <h2 className="text-lg mb-4 w-auto">Describe your overall goal</h2>
+            <h2 className="text-lg mb-4 w-auto">
+              Describe your overall {location.state?.goal} goal
+            </h2>
             <input
               className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
               placeholder="I want to..."

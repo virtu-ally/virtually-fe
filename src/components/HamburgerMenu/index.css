@@ -8,9 +8,10 @@
   color: var(--text-color);
   cursor: pointer;
   padding: 0.5rem;
+  justify-self: flex-end;
+  position: relative;
+  z-index: 99;
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .menu-overlay {
@@ -21,6 +22,10 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
+}
+
+[data-theme="modern"] .menu-content {
+  background-color: #f55d3e;
 }
 
 .menu-content {

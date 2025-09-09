@@ -107,30 +107,91 @@ const Login = () => {
     setError("");
   };
 
+  // Add these handlers
+  const handleAutocomplete = (e: React.FormEvent<HTMLInputElement>) => {
+    const target = e.target as HTMLInputElement;
+    if (target.value && target.value !== form.email) {
+      setForm((prev) => ({ ...prev, email: target.value }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
+    // Get actual input values
+    const formElement = e.target as HTMLFormElement;
+    const emailInput = formElement.elements.namedItem(
+      "email"
+    ) as HTMLInputElement;
+    const passwordInput = formElement.elements.namedItem(
+      "password"
+    ) as HTMLInputElement;
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    // Custom validation
+    if (!email) {
+      showToast("Please enter your email address.");
+      emailInput.focus();
+      return;
+    }
+
+    if (!password) {
+      showToast("Please enter your password.");
+      passwordInput.focus();
+      return;
+    }
+
     if (tab === "signup") {
+      const firstNameInput = formElement.elements.namedItem(
+        "first_name"
+      ) as HTMLInputElement;
+      const lastNameInput = formElement.elements.namedItem(
+        "last_name"
+      ) as HTMLInputElement;
+      const confirmPasswordInput = formElement.elements.namedItem(
+        "confirmPassword"
+      ) as HTMLInputElement;
+
+      const firstName = firstNameInput.value.trim();
+      const lastName = lastNameInput.value.trim();
+      const confirmPassword = confirmPasswordInput.value;
+
       // Validation for signup
-      if (form.password !== form.confirmPassword) {
+      if (!firstName) {
+        showToast("Please enter your first name.");
+        firstNameInput.focus();
+        return;
+      }
+
+      if (!lastName) {
+        showToast("Please enter your last name.");
+        lastNameInput.focus();
+        return;
+      }
+
+      if (!confirmPassword) {
+        showToast("Please confirm your password.");
+        confirmPasswordInput.focus();
+        return;
+      }
+
+      if (password !== confirmPassword) {
         showToast("Passwords do not match.");
         return;
       }
 
-      if (form.password.length < 6) {
+      if (password.length < 6) {
         showToast("Password must be at least 6 characters long.");
         return;
       }
 
       try {
-        const user = await signup(form.email, form.password);
-        // After successful Firebase signup, ensure user exists in database
-        await handleUserInDatabase(
-          user.email || form.email,
-          form.first_name,
-          form.last_name
-        );
+        const user = await signup(email, password);
+        await handleUserInDatabase(user.email || email, firstName, lastName);
+        (e.target as HTMLFormElement).reset();
         setForm({
           first_name: "",
           last_name: "",
@@ -147,9 +208,9 @@ const Login = () => {
     } else {
       // Login
       try {
-        const user = await login(form.email, form.password);
-        // After successful Firebase login, ensure user exists in database
-        await handleUserInDatabase(user.email || form.email);
+        const user = await login(email, password);
+        await handleUserInDatabase(user.email || email);
+        (e.target as HTMLFormElement).reset();
         setForm({
           first_name: "",
           last_name: "",
@@ -229,7 +290,6 @@ const Login = () => {
                 name="first_name"
                 value={form.first_name}
                 onChange={handleChange}
-                required
                 className="login-input"
                 placeholder="Enter your first name"
               />
@@ -240,7 +300,6 @@ const Login = () => {
                 name="last_name"
                 value={form.last_name}
                 onChange={handleChange}
-                required
                 className="login-input"
                 placeholder="Enter your last name"
               />
@@ -253,9 +312,11 @@ const Login = () => {
               type="email"
               value={form.email}
               onChange={handleChange}
-              required
+              onInput={handleAutocomplete}
+              onBlur={handleAutocomplete}
               className="login-input z-[1]"
               placeholder="Enter your email"
+              autoComplete="email"
             />
           </label>
           <label className="text-lg">
@@ -265,7 +326,6 @@ const Login = () => {
               type="password"
               value={form.password}
               onChange={handleChange}
-              required
               className="login-input"
               placeholder="Enter your password"
             />
@@ -278,7 +338,6 @@ const Login = () => {
                 type="password"
                 value={form.confirmPassword}
                 onChange={handleChange}
-                required
                 className="login-input"
                 placeholder="Confirm your password"
               />

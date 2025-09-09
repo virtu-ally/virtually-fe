@@ -29,11 +29,19 @@ const HamburgerMenu = () => {
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle menu"
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {!isOpen && <Menu size={24} />}
       </button>
 
       {isOpen && (
         <div className="menu-overlay" onClick={() => setIsOpen(false)}>
+          <button
+            className="hamburger-button"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={24} /> : null}
+          </button>
+
           <nav className="menu-content" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => handleNavigation("/dashboard")}>
               Dashboard

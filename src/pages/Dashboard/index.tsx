@@ -97,6 +97,7 @@ const NewDashboard = () => {
     <div className="container mx-auto px-4 py-12">
       {!showQuiz && (
         <div className="grid grid-cols-1 gap-6 justify-items-center card-container">
+          Select a category
           <div
             onClick={() => handleCardClick("life")}
             className={`card ${isExiting ? "slide-out" : ""}`}
@@ -105,7 +106,6 @@ const NewDashboard = () => {
             <LifeBuoy className="w-12 h-12 text-[var(--btn-color)] mb-4" />
             <h2 className="text-xl font-semibold">Life</h2>
           </div>
-
           <div
             onClick={() => handleCardClick("health")}
             className={`card ${isExiting ? "slide-out" : ""}`}
@@ -114,7 +114,6 @@ const NewDashboard = () => {
             <Heart className="w-12 h-12 text-[var(--btn-color)] mb-4" />
             <h2 className="text-xl font-semibold">Health</h2>
           </div>
-
           <div
             onClick={() => handleCardClick("education")}
             className={`card ${isExiting ? "slide-out" : ""}`}
@@ -123,7 +122,6 @@ const NewDashboard = () => {
             <GraduationCap className="w-12 h-12 text-[var(--btn-color)] mb-4" />
             <h2 className="text-xl font-semibold">Education</h2>
           </div>
-
           {shouldShowQuizOption && (
             <div
               onClick={handleQuizClick}
@@ -136,7 +134,6 @@ const NewDashboard = () => {
               <ChevronRight className="w-8 h-8 min-w-6 min-h-6" />
             </div>
           )}
-
           {quizQuery.data && (
             <div
               className={`card quiz-completed-card ${

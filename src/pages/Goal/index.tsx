@@ -1,12 +1,69 @@
 import "./index.css";
 
-import React, { useState } from "react";
-
+import Goals from "./Goals";
 import Progress from "./Progress";
 import Template from "../Template";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-const Goal = () => {
-  const [activeTab, setActiveTab] = useState("setup");
+import { getCustomerGoals, type Goal } from "../../api/goals";
+import { useCustomer } from "../../context/CustomerContext";
+
+const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
+  const { profile } = useCustomer();
+  const customerId = profile?.customerId;
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  const {
+    data: goals = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Goal[]>({
+    queryKey: ["goals", customerId],
+    queryFn: () => getCustomerGoals(customerId as string),
+    enabled: !!customerId,
+  });
+
+  useEffect(() => {
+    if (goals.length > 0) {
+      setActiveTab("goals");
+    }
+  }, [goals]);
+
+  const tabs = useMemo(
+    () => [
+      {
+        label: "setup",
+        component: <Template />,
+      },
+      {
+        label: "progress",
+        component: (
+          <Progress
+            goals={goals}
+            isLoading={isLoading}
+            isError={isError}
+            error={error as Error}
+            customerId={customerId as string}
+          />
+        ),
+      },
+      {
+        label: "goals",
+        component: (
+          <Goals
+            goals={goals}
+            isLoading={isLoading}
+            isError={isError}
+            error={error as Error}
+            customerId={customerId as string}
+          />
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <div className="goal-container">
@@ -23,14 +80,16 @@ const Goal = () => {
         >
           Progress
         </button>
+        <button
+          className={`tab ${activeTab === "goals" ? "active" : ""}`}
+          onClick={() => setActiveTab("goals")}
+        >
+          Goals
+        </button>
       </div>
 
       <div className="tab-content">
-        {activeTab === "setup" ? (
-          <Template setActiveTab={setActiveTab} />
-        ) : (
-          <Progress setActiveTab={setActiveTab} />
-        )}
+        {tabs.find((tab) => tab.label === activeTab)?.component}
       </div>
     </div>
   );

@@ -34,13 +34,18 @@ const storageKey = (customerId: string, key: string) =>
   `habitCompletions:${customerId}:${key}`;
 
 const Progress = ({
-  setActiveTab,
+  goals,
+  isLoading,
+  isError,
+  error,
+  customerId,
 }: {
-  setActiveTab: (tab: string) => void;
+  goals: Goal[];
+  isLoading: boolean;
+  isError: boolean;
+  error: Error;
+  customerId: string;
 }) => {
-  const { profile } = useCustomer();
-  const customerId = profile?.customerId;
-
   const [currentMonth, setCurrentMonth] = useState<Date>(() => {
     const d = new Date();
     d.setDate(1);
@@ -48,17 +53,6 @@ const Progress = ({
   });
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
   const [completions, setCompletions] = useState<MonthCompletions>({});
-
-  const {
-    data: goals = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Goal[]>({
-    queryKey: ["goals", customerId],
-    queryFn: () => getCustomerGoals(customerId as string),
-    enabled: !!customerId,
-  });
 
   // Load/save completions for month from localStorage
   useEffect(() => {
@@ -171,7 +165,6 @@ const Progress = ({
       )}
 
       <div className="mb-6">
-        <h3 className="mb-2">Your Goals</h3>
         {isLoading && <div>Loading goals...</div>}
         {isError && (
           <div className="text-red-500">
@@ -179,28 +172,6 @@ const Progress = ({
           </div>
         )}
         {!isLoading && goals.length === 0 && <div>No goals yet.</div>}
-        <ul className="space-y-2">
-          {goals.map((g) => (
-            <li
-              key={g.id}
-              className="bg-white/70 text-[var(--secondary-text-color)] rounded p-3"
-            >
-              <div className="font-semibold">{g.description}</div>
-              {g.habits?.length ? (
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {g.habits.map((h) => (
-                    <span
-                      key={`${g.id}::${h.id}`}
-                      className="text-xs bg-[var(--accent-color-light)] text-[var(--secondary-text-color)] px-2 py-1 rounded"
-                    >
-                      {h.title}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">

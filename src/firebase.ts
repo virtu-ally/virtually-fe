@@ -1,4 +1,12 @@
-import { getAuth } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  browserSessionPersistence,
+  getAuth,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signInWithRedirect,
+} from "firebase/auth";
+
 import { initializeApp } from "firebase/app";
 
 // Optionally import analytics if you want it
@@ -20,6 +28,17 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
+
+// Set up session-based authentication persistence
+// This ensures users are logged out when the browser session ends
+setPersistence(auth, browserSessionPersistence)
+  .then(() => {
+    console.log("Session persistence configured successfully");
+  })
+  .catch((error) => {
+    console.error("Failed to set session persistence:", error);
+  });
+
 // Optionally export analytics
 // export const analytics = getAnalytics(app);
 

@@ -12,6 +12,7 @@ import NewDashboard from "./pages/Dashboard";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
 import { QuizProvider } from "./context/QuizContext";
+import SessionExpiredModal from "./components/SessionExpiredModal";
 import { ThemeProvider } from "./context/ThemeContext";
 import VerifyEmailModal from "./components/VerifyEmailModal";
 
@@ -27,6 +28,7 @@ function App() {
           >
             <Header />
             <VerifyEmailModal />
+            <SessionExpiredModal />
 
             <Routes location={location}>
               <Route path="/" element={<Home />} />

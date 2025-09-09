@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 
 const logoColors: Record<
@@ -36,11 +37,17 @@ const logoColors: Record<
   },
 };
 
-const ThemedLogo = () => {
+const ThemedLogo = ({
+  size = "large",
+  link,
+}: {
+  size?: "large" | "small";
+  link?: string;
+}) => {
   const { theme } = useTheme();
   const colors = logoColors[theme];
 
-  return (
+  const svgElement = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       version="1.1"
@@ -48,8 +55,8 @@ const ThemedLogo = () => {
       x="0px"
       y="0px"
       viewBox="1200 1100 2600 2300"
-      width="270"
-      height="270"
+      width={size === "large" ? "270" : "50"}
+      height={size === "large" ? "270" : "50"}
       style={{ maxWidth: "100%", height: "auto" }}
     >
       <g>
@@ -90,6 +97,8 @@ const ThemedLogo = () => {
       </g>
     </svg>
   );
+
+  return <>{link ? <Link to={link || "/"}>{svgElement}</Link> : svgElement}</>;
 };
 
 export default ThemedLogo;
