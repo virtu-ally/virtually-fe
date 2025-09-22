@@ -8,7 +8,11 @@ import { useLocation } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
-const Template = () => {
+const Template = ({
+  setActiveTab,
+}: {
+  setActiveTab: (tab: string) => void;
+}) => {
   const [goalDescription, setGoalDescription] = useState("");
   const [timeDescription, setTimeDescription] = useState("");
   const location = useLocation();
@@ -115,6 +119,7 @@ const Template = () => {
       {
         onSuccess: (data) => {
           console.log(data, "response goal");
+          setActiveTab("progress");
         },
         onError: (error) => {
           console.error("Error creating goal:", error);
@@ -130,7 +135,7 @@ const Template = () => {
       {/* Loading Overlay */}
       {isPolling && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl transform animate-pulse-scale">
+          <div className="bg-white-transparent rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl transform animate-pulse-scale">
             <div className="relative mb-6">
               <div className="loading-spinner-container">
                 <Sparkles
@@ -174,7 +179,7 @@ const Template = () => {
           {location.state?.goal}
         </h1>
         <div className="flex flex-col gap-4 w-full md:p-16 p-4 items-center">
-          <div className="bg-white rounded-lg p-6 text-[var(--secondary-text-color)] mb-4 md:w-[500px] flex-auto justify-center items-center">
+          <div className="bg-white/80 rounded-lg p-6 text-[var(--secondary-text-color)] mb-4 md:w-[500px] flex-auto justify-center items-center">
             <h2 className="text-lg mb-4 w-auto">
               Describe your overall {location.state?.goal} goal
             </h2>
@@ -211,7 +216,7 @@ const Template = () => {
             </button>
           </div>
           {goalFilledIn && (
-            <div className="bg-white rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 flex-auto w-[500px]">
+            <div className="bg-white/80 rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 flex-auto w-[500px] bg-white-transparent">
               <h2 className="text-lg mb-4 w-auto">Your habits to track</h2>
               {createHabitsMutation.isPending ? (
                 <div className="flex items-center justify-center py-8">
@@ -256,7 +261,7 @@ const Template = () => {
                             <PencilLine size={16} />
                           </button>
                           <p
-                            className="w-full md:min-h-[36px] min-h-[100px] border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
+                            className="task w-full md:min-h-[36px] min-h-[100px] border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
                             onClick={() => {
                               if (goalFilledIn) {
                                 handleTaskEdit(index);

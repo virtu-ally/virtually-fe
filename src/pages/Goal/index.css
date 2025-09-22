@@ -69,7 +69,14 @@
 
 .tab.active {
   background-color: var(--btn-color);
-  color: white;
+  color: var(--secondary-color);
+}
+
+[data-theme="modern"] .tab.active,
+[data-theme="rainbow"] .tab.active,
+[data-theme="blue"] .tab.active {
+  background-color: var(--btn-color);
+  color: var(--secondary-text-color);
 }
 
 .tab-content {

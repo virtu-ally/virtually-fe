@@ -25,6 +25,8 @@ const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
     enabled: !!customerId,
   });
 
+  console.log(isLoading, "isLoading from goal parent");
+
   useEffect(() => {
     if (goals.length > 0) {
       setActiveTab("goals");
@@ -35,7 +37,7 @@ const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
     () => [
       {
         label: "setup",
-        component: <Template />,
+        component: <Template setActiveTab={setActiveTab} />,
       },
       {
         label: "progress",

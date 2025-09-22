@@ -63,11 +63,14 @@ export const suggestHabits = async ({
 
   const responseText = await res.text();
   let parsedData: any;
-  
+
   try {
     parsedData = JSON.parse(responseText);
   } catch {
-    console.warn(`Failed to parse response (status ${res.status}):`, responseText);
+    console.warn(
+      `Failed to parse response (status ${res.status}):`,
+      responseText
+    );
     parsedData = null;
   }
 
@@ -75,15 +78,16 @@ export const suggestHabits = async ({
     return {
       status: 503,
       message: "System is busy. Please try again later.",
-      isError: true
+      isError: true,
     };
   }
 
   if (!res.ok) {
     return {
       status: res.status,
-      message: parsedData?.message || "Habits suggestion process failed to start",
-      isError: true
+      message:
+        parsedData?.message || "Habits suggestion process failed to start",
+      isError: true,
     };
   }
 
@@ -91,26 +95,28 @@ export const suggestHabits = async ({
     data: parsedData,
     status: 200,
     message: "Success",
-    isError: false
+    isError: false,
   };
 };
 
-export const getProcessStatus = async (processId: string): Promise<Result<AsyncProcess>> => {
-  const res = await fetch(
-    `${getBaseUrlForGoals()}/processes/${processId}`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  );
+export const getProcessStatus = async (
+  processId: string
+): Promise<Result<AsyncProcess>> => {
+  const res = await fetch(`${getBaseUrlForGoals()}/processes/${processId}`, {
+    method: "GET",
+    credentials: "include",
+  });
 
   const responseText = await res.text();
   let parsedData: any;
-  
+
   try {
     parsedData = JSON.parse(responseText);
   } catch {
-    console.warn(`Failed to parse response (status ${res.status}):`, responseText);
+    console.warn(
+      `Failed to parse response (status ${res.status}):`,
+      responseText
+    );
     parsedData = null;
   }
 
@@ -118,7 +124,7 @@ export const getProcessStatus = async (processId: string): Promise<Result<AsyncP
     return {
       status: res.status,
       message: parsedData?.message || "Process not found",
-      isError: true
+      isError: true,
     };
   }
 
@@ -126,11 +132,13 @@ export const getProcessStatus = async (processId: string): Promise<Result<AsyncP
     data: parsedData,
     status: 200,
     message: "Success",
-    isError: false
+    isError: false,
   };
 };
 
-export const getSuggestions = async (suggestionId: string): Promise<Result<HabitSuggestions>> => {
+export const getSuggestions = async (
+  suggestionId: string
+): Promise<Result<HabitSuggestions>> => {
   const res = await fetch(
     `${getBaseUrlForGoals()}/suggestions/${suggestionId}`,
     {
@@ -141,11 +149,14 @@ export const getSuggestions = async (suggestionId: string): Promise<Result<Habit
 
   const responseText = await res.text();
   let parsedData: any;
-  
+
   try {
     parsedData = JSON.parse(responseText);
   } catch {
-    console.warn(`Failed to parse response (status ${res.status}):`, responseText);
+    console.warn(
+      `Failed to parse response (status ${res.status}):`,
+      responseText
+    );
     parsedData = null;
   }
 
@@ -153,7 +164,7 @@ export const getSuggestions = async (suggestionId: string): Promise<Result<Habit
     return {
       status: 202,
       message: parsedData?.message || "Process still running",
-      isError: false
+      isError: false,
     };
   }
 
@@ -161,7 +172,7 @@ export const getSuggestions = async (suggestionId: string): Promise<Result<Habit
     return {
       status: 404,
       message: parsedData?.message || "Suggestions not found",
-      isError: true
+      isError: true,
     };
   }
 
@@ -170,7 +181,7 @@ export const getSuggestions = async (suggestionId: string): Promise<Result<Habit
     return {
       status: 500,
       message: parsedData?.message || "Internal server error",
-      isError: true
+      isError: true,
     };
   }
 
@@ -179,7 +190,7 @@ export const getSuggestions = async (suggestionId: string): Promise<Result<Habit
     return {
       status: res.status,
       message: parsedData?.message || `Unexpected error: ${res.statusText}`,
-      isError: true
+      isError: true,
     };
   }
 
@@ -187,7 +198,7 @@ export const getSuggestions = async (suggestionId: string): Promise<Result<Habit
     data: parsedData,
     status: 200,
     message: "Success",
-    isError: false
+    isError: false,
   };
 };
 
@@ -196,29 +207,33 @@ export const pollForResults = async (
   config: { maxAttempts?: number; intervalMs?: number } = {}
 ): Promise<string[]> => {
   const { maxAttempts = 30, intervalMs = 2000 } = config;
-  
+
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const result = await getSuggestions(suggestionId);
-    
+
     // Continue polling for temporary conditions (202, 404)
     if (result.status === 202 || result.status === 404) {
-      console.log(`Attempt ${attempt + 1}/${maxAttempts}: Status ${result.status}, waiting ${intervalMs}ms...`);
-      await new Promise(resolve => setTimeout(resolve, intervalMs));
+      console.log(
+        `Attempt ${attempt + 1}/${maxAttempts}: Status ${
+          result.status
+        }, waiting ${intervalMs}ms...`
+      );
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
       continue;
     }
-    
+
     // Throw immediately for permanent errors (500, etc)
     if (result.status >= 500) {
       throw new Error(`Failed to get suggestions: ${result.message}`);
     }
-    
+
     if (!result.data) {
       throw new Error("Suggestions response contained no data");
     }
-    
+
     return result.data.habits;
   }
-  
+
   throw new Error(`Process timed out after ${maxAttempts} attempts`);
 };
 
@@ -242,5 +257,86 @@ export const createGoal = async ({
     }
   );
   if (!res.ok) throw new Error("Goal creation failed");
+  return res.json();
+};
+
+export interface HabitCompletion {
+  id: string;
+  habit_id: string;
+  customer_id: string;
+  goal_id: string;
+  completion_date: string; // YYYY-MM-DD format
+  completed_at: string;
+  notes?: string;
+}
+
+export interface HabitCompletionWithDetails extends HabitCompletion {
+  habit_name: string;
+  habit_description: string;
+}
+
+export interface HabitCompletionRequest {
+  notes?: string;
+}
+
+export const getHabitCompletions = async (
+  customerId: string,
+  date?: string // YYYY-MM-DD format, defaults to today
+): Promise<HabitCompletionWithDetails[]> => {
+  const url = new URL(`${getBaseUrl()}/customers/${customerId}/completions`);
+  if (date) {
+    url.searchParams.append("date", date);
+  }
+
+  const res = await fetch(url.toString(), {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    credentials: "include",
+  });
+
+  if (res.status === 404) {
+    throw new Error("Customer not found");
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch habit completions: ${res.statusText}`);
+  }
+
+  return res.json();
+};
+
+export const recordHabitCompletion = async (
+  customerId: string,
+  habitId: string,
+  request: HabitCompletionRequest = {}
+): Promise<HabitCompletion> => {
+  const res = await fetch(
+    `${getBaseUrlForGoals()}/customers/${customerId}/habits/${habitId}/completions`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(request),
+    }
+  );
+
+  if (res.status === 404) {
+    throw new Error("Customer or habit not found");
+  }
+
+  if (res.status === 400) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || "Invalid input or habit already completed today"
+    );
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to record habit completion: ${res.statusText}`);
+  }
+
   return res.json();
 };
