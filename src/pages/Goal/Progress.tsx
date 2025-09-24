@@ -10,10 +10,13 @@ import {
 } from "chart.js";
 
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Line } from "react-chartjs-2";
-import { getCustomerGoals, type Goal } from "../../api/goals";
+import { type Goal } from "../../api/goals";
 import { useCustomer } from "../../context/CustomerContext";
+import {
+  useHabitCompletionsByDate,
+  useRecordHabitCompletion,
+} from "../../api/hooks/useHabits";
 
 ChartJS.register(
   CategoryScale,
@@ -25,19 +28,16 @@ ChartJS.register(
   Legend
 );
 
-type DayCompletions = Record<string, boolean>; // key is `${goalId}::${habit}`
-type MonthCompletions = Record<number, DayCompletions>; // 1..N -> completions
-
-const monthKey = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-const storageKey = (customerId: string, key: string) =>
-  `habitCompletions:${customerId}:${key}`;
+// Helper function to format date as YYYY-MM-DD
+const formatDateForAPI = (date: Date): string => {
+  return date.toISOString().split("T")[0];
+};
 
 const Progress = ({
   goals,
-  isLoading,
-  isError,
-  error,
+  isLoading: goalsLoading,
+  isError: goalsError,
+  error: goalsErrorDetails,
   customerId,
 }: {
   goals: Goal[];
@@ -52,30 +52,26 @@ const Progress = ({
     return d;
   });
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
-  const [completions, setCompletions] = useState<MonthCompletions>({});
 
-  // Load/save completions for month from localStorage
-  useEffect(() => {
-    if (!customerId) return;
-    const key = storageKey(customerId, monthKey(currentMonth));
-    const saved = localStorage.getItem(key);
-    try {
-      setCompletions(saved ? (JSON.parse(saved) as MonthCompletions) : {});
-    } catch {
-      setCompletions({});
-    }
-  }, [customerId, currentMonth]);
+  // Get completions for the current month
+  const {
+    completionsByDate,
+    isLoading: completionsLoading,
+    isError: completionsError,
+    error: completionsErrorDetails,
+  } = useHabitCompletionsByDate(
+    customerId,
+    currentMonth.getFullYear(),
+    currentMonth.getMonth()
+  );
 
-  useEffect(() => {
-    if (!customerId) return;
-    const key = storageKey(customerId, monthKey(currentMonth));
-    localStorage.setItem(key, JSON.stringify(completions));
-  }, [customerId, currentMonth, completions]);
+  const recordCompletionMutation = useRecordHabitCompletion();
 
   const firstDayOfMonth = useMemo(
     () => new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1),
     [currentMonth]
   );
+
   const daysInMonth = useMemo(
     () =>
       new Date(
@@ -85,12 +81,21 @@ const Progress = ({
       ).getDate(),
     [currentMonth]
   );
+
   const startWeekday = firstDayOfMonth.getDay(); // 0=Sun
 
+  // Extract habits from goals (this is the key fix)
   const allHabits = useMemo(() => {
-    return goals.flatMap((g) =>
-      g.habits.map((h) => ({ id: `${g.id}::${h.id}`, label: h.title }))
-    );
+    const habits = goals.flatMap((g) => {
+      return g.habits
+        .filter((h) => h.title && h.title.trim() !== "")
+        .map((h) => ({
+          id: h.id,
+          label: h.title,
+          goalId: g.id,
+        }));
+    });
+    return habits;
   }, [goals]);
 
   const selectedDay = selectedDate.getDate();
@@ -108,24 +113,44 @@ const Progress = ({
       d.setDate(1);
       setSelectedDate(d);
     }
-  }, [currentMonth]);
+  }, [currentMonth, selectedDate]);
 
-  const toggleHabitForSelectedDay = (habitId: string) => {
-    setCompletions((prev) => {
-      const day = selectedMonthMatches ? selectedDay : 1;
-      const existing = prev[day] || {};
-      const next: MonthCompletions = {
-        ...prev,
-        [day]: { ...existing, [habitId]: !existing[habitId] },
-      };
-      return next;
-    });
+  const toggleHabitForSelectedDay = async (habitId: string) => {
+    console.log("Attempting to complete habit:", { habitId, customerId });
+
+    const day = selectedMonthMatches ? selectedDay : 1;
+    const isCurrentlyCompleted = completionsByDate[day]?.[habitId] || false;
+
+    if (!isCurrentlyCompleted) {
+      // Only allow checking today's date or past dates
+      const selectedDateFormatted = formatDateForAPI(selectedDate);
+      const today = formatDateForAPI(new Date());
+
+      if (selectedDateFormatted <= today) {
+        try {
+          await recordCompletionMutation.mutateAsync({
+            customerId,
+            habitId,
+            request: {}, // Can add notes here if needed
+          });
+        } catch (error) {
+          console.error("Failed to toggle habit:", error);
+          alert(`Failed to record habit completion: ${error.message}`);
+        }
+      } else {
+        alert("You can only mark habits as completed for today or past dates.");
+      }
+    } else {
+      alert(
+        "Unchecking habits is not supported by the current API. Please contact support if you need to modify past completions."
+      );
+    }
   };
 
   const chartData = useMemo(() => {
     const labels = Array.from({ length: daysInMonth }, (_, i) => `${i + 1}`);
     const data = Array.from({ length: daysInMonth }, (_, i) => {
-      const daily = completions[i + 1] || {};
+      const daily = completionsByDate[i + 1] || {};
       return Object.values(daily).filter(Boolean).length;
     });
     return {
@@ -139,7 +164,7 @@ const Progress = ({
         },
       ],
     };
-  }, [daysInMonth, completions]);
+  }, [daysInMonth, completionsByDate]);
 
   const chartOptions = {
     responsive: true,
@@ -165,13 +190,24 @@ const Progress = ({
       )}
 
       <div className="mb-6">
-        {isLoading && <div>Loading goals...</div>}
-        {isError && (
+        {goalsLoading && <div>Loading goals...</div>}
+        {completionsLoading && <div>Loading habit completions...</div>}
+        {goalsError && (
           <div className="text-red-500">
-            {(error as Error)?.message || "Failed to load goals"}
+            {goalsErrorDetails?.message || "Failed to load goals"}
           </div>
         )}
-        {!isLoading && goals.length === 0 && <div>No goals yet.</div>}
+        {completionsError && (
+          <div className="text-red-500">
+            Failed to load completions: {completionsErrorDetails?.message}
+          </div>
+        )}
+        {!goalsLoading && goals.length === 0 && <div>No goals yet.</div>}
+        {!goalsLoading && goals.length > 0 && allHabits.length === 0 && (
+          <div className="text-yellow-600">
+            Goals loaded but no habits found.
+          </div>
+        )}
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -219,7 +255,7 @@ const Progress = ({
               const dayNum = i + 1;
               const isSelected = selectedMonthMatches && selectedDay === dayNum;
               const dailyCount = Object.values(
-                completions[dayNum] || {}
+                completionsByDate[dayNum] || {}
               ).filter(Boolean).length;
               return (
                 <button
@@ -253,25 +289,38 @@ const Progress = ({
               : currentMonth.toLocaleDateString()}
           </h3>
           {allHabits.length === 0 ? (
-            <div className="text-sm opacity-70">No habits to track yet.</div>
+            <div className="text-sm opacity-70">
+              {goalsLoading ? "Loading habits..." : "No habits to track yet."}
+            </div>
           ) : (
             <ul className="space-y-2">
               {allHabits.map((h) => {
                 const day = selectedMonthMatches ? selectedDay : 1;
-                const checked = Boolean(completions[day]?.[h.id]);
+                const checked = Boolean(completionsByDate[day]?.[h.id]);
+                const isDisabled = recordCompletionMutation.isPending;
+
                 return (
                   <li key={h.id} className="flex items-center gap-2">
                     <input
                       id={h.id}
                       type="checkbox"
                       checked={checked}
+                      disabled={isDisabled}
                       onChange={() => toggleHabitForSelectedDay(h.id)}
                     />
-                    <label htmlFor={h.id}>{h.label}</label>
+                    <label
+                      htmlFor={h.id}
+                      className={isDisabled ? "opacity-50" : ""}
+                    >
+                      {h.label}
+                    </label>
                   </li>
                 );
               })}
             </ul>
+          )}
+          {recordCompletionMutation.isPending && (
+            <div className="mt-2 text-sm opacity-70">Saving...</div>
           )}
         </div>
       </div>

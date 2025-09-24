@@ -63,9 +63,6 @@ const Quiz = ({ setShowQuiz }: { setShowQuiz: (show: boolean) => void }) => {
   ];
 
   const saveQuizData = () => {
-    console.log("Profile:", profile);
-    console.log("Customer ID:", profile?.customerId);
-
     if (profile?.customerId) {
       const quizData = {
         age: state.age,

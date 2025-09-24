@@ -22,7 +22,6 @@ const ThemeSelector = () => {
   const swatchColors = Object.values(themeBgColors);
 
   const handleSwatchChange = (color: { hex: string }) => {
-    console.log("Selected color:", color.hex);
     if (color.hex.toLowerCase() === "#dd14ff") {
       setTheme("rainbow");
       setShowPalette(false);

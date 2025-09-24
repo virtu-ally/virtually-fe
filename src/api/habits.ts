@@ -283,7 +283,9 @@ export const getHabitCompletions = async (
   customerId: string,
   date?: string // YYYY-MM-DD format, defaults to today
 ): Promise<HabitCompletionWithDetails[]> => {
-  const url = new URL(`${getBaseUrl()}/customers/${customerId}/completions`);
+  const url = new URL(
+    `${getBaseUrlForGoals()}/customers/${customerId}/completions`
+  );
   if (date) {
     url.searchParams.append("date", date);
   }

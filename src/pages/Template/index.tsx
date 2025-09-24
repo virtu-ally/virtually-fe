@@ -84,10 +84,14 @@ const Template = ({
               habits: habits,
             });
 
+            const formattedHabits = habits.map((habit) =>
+              habit.replaceAll("*", "").trim()
+            );
+
             if (!goalFilledIn) {
-              setTasks([...habits]);
+              setTasks([...formattedHabits]);
             } else {
-              setTasks([...tasks, ...habits]);
+              setTasks([...tasks, ...formattedHabits]);
             }
             setGoalFilledIn(true);
           } catch (pollError) {

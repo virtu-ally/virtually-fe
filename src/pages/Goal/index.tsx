@@ -19,19 +19,22 @@ const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
     isLoading,
     isError,
     error,
+    refetch,
   } = useQuery<Goal[]>({
     queryKey: ["goals", customerId],
     queryFn: () => getCustomerGoals(customerId as string),
     enabled: !!customerId,
   });
 
-  console.log(isLoading, "isLoading from goal parent");
-
   useEffect(() => {
     if (goals.length > 0) {
       setActiveTab("goals");
     }
   }, [goals]);
+
+  useEffect(() => {
+    refetch();
+  }, [activeTab, refetch]);
 
   const tabs = useMemo(
     () => [
@@ -64,7 +67,7 @@ const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
         ),
       },
     ],
-    []
+    [goals, isLoading, isError, error, customerId]
   );
 
   return (
