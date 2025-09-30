@@ -1,4 +1,4 @@
-import { getBaseUrlForGoals } from "./getBaseUrl";
+import { getBaseUrlForGoals, getAuthHeaders } from "./getBaseUrl";
 
 export interface Habit {
   id: string;
@@ -13,15 +13,13 @@ export interface Goal {
   created_at?: string;
 }
 
-export const getCustomerGoals = async (customerId: string): Promise<Goal[]> => {
-  const res = await fetch(
-    `${getBaseUrlForGoals()}/customers/${customerId}/goals`,
-    {
-      method: "GET",
-      headers: { Accept: "application/json" },
-      credentials: "include",
-    }
-  );
+export const getCustomerGoals = async (): Promise<Goal[]> => {
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(`${getBaseUrlForGoals()}/me/goals`, {
+    method: "GET",
+    headers: authHeaders,
+    credentials: "include",
+  });
 
   if (res.status === 404) {
     // Customer not found → surface a clear error

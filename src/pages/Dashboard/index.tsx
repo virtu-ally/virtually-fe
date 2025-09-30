@@ -29,7 +29,7 @@ const NewDashboard = () => {
     enabled: !!user?.email,
   });
 
-  const quizQuery = useGetCustomerQuiz(profile?.customerId);
+  const quizQuery = useGetCustomerQuiz();
 
   useEffect(() => {
     if (user && !customerQuery.isLoading) {

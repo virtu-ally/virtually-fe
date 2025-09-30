@@ -63,24 +63,16 @@ const Quiz = ({ setShowQuiz }: { setShowQuiz: (show: boolean) => void }) => {
   ];
 
   const saveQuizData = () => {
-    if (profile?.customerId) {
-      const quizData = {
-        age: state.age,
-        educationLevel: state.educationLevel,
-        weight: state.weight,
-        height: state.height,
-        goals: state.goals,
-      };
+    const quizData = {
+      age: state.age,
+      educationLevel: state.educationLevel,
+      weight: state.weight,
+      height: state.height,
+      goals: state.goals,
+    };
 
-      console.log("Sending quiz data:", quizData);
-
-      saveQuizMutation.mutate({
-        customerId: profile.customerId,
-        quizData,
-      });
-    } else {
-      console.error("No customer ID available, profile:", profile);
-    }
+    console.log("Sending quiz data:", quizData);
+    saveQuizMutation.mutate(quizData);
   };
 
   const handleNext = () => {

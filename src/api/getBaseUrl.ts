@@ -1,3 +1,5 @@
+import { auth } from "../firebase";
+
 export const getBaseUrl = () => {
   const isProd = import.meta.env.MODE === "production";
 
@@ -19,4 +21,16 @@ export const getBaseUrlForGoals = () => {
   }
 
   return "http://localhost:8081";
+};
+
+export const getAuthHeaders = async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+  const token = await user.getIdToken();
+  return {
+    "Authorization": `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
 };

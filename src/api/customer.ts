@@ -1,4 +1,4 @@
-import { getBaseUrl } from "./getBaseUrl";
+import { getBaseUrl, getAuthHeaders } from "./getBaseUrl";
 
 export const signup = async (form: {
   first_name: string;
@@ -17,10 +17,11 @@ export const signup = async (form: {
   return res.json();
 };
 
-export const login = async ({ id }) => {
-  const res = await fetch(`${getBaseUrl()}/customers/${id}`, {
+export const login = async () => {
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(`${getBaseUrl()}/me`, {
     method: "GET",
-    headers: { Accept: "application/json" },
+    headers: authHeaders,
   });
   if (!res.ok) throw new Error("Login failed");
   return res.json();
@@ -45,14 +46,12 @@ export interface CustomerQuiz {
 }
 
 export const saveCustomerQuiz = async (
-  customerId: string,
   quizData: Record<string, any>
 ): Promise<CustomerQuiz> => {
-  const response = await fetch(`${getBaseUrl()}/customers/${customerId}/quiz`, {
+  const authHeaders = await getAuthHeaders();
+  const response = await fetch(`${getBaseUrl()}/me/quiz`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: authHeaders,
     body: JSON.stringify(quizData),
   });
 
@@ -63,12 +62,11 @@ export const saveCustomerQuiz = async (
   return response.json();
 };
 
-export const getCustomerQuiz = async (
-  customerId: string
-): Promise<CustomerQuiz | null> => {
-  const response = await fetch(`${getBaseUrl()}/customers/${customerId}/quiz`, {
+export const getCustomerQuiz = async (): Promise<CustomerQuiz | null> => {
+  const authHeaders = await getAuthHeaders();
+  const response = await fetch(`${getBaseUrl()}/me/quiz`, {
     method: "GET",
-    headers: { Accept: "application/json" },
+    headers: authHeaders,
     credentials: "include",
   });
 

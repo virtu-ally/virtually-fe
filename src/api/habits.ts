@@ -1,12 +1,10 @@
-import { getBaseUrl, getBaseUrlForGoals } from "./getBaseUrl";
+import { getBaseUrl, getBaseUrlForGoals, getAuthHeaders } from "./getBaseUrl";
 
 interface SuggestHabitsRequest {
-  customerId: string;
   goal: string;
 }
 
 interface CreateGoalRequest {
-  customerId: string;
   description: string;
   habits: string[];
 }
@@ -46,20 +44,18 @@ interface Result<T> {
 }
 
 export const suggestHabits = async ({
-  customerId,
   goal,
 }: SuggestHabitsRequest): Promise<Result<AsyncProcessResponse>> => {
-  const res = await fetch(
-    `${getBaseUrlForGoals()}/customers/${customerId}/suggest-habits`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain",
-      },
-      credentials: "include",
-      body: goal,
-    }
-  );
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(`${getBaseUrlForGoals()}/me/suggest-habits`, {
+    method: "POST",
+    headers: {
+      ...authHeaders,
+      "Content-Type": "text/plain",
+    },
+    credentials: "include",
+    body: goal,
+  });
 
   const responseText = await res.text();
   let parsedData: any;
@@ -238,24 +234,19 @@ export const pollForResults = async (
 };
 
 export const createGoal = async ({
-  customerId,
   description,
   habits,
 }: CreateGoalRequest) => {
-  const res = await fetch(
-    `${getBaseUrlForGoals()}/customers/${customerId}/goals`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        goal_description: description,
-        finalised_habits: habits,
-      }),
-    }
-  );
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(`${getBaseUrlForGoals()}/me/goals`, {
+    method: "POST",
+    headers: authHeaders,
+    credentials: "include",
+    body: JSON.stringify({
+      goal_description: description,
+      finalised_habits: habits,
+    }),
+  });
   if (!res.ok) throw new Error("Goal creation failed");
   return res.json();
 };
@@ -280,19 +271,17 @@ export interface HabitCompletionRequest {
 }
 
 export const getHabitCompletions = async (
-  customerId: string,
   date?: string // YYYY-MM-DD format, defaults to today
 ): Promise<HabitCompletionWithDetails[]> => {
-  const url = new URL(
-    `${getBaseUrlForGoals()}/customers/${customerId}/completions`
-  );
+  const authHeaders = await getAuthHeaders();
+  const url = new URL(`${getBaseUrlForGoals()}/me/completions`);
   if (date) {
     url.searchParams.append("date", date);
   }
 
   const res = await fetch(url.toString(), {
     method: "GET",
-    headers: { Accept: "application/json" },
+    headers: authHeaders,
     credentials: "include",
   });
 
@@ -308,18 +297,15 @@ export const getHabitCompletions = async (
 };
 
 export const recordHabitCompletion = async (
-  customerId: string,
   habitId: string,
   request: HabitCompletionRequest = {}
 ): Promise<HabitCompletion> => {
+  const authHeaders = await getAuthHeaders();
   const res = await fetch(
-    `${getBaseUrlForGoals()}/customers/${customerId}/habits/${habitId}/completions`,
+    `${getBaseUrlForGoals()}/me/habits/${habitId}/completions`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers: authHeaders,
       credentials: "include",
       body: JSON.stringify(request),
     }
