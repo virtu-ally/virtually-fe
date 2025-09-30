@@ -5,11 +5,10 @@ export const signup = async (form: {
   last_name: string;
   email: string;
 }) => {
+  const authHeaders = await getAuthHeaders();
   const res = await fetch(`${getBaseUrl()}/customers`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: authHeaders,
     credentials: "include",
     body: JSON.stringify(form),
   });
@@ -24,16 +23,6 @@ export const login = async () => {
     headers: authHeaders,
   });
   if (!res.ok) throw new Error("Login failed");
-  return res.json();
-};
-
-export const getCustomerByEmail = async (email: string) => {
-  const res = await fetch(`${getBaseUrl()}/customers/${email}?byEmail=true`, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Customer not found");
   return res.json();
 };
 

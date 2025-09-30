@@ -98,8 +98,10 @@ export const suggestHabits = async ({
 export const getProcessStatus = async (
   processId: string
 ): Promise<Result<AsyncProcess>> => {
+  const authHeaders = await getAuthHeaders();
   const res = await fetch(`${getBaseUrlForGoals()}/processes/${processId}`, {
     method: "GET",
+    headers: authHeaders,
     credentials: "include",
   });
 
@@ -135,10 +137,12 @@ export const getProcessStatus = async (
 export const getSuggestions = async (
   suggestionId: string
 ): Promise<Result<HabitSuggestions>> => {
+  const authHeaders = await getAuthHeaders();
   const res = await fetch(
     `${getBaseUrlForGoals()}/suggestions/${suggestionId}`,
     {
       method: "GET",
+      headers: authHeaders,
       credentials: "include",
     }
   );

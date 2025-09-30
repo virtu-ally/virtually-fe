@@ -1,7 +1,7 @@
 import "./index.css";
 
 import { ChevronRight, GraduationCap, Heart, LifeBuoy } from "lucide-react";
-import { getCustomerByEmail, signup } from "../../api/customer";
+import { login, signup } from "../../api/customer";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -24,9 +24,9 @@ const NewDashboard = () => {
   const { setProfile, profile } = useCustomer();
 
   const customerQuery = useQuery({
-    queryKey: ["customer", user?.email],
-    queryFn: () => getCustomerByEmail(user?.email || ""),
-    enabled: !!user?.email,
+    queryKey: ["customer", user?.uid],
+    queryFn: () => login(),
+    enabled: !!user?.uid,
   });
 
   const quizQuery = useGetCustomerQuiz();

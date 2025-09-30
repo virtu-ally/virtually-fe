@@ -3,7 +3,6 @@ import "./index.css";
 import {
   login as apiLogin,
   signup as apiSignup,
-  getCustomerByEmail,
 } from "../../api/customer";
 import { useRef, useState } from "react";
 
@@ -83,11 +82,10 @@ const Login = () => {
     lastName?: string
   ) => {
     try {
-      // Check if user exists in database
-      await getCustomerByEmail(email);
-      // User exists, no need to create account
+      // Try to get customer - if exists, we're done
+      await apiLogin();
     } catch (error) {
-      // User doesn't exist, create account in database
+      // Customer doesn't exist, create one
       try {
         await apiSignup({
           first_name: firstName || "",
