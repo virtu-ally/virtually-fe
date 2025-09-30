@@ -6,7 +6,7 @@ export const signup = async (form: {
   email: string;
 }) => {
   const authHeaders = await getAuthHeaders();
-  const res = await fetch(`${getBaseUrl()}/customers`, {
+  const res = await fetch(`${getBaseUrl()}/me`, {
     method: "POST",
     headers: authHeaders,
     credentials: "include",
