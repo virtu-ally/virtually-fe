@@ -116,7 +116,6 @@ const Template = ({
 
     createGoalMutation.mutate(
       {
-        customerId: profile.customerId,
         description: goalDescription,
         habits: tasks,
       },

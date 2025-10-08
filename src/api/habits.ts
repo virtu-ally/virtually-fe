@@ -252,7 +252,13 @@ export const createGoal = async ({
     }),
   });
   if (!res.ok) throw new Error("Goal creation failed");
-  return res.json();
+
+  const data = await res.json();
+  return {
+    id: data.id,
+    description: data.goal_description,
+    habits: data.habits,
+  };
 };
 
 export interface HabitCompletion {
