@@ -146,7 +146,9 @@ const Progress = ({
         try {
           await recordCompletionMutation.mutateAsync({
             habitId,
-            request: {}, // Can add notes here if needed
+            request: {
+              completionDate: selectedDateFormatted
+            },
           });
         } catch (error) {
           console.error("Failed to record habit completion:", error);

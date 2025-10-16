@@ -281,6 +281,7 @@ export interface HabitCompletionWithDetails extends HabitCompletion {
 
 export interface HabitCompletionRequest {
   notes?: string;
+  completionDate?: string;
 }
 
 export const getHabitCompletions = async (
@@ -314,6 +315,16 @@ export const recordHabitCompletion = async (
   request: HabitCompletionRequest = {}
 ): Promise<HabitCompletion> => {
   const authHeaders = await getAuthHeaders();
+  const body: { habit_id: string; notes?: string; completion_date?: string } = {
+    habit_id: habitId,
+  };
+  if (request.notes !== undefined) {
+    body.notes = request.notes;
+  }
+  if (request.completionDate !== undefined) {
+    body.completion_date = request.completionDate;
+  }
+
   const res = await fetch(`${getBaseUrlForGoals()}/me/completions`, {
     method: "POST",
     headers: {
@@ -321,7 +332,7 @@ export const recordHabitCompletion = async (
       "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify({ habit_id: habitId, notes: request.notes }),
+    body: JSON.stringify(body),
   });
 
   if (res.status === 404) {
@@ -331,7 +342,7 @@ export const recordHabitCompletion = async (
   if (res.status === 400) {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(
-      errorData.message || "Invalid input or habit already completed today"
+      errorData.message || "Invalid input or habit already completed for this date"
     );
   }
 
