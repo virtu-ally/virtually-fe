@@ -1,7 +1,6 @@
 import "./index.css";
 
-import Goals from "./Goals";
-import Progress from "./Progress";
+import GoalsCarousel from "./GoalsCarousel";
 import Template from "../Template";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -46,21 +45,9 @@ const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
         component: <Template setActiveTab={setActiveTab} />,
       },
       {
-        label: "progress",
-        component: (
-          <Progress
-            goals={goals}
-            isLoading={isLoading}
-            isError={isError}
-            error={error as Error}
-            customerId={customerId as string}
-          />
-        ),
-      },
-      {
         label: "goals",
         component: (
-          <Goals
+          <GoalsCarousel
             goals={goals}
             isLoading={isLoading}
             isError={isError}
@@ -71,7 +58,7 @@ const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
         ),
       },
     ],
-    [goals, isLoading, isError, error, customerId]
+    [goals, isLoading, isError, error, customerId, initialCategoryId]
   );
 
   return (
@@ -81,13 +68,7 @@ const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
           className={`tab ${activeTab === "setup" ? "active" : ""}`}
           onClick={() => setActiveTab("setup")}
         >
-          Setup
-        </button>
-        <button
-          className={`tab ${activeTab === "progress" ? "active" : ""}`}
-          onClick={() => setActiveTab("progress")}
-        >
-          Progress
+          New Goal
         </button>
         <button
           className={`tab ${activeTab === "goals" ? "active" : ""}`}
