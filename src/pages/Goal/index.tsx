@@ -5,6 +5,7 @@ import Progress from "./Progress";
 import Template from "../Template";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 
 import { getCustomerGoals, type Goal } from "../../api/goals";
 import { useCustomer } from "../../context/CustomerContext";
@@ -12,6 +13,8 @@ import { useCustomer } from "../../context/CustomerContext";
 const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
   const { profile } = useCustomer();
   const customerId = profile?.customerId;
+  const location = useLocation();
+  const initialCategoryId = location.state?.categoryId || null;
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   const {
@@ -63,6 +66,7 @@ const Goal = ({ defaultTab = "setup" }: { defaultTab?: string }) => {
             isError={isError}
             error={error as Error}
             customerId={customerId as string}
+            initialCategoryId={initialCategoryId}
           />
         ),
       },

@@ -33,15 +33,17 @@ const Goals = ({
   isError,
   error,
   customerId,
+  initialCategoryId = null,
 }: {
   goals: Goal[];
   isLoading: boolean;
   isError: boolean;
   error: Error;
   customerId: string;
+  initialCategoryId?: string | null;
 }) => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
+    initialCategoryId
   );
   const [movingGoalId, setMovingGoalId] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -89,7 +91,7 @@ const Goals = ({
   // Filter goals by selected category
   const filteredGoals = useMemo(() => {
     if (!selectedCategoryId) {
-      return goals; // Show all goals
+      return [];
     }
     return goals.filter((goal) => goal.category_id === selectedCategoryId);
   }, [goals, selectedCategoryId]);
@@ -199,16 +201,6 @@ const Goals = ({
       {/* Category Filter Tabs */}
       <div className="mb-6 overflow-x-auto">
         <div className="flex gap-2 min-w-max">
-          <button
-            onClick={() => setSelectedCategoryId(null)}
-            className={`px-4 py-2 rounded ${
-              selectedCategoryId === null
-                ? "bg-[var(--btn-color)] text-white"
-                : "bg-white/70 text-[var(--secondary-text-color)] hover:bg-white/90"
-            }`}
-          >
-            All Goals
-          </button>
           {categoriesQuery.isLoading && (
             <span className="px-4 py-2 text-sm opacity-70">
               Loading categories...
@@ -259,14 +251,12 @@ const Goals = ({
             {(error as Error)?.message || "Failed to load goals"}
           </div>
         )}
-        {!isLoading &&
-          filteredGoals.length === 0 &&
-          selectedCategoryId === null && <div>No goals yet.</div>}
-        {!isLoading &&
-          filteredGoals.length === 0 &&
-          selectedCategoryId !== null && (
-            <div>No goals in this category yet.</div>
-          )}
+        {!isLoading && !selectedCategoryId && (
+          <div>Please select a category to view goals.</div>
+        )}
+        {!isLoading && selectedCategoryId && filteredGoals.length === 0 && (
+          <div>No goals in this category yet.</div>
+        )}
         <ul className="space-y-2">
           {filteredGoals.map((g) => (
             <li
