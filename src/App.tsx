@@ -15,6 +15,7 @@ import { QuizProvider } from "./context/QuizContext";
 import SessionExpiredModal from "./components/SessionExpiredModal";
 import { ThemeProvider } from "./context/ThemeContext";
 import VerifyEmailModal from "./components/VerifyEmailModal";
+import CategoryManagement from "./pages/CategoryManagement";
 
 function App() {
   const location = useLocation();
@@ -61,6 +62,15 @@ function App() {
                 element={
                   <PrivateRoute>
                     <Profile />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/categories"
+                element={
+                  <PrivateRoute>
+                    <CategoryManagement />
                   </PrivateRoute>
                 }
               />

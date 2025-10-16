@@ -114,10 +114,18 @@ const Template = ({
       return;
     }
 
+    const categoryId = location.state?.categoryId;
+    if (!categoryId) {
+      console.error("No category ID available");
+      alert("Error: No category selected. Please select a category from the dashboard.");
+      return;
+    }
+
     createGoalMutation.mutate(
       {
         description: goalDescription,
         habits: tasks,
+        category_id: categoryId,
       },
       {
         onSuccess: (data) => {
@@ -179,12 +187,12 @@ const Template = ({
         }
       >
         <h1 className="title text-3xl mb-6 pt-8 px-4 w-full text-center capitalize ">
-          {location.state?.goal}
+          {location.state?.categoryName || location.state?.goal}
         </h1>
         <div className="flex flex-col gap-4 w-full md:p-16 p-4 items-center">
           <div className="bg-white/80 rounded-lg p-6 text-[var(--secondary-text-color)] mb-4 md:w-[500px] flex-auto justify-center items-center">
             <h2 className="text-lg mb-4 w-auto">
-              Describe your overall {location.state?.goal} goal
+              Describe your overall {location.state?.categoryName || location.state?.goal} goal
             </h2>
             <input
               className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"

@@ -7,6 +7,7 @@ interface SuggestHabitsRequest {
 interface CreateGoalRequest {
   description: string;
   habits: string[];
+  category_id: string;
 }
 
 interface AsyncProcessResponse {
@@ -240,6 +241,7 @@ export const pollForResults = async (
 export const createGoal = async ({
   description,
   habits,
+  category_id,
 }: CreateGoalRequest) => {
   const authHeaders = await getAuthHeaders();
   const res = await fetch(`${getBaseUrlForGoals()}/me/goals`, {
@@ -249,6 +251,7 @@ export const createGoal = async ({
     body: JSON.stringify({
       goal_description: description,
       finalised_habits: habits,
+      category_id,
     }),
   });
   if (!res.ok) throw new Error("Goal creation failed");

@@ -11,7 +11,10 @@ import {
 
 import { useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
-import { type Goal } from "../../api/goals";
+import { type Goal, moveGoal } from "../../api/goals";
+import { getCategories, type Category } from "../../api/categories";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { FolderInput } from "lucide-react";
 
 ChartJS.register(
   CategoryScale,
@@ -77,6 +80,54 @@ const Goals = ({
 }) => {
   const [allMonthsData, setAllMonthsData] = useState<AllMonthsData>({});
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [movingGoalId, setMovingGoalId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // Fetch categories
+  const categoriesQuery = useQuery({
+    queryKey: ["categories", customerId],
+    queryFn: () => getCategories(),
+    enabled: !!customerId,
+  });
+
+  const categories = categoriesQuery.data || [];
+
+  // Move goal mutation
+  const moveGoalMutation = useMutation({
+    mutationFn: ({ goalId, categoryId }: { goalId: string; categoryId: string }) =>
+      moveGoal(goalId, categoryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", customerId] });
+      setMovingGoalId(null);
+      alert("Goal moved successfully!");
+    },
+    onError: (error) => {
+      console.error("Failed to move goal:", error);
+      alert("Failed to move goal. Please try again.");
+      setMovingGoalId(null);
+    },
+  });
+
+  // Filter goals by selected category
+  const filteredGoals = useMemo(() => {
+    if (!selectedCategoryId) {
+      return goals; // Show all goals
+    }
+    return goals.filter((goal) => goal.category_id === selectedCategoryId);
+  }, [goals, selectedCategoryId]);
+
+  // Get category name by ID
+  const getCategoryName = (categoryId: string): string => {
+    const category = categories.find((cat) => cat.id === categoryId);
+    return category?.name || "Unknown";
+  };
+
+  // Handle moving goal to new category
+  const handleMoveGoal = (goalId: string, newCategoryId: string) => {
+    setMovingGoalId(goalId);
+    moveGoalMutation.mutate({ goalId, categoryId: newCategoryId });
+  };
 
   // Load all available months data from localStorage
   useEffect(() => {
@@ -123,7 +174,7 @@ const Goals = ({
         monthCompletions += dailyCompletions;
       }
 
-      const totalHabits = goals.reduce(
+      const totalHabits = filteredGoals.reduce(
         (acc, goal) => acc + (goal.habits?.length || 0),
         0
       );
@@ -150,7 +201,7 @@ const Goals = ({
       completionRate,
       monthlyTotals,
     };
-  }, [allMonthsData, availableMonths, goals]);
+  }, [allMonthsData, availableMonths, filteredGoals]);
 
   // Chart data for all months combined
   const chartData = useMemo(() => {
@@ -185,7 +236,7 @@ const Goals = ({
       }
 
       // Calculate completion rate for the month
-      const totalHabits = goals.reduce(
+      const totalHabits = filteredGoals.reduce(
         (acc, goal) => acc + (goal.habits?.length || 0),
         0
       );
@@ -219,7 +270,7 @@ const Goals = ({
         },
       ],
     };
-  }, [allMonthsData, availableMonths, goals]);
+  }, [allMonthsData, availableMonths, filteredGoals]);
 
   const chartOptions = {
     responsive: true,
@@ -278,6 +329,38 @@ const Goals = ({
         <div className="mb-4 text-sm opacity-80">No customer selected.</div>
       )}
 
+      {/* Category Filter Tabs */}
+      <div className="mb-6 overflow-x-auto">
+        <div className="flex gap-2 min-w-max">
+          <button
+            onClick={() => setSelectedCategoryId(null)}
+            className={`px-4 py-2 rounded ${
+              selectedCategoryId === null
+                ? "bg-[var(--btn-color)] text-white"
+                : "bg-white/70 text-[var(--secondary-text-color)] hover:bg-white/90"
+            }`}
+          >
+            All Goals
+          </button>
+          {categoriesQuery.isLoading && (
+            <span className="px-4 py-2 text-sm opacity-70">Loading categories...</span>
+          )}
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategoryId(category.id)}
+              className={`px-4 py-2 rounded whitespace-nowrap ${
+                selectedCategoryId === category.id
+                  ? "bg-[var(--btn-color)] text-white"
+                  : "bg-white/70 text-[var(--secondary-text-color)] hover:bg-white/90"
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Overall Statistics */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white/70 text-[var(--secondary-text-color)] rounded p-4">
@@ -307,14 +390,61 @@ const Goals = ({
             {(error as Error)?.message || "Failed to load goals"}
           </div>
         )}
-        {!isLoading && goals.length === 0 && <div>No goals yet.</div>}
+        {!isLoading && filteredGoals.length === 0 && selectedCategoryId === null && <div>No goals yet.</div>}
+        {!isLoading && filteredGoals.length === 0 && selectedCategoryId !== null && (
+          <div>No goals in this category yet.</div>
+        )}
         <ul className="space-y-2">
-          {goals.map((g) => (
+          {filteredGoals.map((g) => (
             <li
               key={g.id}
               className="bg-white/70 text-[var(--secondary-text-color)] rounded p-3"
             >
-              <div className="font-semibold">{g.description}</div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="font-semibold flex-1">{g.description}</div>
+                <div className="flex items-center gap-2">
+                  {g.category_id && (
+                    <span className="text-xs bg-[var(--btn-color)] text-white px-2 py-1 rounded">
+                      {getCategoryName(g.category_id)}
+                    </span>
+                  )}
+                  {/* Move Goal Dropdown */}
+                  <div className="relative group">
+                    <button
+                      className="text-blue-600 hover:text-blue-800 p-1"
+                      title="Move to another category"
+                      disabled={movingGoalId === g.id}
+                    >
+                      <FolderInput size={16} />
+                    </button>
+                    {/* Dropdown menu */}
+                    <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded border border-gray-200 z-10 min-w-[150px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                      <div className="py-1">
+                        <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b">
+                          Move to:
+                        </div>
+                        {categories
+                          .filter((cat) => cat.id !== g.category_id)
+                          .map((category) => (
+                            <button
+                              key={category.id}
+                              onClick={() => handleMoveGoal(g.id, category.id)}
+                              disabled={movingGoalId === g.id}
+                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {category.name}
+                            </button>
+                          ))}
+                        {categories.filter((cat) => cat.id !== g.category_id).length === 0 && (
+                          <div className="px-3 py-2 text-sm text-gray-500">
+                            No other categories
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               {g.habits?.length ? (
                 <div className="mt-1 flex flex-wrap gap-2">
                   {g.habits.map((h) => (

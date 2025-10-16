@@ -46,6 +46,9 @@ const HamburgerMenu = () => {
             <button onClick={() => handleNavigation("/dashboard")}>
               Dashboard
             </button>
+            <button onClick={() => handleNavigation("/categories")}>
+              Manage Categories
+            </button>
             <button onClick={() => handleNavigation("/profile")}>
               Profile
             </button>
