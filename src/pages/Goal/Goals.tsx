@@ -9,12 +9,13 @@ import {
   Tooltip,
 } from "chart.js";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { type Goal, moveGoal } from "../../api/goals";
-import { getCategories, type Category } from "../../api/categories";
+import { getCategories } from "../../api/categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FolderInput } from "lucide-react";
+import { useMonthlyHabitCompletions } from "../../api/hooks/useHabits";
 
 ChartJS.register(
   CategoryScale,
@@ -25,45 +26,6 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-
-type DayCompletions = Record<string, boolean>; // key is `${goalId}::${habit}`
-type MonthCompletions = Record<number, DayCompletions>; // 1..N -> completions
-type AllMonthsData = Record<string, MonthCompletions>; // "YYYY-MM" -> month data
-
-const monthKey = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-const storageKey = (customerId: string, key: string) =>
-  `habitCompletions:${customerId}:${key}`;
-
-// Helper function to get all available months from localStorage
-const getAllAvailableMonths = (customerId: string): string[] => {
-  if (!customerId) return [];
-
-  const months: string[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith(`habitCompletions:${customerId}:`)) {
-      const monthKey = key.replace(`habitCompletions:${customerId}:`, "");
-      if (monthKey.match(/^\d{4}-\d{2}$/)) {
-        // Validate YYYY-MM format
-        months.push(monthKey);
-      }
-    }
-  }
-
-  return months.sort(); // Sort chronologically
-};
-
-// Helper function to parse month key to Date
-const parseMonthKey = (monthKey: string): Date => {
-  const [year, month] = monthKey.split("-").map(Number);
-  return new Date(year, month - 1, 1);
-};
-
-// Helper function to get days in a month
-const getDaysInMonth = (year: number, month: number): number => {
-  return new Date(year, month + 1, 0).getDate();
-};
 
 const Goals = ({
   goals,
@@ -78,11 +40,21 @@ const Goals = ({
   error: Error;
   customerId: string;
 }) => {
-  const [allMonthsData, setAllMonthsData] = useState<AllMonthsData>({});
-  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  );
   const [movingGoalId, setMovingGoalId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  // Get current month data
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+
+  const { data: currentMonthCompletions = [] } = useMonthlyHabitCompletions(
+    currentYear,
+    currentMonth
+  );
 
   // Fetch categories
   const categoriesQuery = useQuery({
@@ -95,8 +67,13 @@ const Goals = ({
 
   // Move goal mutation
   const moveGoalMutation = useMutation({
-    mutationFn: ({ goalId, categoryId }: { goalId: string; categoryId: string }) =>
-      moveGoal(goalId, categoryId),
+    mutationFn: ({
+      goalId,
+      categoryId,
+    }: {
+      goalId: string;
+      categoryId: string;
+    }) => moveGoal(goalId, categoryId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals", customerId] });
       setMovingGoalId(null);
@@ -129,201 +106,91 @@ const Goals = ({
     moveGoalMutation.mutate({ goalId, categoryId: newCategoryId });
   };
 
-  // Load all available months data from localStorage
-  useEffect(() => {
-    if (!customerId) return;
+  // Calculate statistics for current month
+  const currentMonthStats = useMemo(() => {
+    const completionCount = currentMonthCompletions.length;
+    const totalHabits = filteredGoals.reduce(
+      (acc, goal) => acc + (goal.habits?.length || 0),
+      0
+    );
 
-    const months = getAllAvailableMonths(customerId);
-    setAvailableMonths(months);
-
-    const allData: AllMonthsData = {};
-
-    months.forEach((month) => {
-      const key = storageKey(customerId, month);
-      const saved = localStorage.getItem(key);
-      try {
-        allData[month] = saved ? (JSON.parse(saved) as MonthCompletions) : {};
-      } catch {
-        allData[month] = {};
-      }
-    });
-
-    setAllMonthsData(allData);
-  }, [customerId]);
-
-  // Calculate total statistics across all months
-  const totalStats = useMemo(() => {
-    let totalCompletions = 0;
-    let totalPossibleCompletions = 0;
-    const monthlyTotals: Array<{
-      month: string;
-      completions: number;
-      possible: number;
-    }> = [];
-
-    availableMonths.forEach((monthKey) => {
-      const monthData = allMonthsData[monthKey] || {};
-      const date = parseMonthKey(monthKey);
-      const daysInMonth = getDaysInMonth(date.getFullYear(), date.getMonth());
-
-      let monthCompletions = 0;
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dailyCompletions = Object.values(monthData[day] || {}).filter(
-          Boolean
-        ).length;
-        monthCompletions += dailyCompletions;
-      }
-
-      const totalHabits = filteredGoals.reduce(
-        (acc, goal) => acc + (goal.habits?.length || 0),
-        0
-      );
-      const monthPossible = daysInMonth * totalHabits;
-
-      totalCompletions += monthCompletions;
-      totalPossibleCompletions += monthPossible;
-
-      monthlyTotals.push({
-        month: monthKey,
-        completions: monthCompletions,
-        possible: monthPossible,
-      });
-    });
-
+    const daysInMonth = new Date(
+      currentYear,
+      currentMonth + 1,
+      0
+    ).getDate();
+    const possibleCompletions = daysInMonth * totalHabits;
     const completionRate =
-      totalPossibleCompletions > 0
-        ? (totalCompletions / totalPossibleCompletions) * 100
+      possibleCompletions > 0
+        ? (completionCount / possibleCompletions) * 100
         : 0;
 
     return {
-      totalCompletions,
-      totalPossibleCompletions,
+      completionCount,
+      possibleCompletions,
       completionRate,
-      monthlyTotals,
     };
-  }, [allMonthsData, availableMonths, filteredGoals]);
+  }, [currentMonthCompletions, filteredGoals, currentYear, currentMonth]);
 
-  // Chart data for all months combined
+  // Chart data for current month (daily completions)
   const chartData = useMemo(() => {
-    if (availableMonths.length === 0) {
-      return {
-        labels: [],
-        datasets: [],
-      };
-    }
+    const daysInMonth = new Date(
+      currentYear,
+      currentMonth + 1,
+      0
+    ).getDate();
+    const labels = Array.from({ length: daysInMonth }, (_, i) => `${i + 1}`);
 
-    // Create labels and data for all months
-    const labels: string[] = [];
-    const completionData: number[] = [];
-    const completionRateData: number[] = [];
-
-    availableMonths.forEach((monthKey) => {
-      const monthData = allMonthsData[monthKey] || {};
-      const date = parseMonthKey(monthKey);
-      const daysInMonth = getDaysInMonth(date.getFullYear(), date.getMonth());
-      const monthLabel = date.toLocaleString(undefined, {
-        month: "short",
-        year: "numeric",
-      });
-
-      // Calculate total completions for the month
-      let monthCompletions = 0;
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dailyCompletions = Object.values(monthData[day] || {}).filter(
-          Boolean
-        ).length;
-        monthCompletions += dailyCompletions;
-      }
-
-      // Calculate completion rate for the month
-      const totalHabits = filteredGoals.reduce(
-        (acc, goal) => acc + (goal.habits?.length || 0),
-        0
-      );
-      const monthPossible = daysInMonth * totalHabits;
-      const monthRate =
-        monthPossible > 0 ? (monthCompletions / monthPossible) * 100 : 0;
-
-      labels.push(monthLabel);
-      completionData.push(monthCompletions);
-      completionRateData.push(Number(monthRate.toFixed(1)));
+    // Group completions by day
+    const completionsByDay: Record<number, number> = {};
+    currentMonthCompletions.forEach((completion) => {
+      const date = new Date(completion.completion_date);
+      const day = date.getDate();
+      completionsByDay[day] = (completionsByDay[day] || 0) + 1;
     });
+
+    const data = labels.map((label, i) => completionsByDay[i + 1] || 0);
 
     return {
       labels,
       datasets: [
         {
-          label: "Total Completions",
-          data: completionData,
+          label: "Daily Completions",
+          data,
           borderColor: "rgb(75, 192, 192)",
           backgroundColor: "rgba(75, 192, 192, 0.2)",
           tension: 0.1,
-          yAxisID: "y",
-        },
-        {
-          label: "Completion Rate (%)",
-          data: completionRateData,
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: "rgba(255, 99, 132, 0.2)",
-          tension: 0.1,
-          yAxisID: "y1",
         },
       ],
     };
-  }, [allMonthsData, availableMonths, filteredGoals]);
+  }, [currentMonthCompletions, currentYear, currentMonth]);
 
   const chartOptions = {
     responsive: true,
-    interaction: {
-      mode: "index" as const,
-      intersect: false,
-    },
     plugins: {
       legend: { position: "top" as const },
       title: {
         display: true,
-        text: "Goal Progress - All Time Overview",
+        text: `${new Date(currentYear, currentMonth).toLocaleString(
+          undefined,
+          {
+            month: "long",
+            year: "numeric",
+          }
+        )} - Daily Completions`,
       },
     },
     scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: "Month",
-        },
-      },
       y: {
-        type: "linear" as const,
-        display: true,
-        position: "left" as const,
-        title: {
-          display: true,
-          text: "Total Completions",
-        },
         beginAtZero: true,
         ticks: { stepSize: 1 },
-      },
-      y1: {
-        type: "linear" as const,
-        display: true,
-        position: "right" as const,
-        title: {
-          display: true,
-          text: "Completion Rate (%)",
-        },
-        beginAtZero: true,
-        max: 100,
-        grid: {
-          drawOnChartArea: false,
-        },
       },
     },
   };
 
   return (
     <div className="progress-container px-4 py-6 text-[var(--text-color)]">
-      <h2 className="mb-4">All-Time Goal Progress</h2>
+      <h2 className="mb-4">Goal Overview</h2>
 
       {!customerId && (
         <div className="mb-4 text-sm opacity-80">No customer selected.</div>
@@ -343,7 +210,9 @@ const Goals = ({
             All Goals
           </button>
           {categoriesQuery.isLoading && (
-            <span className="px-4 py-2 text-sm opacity-70">Loading categories...</span>
+            <span className="px-4 py-2 text-sm opacity-70">
+              Loading categories...
+            </span>
           )}
           {categories.map((category) => (
             <button
@@ -361,23 +230,23 @@ const Goals = ({
         </div>
       </div>
 
-      {/* Overall Statistics */}
+      {/* Current Month Statistics */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white/70 text-[var(--secondary-text-color)] rounded p-4">
           <h4 className="font-semibold text-lg">
-            {totalStats.totalCompletions}
+            {currentMonthStats.completionCount}
           </h4>
-          <p className="text-sm opacity-80">Total Completions</p>
+          <p className="text-sm opacity-80">Completions This Month</p>
         </div>
         <div className="bg-white/70 text-[var(--secondary-text-color)] rounded p-4">
           <h4 className="font-semibold text-lg">
-            {totalStats.completionRate.toFixed(1)}%
+            {currentMonthStats.completionRate.toFixed(1)}%
           </h4>
-          <p className="text-sm opacity-80">Overall Completion Rate</p>
+          <p className="text-sm opacity-80">Monthly Completion Rate</p>
         </div>
         <div className="bg-white/70 text-[var(--secondary-text-color)] rounded p-4">
-          <h4 className="font-semibold text-lg">{availableMonths.length}</h4>
-          <p className="text-sm opacity-80">Months Tracked</p>
+          <h4 className="font-semibold text-lg">{filteredGoals.length}</h4>
+          <p className="text-sm opacity-80">Active Goals</p>
         </div>
       </div>
 
@@ -390,10 +259,14 @@ const Goals = ({
             {(error as Error)?.message || "Failed to load goals"}
           </div>
         )}
-        {!isLoading && filteredGoals.length === 0 && selectedCategoryId === null && <div>No goals yet.</div>}
-        {!isLoading && filteredGoals.length === 0 && selectedCategoryId !== null && (
-          <div>No goals in this category yet.</div>
-        )}
+        {!isLoading &&
+          filteredGoals.length === 0 &&
+          selectedCategoryId === null && <div>No goals yet.</div>}
+        {!isLoading &&
+          filteredGoals.length === 0 &&
+          selectedCategoryId !== null && (
+            <div>No goals in this category yet.</div>
+          )}
         <ul className="space-y-2">
           {filteredGoals.map((g) => (
             <li
@@ -435,7 +308,8 @@ const Goals = ({
                               {category.name}
                             </button>
                           ))}
-                        {categories.filter((cat) => cat.id !== g.category_id).length === 0 && (
+                        {categories.filter((cat) => cat.id !== g.category_id)
+                          .length === 0 && (
                           <div className="px-3 py-2 text-sm text-gray-500">
                             No other categories
                           </div>
@@ -462,53 +336,10 @@ const Goals = ({
         </ul>
       </div>
 
-      {/* Monthly Breakdown */}
-      {availableMonths.length > 0 && (
-        <div className="mb-6">
-          <h3 className="mb-2">Monthly Breakdown</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {totalStats.monthlyTotals.map(
-              ({ month, completions, possible }) => {
-                const rate = possible > 0 ? (completions / possible) * 100 : 0;
-                const date = parseMonthKey(month);
-                const monthLabel = date.toLocaleString(undefined, {
-                  month: "long",
-                  year: "numeric",
-                });
-
-                return (
-                  <div
-                    key={month}
-                    className="bg-white/70 text-[var(--secondary-text-color)] rounded p-3"
-                  >
-                    <h4 className="font-semibold">{monthLabel}</h4>
-                    <p className="text-sm">
-                      {completions} / {possible} completions
-                    </p>
-                    <p className="text-sm font-medium">
-                      {rate.toFixed(1)}% completion rate
-                    </p>
-                  </div>
-                );
-              }
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Chart */}
-      {availableMonths.length > 0 ? (
-        <div className="chart-container mt-6 bg-white/80 rounded p-4 text-[var(--secondary-text-color)]">
-          <Line data={chartData} options={chartOptions} />
-        </div>
-      ) : (
-        <div className="chart-container mt-6 bg-white/80 rounded p-4 text-[var(--secondary-text-color)] text-center">
-          <p>
-            No progress data available yet. Start tracking your habits to see
-            your progress!
-          </p>
-        </div>
-      )}
+      <div className="chart-container mt-6 bg-white/80 rounded p-4 text-[var(--secondary-text-color)]">
+        <Line data={chartData} options={chartOptions} />
+      </div>
     </div>
   );
 };

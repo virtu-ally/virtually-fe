@@ -16,6 +16,7 @@ import { useCustomer } from "../../context/CustomerContext";
 import {
   useHabitCompletionsByDate,
   useRecordHabitCompletion,
+  useDeleteHabitCompletion,
 } from "../../api/hooks/useHabits";
 
 ChartJS.register(
@@ -55,17 +56,32 @@ const Progress = ({
 
   // Get completions for the current month
   const {
+    data: completionsData = [],
     completionsByDate,
     isLoading: completionsLoading,
     isError: completionsError,
     error: completionsErrorDetails,
   } = useHabitCompletionsByDate(
-    customerId,
     currentMonth.getFullYear(),
     currentMonth.getMonth()
   );
 
   const recordCompletionMutation = useRecordHabitCompletion();
+  const deleteCompletionMutation = useDeleteHabitCompletion();
+
+  // Create a mapping of day -> habitId -> completionId for deletion
+  const completionIdsByDate = useMemo(() => {
+    const mapping: Record<number, Record<string, string>> = {};
+    completionsData.forEach((completion) => {
+      const date = new Date(completion.completion_date);
+      const day = date.getDate();
+      if (!mapping[day]) {
+        mapping[day] = {};
+      }
+      mapping[day][completion.habit_id] = completion.id;
+    });
+    return mapping;
+  }, [completionsData]);
 
   const firstDayOfMonth = useMemo(
     () => new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1),
@@ -84,7 +100,7 @@ const Progress = ({
 
   const startWeekday = firstDayOfMonth.getDay(); // 0=Sun
 
-  // Extract habits from goals (this is the key fix)
+  // Extract habits from goals
   const allHabits = useMemo(() => {
     const habits = goals.flatMap((g) => {
       return g.habits
@@ -116,35 +132,55 @@ const Progress = ({
   }, [currentMonth, selectedDate]);
 
   const toggleHabitForSelectedDay = async (habitId: string) => {
-    console.log("Attempting to complete habit:", { habitId, customerId });
+    console.log("Attempting to toggle habit:", { habitId });
 
     const day = selectedMonthMatches ? selectedDay : 1;
     const isCurrentlyCompleted = completionsByDate[day]?.[habitId] || false;
 
     if (!isCurrentlyCompleted) {
-      // Only allow checking today's date or past dates
+      // Checking a habit - only allow today's date or past dates
       const selectedDateFormatted = formatDateForAPI(selectedDate);
       const today = formatDateForAPI(new Date());
 
       if (selectedDateFormatted <= today) {
         try {
           await recordCompletionMutation.mutateAsync({
-            customerId,
             habitId,
             request: {}, // Can add notes here if needed
           });
         } catch (error) {
-          console.error("Failed to toggle habit:", error);
+          console.error("Failed to record habit completion:", error);
           alert(`Failed to record habit completion: ${error.message}`);
         }
       } else {
         alert("You can only mark habits as completed for today or past dates.");
       }
     } else {
-      alert(
-        "Unchecking habits is not supported by the current API. Please contact support if you need to modify past completions."
+      // Unchecking a habit - show confirmation dialog
+      const confirmDelete = window.confirm(
+        "Are you sure you want to remove this completion? This action cannot be undone."
       );
+
+      if (confirmDelete) {
+        const completionId = completionIdsByDate[day]?.[habitId];
+        if (completionId) {
+          try {
+            await deleteCompletionMutation.mutateAsync({ completionId });
+          } catch (error) {
+            console.error("Failed to delete habit completion:", error);
+            alert(`Failed to delete habit completion: ${error.message}`);
+          }
+        } else {
+          alert("Completion ID not found. Please refresh the page and try again.");
+        }
+      }
     }
+  };
+
+  const goToToday = () => {
+    const today = new Date();
+    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+    setSelectedDate(today);
   };
 
   const chartData = useMemo(() => {
@@ -181,6 +217,12 @@ const Progress = ({
     scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
   };
 
+  const today = new Date();
+  const todayDay = today.getDate();
+  const todayMatches =
+    today.getFullYear() === currentMonth.getFullYear() &&
+    today.getMonth() === currentMonth.getMonth();
+
   return (
     <div className="progress-container px-4 py-6 text-[var(--text-color)]">
       <h2 className="mb-4">Progress Tracker</h2>
@@ -214,7 +256,7 @@ const Progress = ({
         <div className="bg-white/80 text-[var(--secondary-text-color)] rounded p-4">
           <div className="flex items-center justify-between mb-3">
             <button
-              className="px-2 py-1 border rounded"
+              className="px-2 py-1 border rounded hover:bg-gray-100"
               onClick={() =>
                 setCurrentMonth(
                   (d) => new Date(d.getFullYear(), d.getMonth() - 1, 1)
@@ -230,7 +272,7 @@ const Progress = ({
               })}
             </div>
             <button
-              className="px-2 py-1 border rounded"
+              className="px-2 py-1 border rounded hover:bg-gray-100"
               onClick={() =>
                 setCurrentMonth(
                   (d) => new Date(d.getFullYear(), d.getMonth() + 1, 1)
@@ -238,6 +280,15 @@ const Progress = ({
               }
             >
               Next
+            </button>
+          </div>
+
+          <div className="mb-2 text-center">
+            <button
+              className="px-3 py-1 text-sm border rounded bg-blue-50 hover:bg-blue-100"
+              onClick={goToToday}
+            >
+              Today
             </button>
           </div>
 
@@ -254,9 +305,24 @@ const Progress = ({
             {Array.from({ length: daysInMonth }, (_, i) => {
               const dayNum = i + 1;
               const isSelected = selectedMonthMatches && selectedDay === dayNum;
+              const isToday = todayMatches && todayDay === dayNum;
               const dailyCount = Object.values(
                 completionsByDate[dayNum] || {}
               ).filter(Boolean).length;
+
+              // Color coding based on completion count
+              let bgColor = "bg-white";
+              if (dailyCount > 0) {
+                const completionRatio = dailyCount / allHabits.length;
+                if (completionRatio >= 0.8) {
+                  bgColor = "bg-green-100";
+                } else if (completionRatio >= 0.5) {
+                  bgColor = "bg-yellow-100";
+                } else {
+                  bgColor = "bg-orange-100";
+                }
+              }
+
               return (
                 <button
                   key={dayNum}
@@ -265,15 +331,19 @@ const Progress = ({
                     d.setDate(dayNum);
                     setSelectedDate(d);
                   }}
-                  className={`h-10 rounded border text-sm flex flex-col items-center justify-center ${
+                  className={`h-10 rounded border text-sm flex flex-col items-center justify-center transition-colors ${bgColor} ${
                     isSelected
-                      ? "bg-[var(--accent-color-light)] border-[var(--accent-color)]"
-                      : "bg-white"
+                      ? "border-2 border-[var(--accent-color)] ring-2 ring-[var(--accent-color)]/30"
+                      : isToday
+                      ? "border-2 border-blue-400"
+                      : "border-gray-300"
                   }`}
                 >
-                  <span>{dayNum}</span>
+                  <span className={isToday ? "font-bold" : ""}>{dayNum}</span>
                   {dailyCount > 0 && (
-                    <span className="text-[10px] opacity-70">{dailyCount}</span>
+                    <span className="text-[10px] font-semibold text-green-700">
+                      {dailyCount}
+                    </span>
                   )}
                 </button>
               );
@@ -297,7 +367,9 @@ const Progress = ({
               {allHabits.map((h) => {
                 const day = selectedMonthMatches ? selectedDay : 1;
                 const checked = Boolean(completionsByDate[day]?.[h.id]);
-                const isDisabled = recordCompletionMutation.isPending;
+                const isDisabled =
+                  recordCompletionMutation.isPending ||
+                  deleteCompletionMutation.isPending;
 
                 return (
                   <li key={h.id} className="flex items-center gap-2">
@@ -307,10 +379,13 @@ const Progress = ({
                       checked={checked}
                       disabled={isDisabled}
                       onChange={() => toggleHabitForSelectedDay(h.id)}
+                      className="cursor-pointer"
                     />
                     <label
                       htmlFor={h.id}
-                      className={isDisabled ? "opacity-50" : ""}
+                      className={`cursor-pointer ${
+                        isDisabled ? "opacity-50" : ""
+                      }`}
                     >
                       {h.label}
                     </label>
@@ -319,8 +394,11 @@ const Progress = ({
               })}
             </ul>
           )}
-          {recordCompletionMutation.isPending && (
-            <div className="mt-2 text-sm opacity-70">Saving...</div>
+          {(recordCompletionMutation.isPending ||
+            deleteCompletionMutation.isPending) && (
+            <div className="mt-2 text-sm opacity-70">
+              {recordCompletionMutation.isPending ? "Saving..." : "Deleting..."}
+            </div>
           )}
         </div>
       </div>

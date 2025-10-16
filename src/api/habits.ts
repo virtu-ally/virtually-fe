@@ -1,4 +1,4 @@
-import { getBaseUrl, getBaseUrlForGoals, getAuthHeaders } from "./getBaseUrl";
+import { getBaseUrlForGoals, getAuthHeaders } from "./getBaseUrl";
 
 interface SuggestHabitsRequest {
   goal: string;
@@ -314,15 +314,15 @@ export const recordHabitCompletion = async (
   request: HabitCompletionRequest = {}
 ): Promise<HabitCompletion> => {
   const authHeaders = await getAuthHeaders();
-  const res = await fetch(
-    `${getBaseUrlForGoals()}/me/habits/${habitId}/completions`,
-    {
-      method: "POST",
-      headers: authHeaders,
-      credentials: "include",
-      body: JSON.stringify(request),
-    }
-  );
+  const res = await fetch(`${getBaseUrlForGoals()}/me/completions`, {
+    method: "POST",
+    headers: {
+      ...authHeaders,
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ habit_id: habitId, notes: request.notes }),
+  });
 
   if (res.status === 404) {
     throw new Error("Customer or habit not found");
@@ -340,4 +340,30 @@ export const recordHabitCompletion = async (
   }
 
   return res.json();
+};
+
+export const deleteHabitCompletion = async (
+  completionId: string
+): Promise<void> => {
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(
+    `${getBaseUrlForGoals()}/me/completions/${completionId}`,
+    {
+      method: "DELETE",
+      headers: authHeaders,
+      credentials: "include",
+    }
+  );
+
+  if (res.status === 404) {
+    throw new Error("Completion not found");
+  }
+
+  if (res.status === 401) {
+    throw new Error("Unauthorized");
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to delete habit completion: ${res.statusText}`);
+  }
 };
