@@ -22,35 +22,29 @@ const GoalCard = ({
   categories,
   onMoveGoal,
   movingGoalId,
-  currentMonth,
-  setCurrentMonth,
   selectedDate,
-  setSelectedDate,
 }: {
   goal: Goal;
   isSelected: boolean;
   categories: Category[];
   onMoveGoal: (goalId: string, categoryId: string) => void;
   movingGoalId: string | null;
-  currentMonth: Date;
-  setCurrentMonth: (date: Date | ((prev: Date) => Date)) => void;
   selectedDate: Date;
-  setSelectedDate: (date: Date) => void;
 }) => {
   const {
     completionsByDate,
     isLoading: completionsLoading,
   } = useHabitCompletionsByDate(
-    currentMonth.getFullYear(),
-    currentMonth.getMonth()
+    selectedDate.getFullYear(),
+    selectedDate.getMonth()
   );
 
   const recordCompletionMutation = useRecordHabitCompletion();
   const deleteCompletionMutation = useDeleteHabitCompletion();
 
   const { data: completionsData = [] } = useHabitCompletionsByDate(
-    currentMonth.getFullYear(),
-    currentMonth.getMonth()
+    selectedDate.getFullYear(),
+    selectedDate.getMonth()
   );
 
   const completionIdsByDate = useMemo(() => {
@@ -82,34 +76,14 @@ const GoalCard = ({
       }));
   }, [goal]);
 
-  const firstDayOfMonth = useMemo(
-    () => new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1),
-    [currentMonth]
-  );
-
-  const daysInMonth = useMemo(
-    () =>
-      new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth() + 1,
-        0
-      ).getDate(),
-    [currentMonth]
-  );
-
-  const startWeekday = firstDayOfMonth.getDay();
-
   const selectedDay = selectedDate.getDate();
-  const selectedMonthMatches =
-    selectedDate.getFullYear() === currentMonth.getFullYear() &&
-    selectedDate.getMonth() === currentMonth.getMonth();
 
   const [optimisticCompletions, setOptimisticCompletions] = useState<
     Record<string, boolean>
   >({});
 
   const toggleHabitForSelectedDay = async (habitId: string) => {
-    const day = selectedMonthMatches ? selectedDay : 1;
+    const day = selectedDay;
     const isCurrentlyCompleted = completionsByDate[day]?.[habitId] || false;
     const optimisticKey = `${day}-${habitId}`;
 
@@ -173,18 +147,6 @@ const GoalCard = ({
     }
   };
 
-  const goToToday = () => {
-    const today = new Date();
-    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
-    setSelectedDate(today);
-  };
-
-  const today = new Date();
-  const todayDay = today.getDate();
-  const todayMatches =
-    today.getFullYear() === currentMonth.getFullYear() &&
-    today.getMonth() === currentMonth.getMonth();
-
   return (
     <div className="bg-white/80 text-[var(--secondary-text-color)] rounded-lg p-6 shadow-lg">
       <div className="flex items-center justify-between mb-4">
@@ -233,107 +195,14 @@ const GoalCard = ({
       </div>
 
       {isSelected && (
-        <div className="grid md:grid-cols-2 gap-4 mt-4">
+        <div className="mt-4">
           <div className="bg-white/80 text-[var(--secondary-text-color)] rounded p-4">
-            <div className="flex items-center justify-between mb-3">
-              <button
-                className="px-2 py-1 border rounded hover:bg-gray-100"
-                onClick={() =>
-                  setCurrentMonth(
-                    (d) => new Date(d.getFullYear(), d.getMonth() - 1, 1)
-                  )
-                }
-              >
-                Prev
-              </button>
-              <div className="font-semibold text-sm">
-                {currentMonth.toLocaleString(undefined, {
-                  month: "long",
-                  year: "numeric",
-                })}
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-semibold">Habits</h3>
+              <div className="text-sm text-gray-600">
+                {selectedDate.toLocaleDateString()}
               </div>
-              <button
-                className="px-2 py-1 border rounded hover:bg-gray-100"
-                onClick={() =>
-                  setCurrentMonth(
-                    (d) => new Date(d.getFullYear(), d.getMonth() + 1, 1)
-                  )
-                }
-              >
-                Next
-              </button>
             </div>
-
-            <div className="mb-2 text-center">
-              <button
-                className="px-3 py-1 text-sm border rounded bg-blue-50 hover:bg-blue-100"
-                onClick={goToToday}
-              >
-                Today
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 text-center text-xs font-semibold mb-1 opacity-70">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                <div key={d}>{d}</div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: startWeekday }).map((_, i) => (
-                <div key={`pad-${i}`} className="h-8" />
-              ))}
-              {Array.from({ length: daysInMonth }, (_, i) => {
-                const dayNum = i + 1;
-                const isSelectedDay =
-                  selectedMonthMatches && selectedDay === dayNum;
-                const isToday = todayMatches && todayDay === dayNum;
-                const dailyCount = Object.values(
-                  completionsByDate[dayNum] || {}
-                ).filter(Boolean).length;
-
-                let bgColor = "bg-white";
-                if (dailyCount > 0) {
-                  const completionRatio = dailyCount / selectedGoalHabits.length;
-                  if (completionRatio >= 0.8) {
-                    bgColor = "bg-green-100";
-                  } else if (completionRatio >= 0.5) {
-                    bgColor = "bg-yellow-100";
-                  } else {
-                    bgColor = "bg-orange-100";
-                  }
-                }
-
-                return (
-                  <button
-                    key={dayNum}
-                    onClick={() => {
-                      const d = new Date(currentMonth);
-                      d.setDate(dayNum);
-                      setSelectedDate(d);
-                    }}
-                    className={`h-8 rounded border text-xs flex flex-col items-center justify-center transition-colors ${bgColor} ${
-                      isSelectedDay
-                        ? "border-2 border-[var(--accent-color)] ring-2 ring-[var(--accent-color)]/30"
-                        : isToday
-                        ? "border-2 border-blue-400"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <span className={isToday ? "font-bold" : ""}>{dayNum}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="bg-white/80 text-[var(--secondary-text-color)] rounded p-4">
-            <h3 className="mb-2 font-semibold">
-              Habits on{" "}
-              {selectedMonthMatches
-                ? selectedDate.toLocaleDateString()
-                : currentMonth.toLocaleDateString()}
-            </h3>
             {selectedGoalHabits.length === 0 ? (
               <div className="text-sm opacity-70">
                 {completionsLoading
@@ -343,7 +212,7 @@ const GoalCard = ({
             ) : (
               <ul className="space-y-2">
                 {selectedGoalHabits.map((h) => {
-                  const day = selectedMonthMatches ? selectedDay : 1;
+                  const day = selectedDay;
                   const optimisticKey = `${day}-${h.id}`;
                   const optimisticState = optimisticCompletions[optimisticKey];
                   const checked =
@@ -359,13 +228,25 @@ const GoalCard = ({
                       <button
                         onClick={() => toggleHabitForSelectedDay(h.id)}
                         disabled={isDisabled}
-                        className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all ${
+                        className={`relative w-full text-left px-4 py-3 rounded-lg border-2 transition-all ${
                           checked
-                            ? "bg-green-100 border-green-400 hover:bg-green-200"
+                            ? "border-[var(--btn-color)]"
                             : "bg-white border-gray-300 hover:bg-gray-50"
                         } ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                       >
-                        <span className={checked ? "font-medium text-green-800" : ""}>
+                        {checked && (
+                          <div
+                            className="absolute inset-0 rounded-lg"
+                            style={{
+                              backgroundColor: "var(--btn-color)",
+                              opacity: 0.1,
+                            }}
+                          />
+                        )}
+                        <span
+                          className={`relative ${checked ? "font-medium" : ""}`}
+                          style={checked ? { color: "var(--btn-color)" } : undefined}
+                        >
                           {h.label}
                         </span>
                       </button>

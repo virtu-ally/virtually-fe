@@ -107,6 +107,13 @@ const GoalsCarousel = ({
     return goals.filter((goal) => goal.category_id === selectedCategoryId);
   }, [goals, selectedCategoryId]);
 
+  const totalHabitCount = useMemo(() => {
+    return filteredGoals.reduce((acc, goal) => {
+      const validHabits = goal.habits.filter((h) => h.title && h.title.trim() !== "");
+      return acc + validHabits.length;
+    }, 0);
+  }, [filteredGoals]);
+
   const handleMoveGoal = (goalId: string, newCategoryId: string) => {
     setMovingGoalId(goalId);
     moveGoalMutation.mutate({ goalId, categoryId: newCategoryId });
@@ -169,43 +176,88 @@ const GoalsCarousel = ({
   }, [currentMonth, selectedDate]);
 
   const selectedGoalChartData = useMemo(() => {
-    const labels = Array.from({ length: daysInMonth }, (_, i) => `${i + 1}`);
-    const data = Array.from({ length: daysInMonth }, (_, i) => {
-      const daily = completionsByDate[i + 1] || {};
-      if (!selectedGoal) return 0;
-      const goalHabitIds = selectedGoal.habits.map((h) => h.id);
-      return Object.entries(daily).filter(
-        ([habitId, completed]) =>
-          completed && goalHabitIds.includes(habitId)
-      ).length;
+    const last7Days = [];
+
+    // Generate 7 days ending on selectedDate
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(selectedDate);
+      date.setDate(selectedDate.getDate() - i);
+      last7Days.push(date);
+    }
+
+    const labels = last7Days.map(date =>
+      date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    );
+
+    const data = last7Days.map(date => {
+      const day = date.getDate();
+      const month = date.getMonth();
+      const year = date.getFullYear();
+
+      // Only use completionsByDate if it matches the date's month/year
+      if (year === currentMonth.getFullYear() && month === currentMonth.getMonth()) {
+        const daily = completionsByDate[day] || {};
+        if (!selectedGoal) return 0;
+        const goalHabitIds = selectedGoal.habits.map((h) => h.id);
+        return Object.entries(daily).filter(
+          ([habitId, completed]) =>
+            completed && goalHabitIds.includes(habitId)
+        ).length;
+      }
+      return 0;
     });
+
     return {
       labels,
       datasets: [
         {
-          label: "Completed habits for this goal",
+          label: "Completed habits",
           data,
           borderColor: "rgb(75, 192, 192)",
-          tension: 0.1,
+          backgroundColor: "rgba(75, 192, 192, 0.2)",
+          tension: 0.3,
+          fill: true,
         },
       ],
-    };
-  }, [daysInMonth, completionsByDate, selectedGoal]);
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: "top" as const },
-      title: {
-        display: true,
-        text: `Daily Completions — ${currentMonth.toLocaleString(undefined, {
-          month: "long",
-          year: "numeric",
-        })}`,
+      dateRange: {
+        start: last7Days[0],
+        end: last7Days[last7Days.length - 1],
       },
-    },
-    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
-  };
+    };
+  }, [completionsByDate, selectedGoal, currentMonth, selectedDate]);
+
+  const chartOptions = useMemo(() => {
+    const dateRange = selectedGoalChartData.dateRange;
+    const startStr = dateRange.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const endStr = dateRange.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+    return {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: `${startStr} - ${endStr}`,
+          font: {
+            size: 16,
+            weight: "bold" as const,
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        },
+        x: {
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+          },
+        },
+      },
+    };
+  }, [selectedGoalChartData]);
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -258,12 +310,6 @@ const GoalsCarousel = ({
         onCategorySelect={handleCategorySelect}
       />
 
-      <GoalStats
-        completionCount={currentMonthStats.completionCount}
-        completionRate={currentMonthStats.completionRate}
-        goalCount={filteredGoals.length}
-      />
-
       {isLoading && <div>Loading goals...</div>}
       {isError && (
         <div className="text-red-500">
@@ -306,10 +352,7 @@ const GoalsCarousel = ({
                         categories={categories}
                         onMoveGoal={handleMoveGoal}
                         movingGoalId={movingGoalId}
-                        currentMonth={currentMonth}
-                        setCurrentMonth={setCurrentMonth}
                         selectedDate={selectedDate}
-                        setSelectedDate={setSelectedDate}
                       />
                     </div>
                   ))}
@@ -328,11 +371,23 @@ const GoalsCarousel = ({
             )}
           </div>
 
-          {selectedGoal && (
-            <div className="chart-container mt-6 bg-white/80 rounded p-4 text-[var(--secondary-text-color)]">
-              <Line data={selectedGoalChartData} options={chartOptions} />
-            </div>
-          )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <GoalStats
+              completionCount={currentMonthStats.completionCount}
+              completionRate={currentMonthStats.completionRate}
+              goalCount={filteredGoals.length}
+              currentMonth={currentMonth}
+              setCurrentMonth={setCurrentMonth}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+            />
+
+            {selectedGoal && (
+              <div className="chart-container bg-white/80 rounded p-4 text-[var(--secondary-text-color)]">
+                <Line data={selectedGoalChartData} options={chartOptions} />
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>
