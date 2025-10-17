@@ -53,6 +53,9 @@ const Progress = ({
     return d;
   });
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+  const [optimisticCompletions, setOptimisticCompletions] = useState<
+    Record<string, boolean>
+  >({});
 
   // Get completions for the current month
   const {
@@ -136,13 +139,15 @@ const Progress = ({
 
     const day = selectedMonthMatches ? selectedDay : 1;
     const isCurrentlyCompleted = completionsByDate[day]?.[habitId] || false;
+    const optimisticKey = `${day}-${habitId}`;
 
     if (!isCurrentlyCompleted) {
-      // Checking a habit - only allow today's date or past dates
       const selectedDateFormatted = formatDateForAPI(selectedDate);
       const today = formatDateForAPI(new Date());
 
       if (selectedDateFormatted <= today) {
+        setOptimisticCompletions((prev) => ({ ...prev, [optimisticKey]: true }));
+        
         try {
           await recordCompletionMutation.mutateAsync({
             habitId,
@@ -150,7 +155,17 @@ const Progress = ({
               completionDate: selectedDateFormatted
             },
           });
+          setOptimisticCompletions((prev) => {
+            const next = { ...prev };
+            delete next[optimisticKey];
+            return next;
+          });
         } catch (error) {
+          setOptimisticCompletions((prev) => {
+            const next = { ...prev };
+            delete next[optimisticKey];
+            return next;
+          });
           console.error("Failed to record habit completion:", error);
           alert(`Failed to record habit completion: ${error.message}`);
         }
@@ -158,23 +173,28 @@ const Progress = ({
         alert("You can only mark habits as completed for today or past dates.");
       }
     } else {
-      // Unchecking a habit - show confirmation dialog
-      const confirmDelete = window.confirm(
-        "Are you sure you want to remove this completion? This action cannot be undone."
-      );
+      const completionId = completionIdsByDate[day]?.[habitId];
+      if (completionId) {
+        setOptimisticCompletions((prev) => ({ ...prev, [optimisticKey]: false }));
 
-      if (confirmDelete) {
-        const completionId = completionIdsByDate[day]?.[habitId];
-        if (completionId) {
-          try {
-            await deleteCompletionMutation.mutateAsync({ completionId });
-          } catch (error) {
-            console.error("Failed to delete habit completion:", error);
-            alert(`Failed to delete habit completion: ${error.message}`);
-          }
-        } else {
-          alert("Completion ID not found. Please refresh the page and try again.");
+        try {
+          await deleteCompletionMutation.mutateAsync({ completionId });
+          setOptimisticCompletions((prev) => {
+            const next = { ...prev };
+            delete next[optimisticKey];
+            return next;
+          });
+        } catch (error) {
+          setOptimisticCompletions((prev) => {
+            const next = { ...prev };
+            delete next[optimisticKey];
+            return next;
+          });
+          console.error("Failed to delete habit completion:", error);
+          alert(`Failed to delete habit completion: ${error.message}`);
         }
+      } else {
+        alert("Completion ID not found. Please refresh the page and try again.");
       }
     }
   };
@@ -368,29 +388,31 @@ const Progress = ({
             <ul className="space-y-2">
               {allHabits.map((h) => {
                 const day = selectedMonthMatches ? selectedDay : 1;
-                const checked = Boolean(completionsByDate[day]?.[h.id]);
+                const optimisticKey = `${day}-${h.id}`;
+                const optimisticState = optimisticCompletions[optimisticKey];
+                const checked =
+                  optimisticState !== undefined
+                    ? optimisticState
+                    : Boolean(completionsByDate[day]?.[h.id]);
                 const isDisabled =
                   recordCompletionMutation.isPending ||
                   deleteCompletionMutation.isPending;
 
                 return (
-                  <li key={h.id} className="flex items-center gap-2">
-                    <input
-                      id={h.id}
-                      type="checkbox"
-                      checked={checked}
+                  <li key={h.id}>
+                    <button
+                      onClick={() => toggleHabitForSelectedDay(h.id)}
                       disabled={isDisabled}
-                      onChange={() => toggleHabitForSelectedDay(h.id)}
-                      className="cursor-pointer"
-                    />
-                    <label
-                      htmlFor={h.id}
-                      className={`cursor-pointer ${
-                        isDisabled ? "opacity-50" : ""
-                      }`}
+                      className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all ${
+                        checked
+                          ? "bg-green-100 border-green-400 hover:bg-green-200"
+                          : "bg-white border-gray-300 hover:bg-gray-50"
+                      } ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                     >
-                      {h.label}
-                    </label>
+                      <span className={checked ? "font-medium text-green-800" : ""}>
+                        {h.label}
+                      </span>
+                    </button>
                   </li>
                 );
               })}
