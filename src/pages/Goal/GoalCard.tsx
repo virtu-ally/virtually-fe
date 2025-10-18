@@ -13,7 +13,10 @@ type Category = {
 };
 
 const formatDateForAPI = (date: Date): string => {
-  return date.toISOString().split("T")[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 const GoalCard = ({
@@ -42,21 +45,19 @@ const GoalCard = ({
   const recordCompletionMutation = useRecordHabitCompletion();
   const deleteCompletionMutation = useDeleteHabitCompletion();
 
-  const { data: completionsData = [] } = useHabitCompletionsByDate(
+  const { data: completionsData = {} } = useHabitCompletionsByDate(
     selectedDate.getFullYear(),
     selectedDate.getMonth()
   );
 
   const completionIdsByDate = useMemo(() => {
     const mapping: Record<number, Record<string, string>> = {};
-    completionsData.forEach((completion) => {
-      const date = new Date(completion.completion_date);
-      const day = date.getDate();
-      if (!mapping[day]) {
-        mapping[day] = {};
+    for (const [day, habits] of Object.entries(completionsData)) {
+      mapping[Number(day)] = {};
+      for (const [habitId, completion] of Object.entries(habits)) {
+        mapping[Number(day)][habitId] = completion.id;
       }
-      mapping[day][completion.habit_id] = completion.id;
-    });
+    }
     return mapping;
   }, [completionsData]);
 
@@ -124,7 +125,13 @@ const GoalCard = ({
         setOptimisticCompletions((prev) => ({ ...prev, [optimisticKey]: false }));
 
         try {
-          await deleteCompletionMutation.mutateAsync({ completionId });
+          await deleteCompletionMutation.mutateAsync({
+            completionId,
+            year: selectedDate.getFullYear(),
+            month: selectedDate.getMonth(),
+            day,
+            habitId,
+          });
           setOptimisticCompletions((prev) => {
             const next = { ...prev };
             delete next[optimisticKey];

@@ -285,13 +285,11 @@ export interface HabitCompletionRequest {
 }
 
 export const getHabitCompletions = async (
-  date?: string // YYYY-MM-DD format, defaults to today
+  month: string // YYYY-MM format (required)
 ): Promise<HabitCompletionWithDetails[]> => {
   const authHeaders = await getAuthHeaders();
   const url = new URL(`${getBaseUrlForGoals()}/me/completions`);
-  if (date) {
-    url.searchParams.append("date", date);
-  }
+  url.searchParams.append("month", month);
 
   const res = await fetch(url.toString(), {
     method: "GET",
@@ -301,6 +299,13 @@ export const getHabitCompletions = async (
 
   if (res.status === 404) {
     throw new Error("Customer not found");
+  }
+
+  if (res.status === 400) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || "Invalid month format"
+    );
   }
 
   if (!res.ok) {
