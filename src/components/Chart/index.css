@@ -1,0 +1,42 @@
+[data-theme="dark"] .chart-container {
+  --chart-text-color: #e5e7eb;
+  --chart-grid-color: #6b7280;
+  --chart-accent-color: #a78bfa;
+  --chart-accent-light: #c4b5fd;
+}
+
+[data-theme="blue"] .chart-container {
+  --chart-text-color: #fbbf24;
+  --chart-grid-color: #fbbf24;
+  --chart-accent-color: #f59e0b;
+  --chart-accent-light: #fde047;
+}
+
+[data-theme="neon"] .chart-container {
+  --chart-text-color: #7dd3fc;
+  --chart-grid-color: #656586;
+  --chart-accent-color: #00fff7;
+  --chart-accent-light: #7dd3fc;
+}
+
+[data-theme="rainbow"] .chart-container {
+  --chart-text-color: #1a1a1a;
+  --chart-grid-color: #6b7280;
+  --chart-accent-color: #f59e0b;
+  --chart-accent-light: #fbbf24;
+  --chart-tooltip-text: #1a1a1a;
+}
+
+[data-theme="modern"] .chart-container {
+  --chart-text-color: var(--secondary-text-color);
+  --chart-grid-color: var(--secondary-color);
+  --chart-accent-color: var(--accent-color);
+  --chart-accent-light: var(--accent-color-light);
+}
+
+[data-theme="light"] .chart-container {
+  --chart-text-color: var(--secondary-text-color);
+  --chart-grid-color: var(--secondary-color);
+  --chart-accent-color: var(--accent-color);
+  --chart-accent-light: var(--accent-color-light);
+}

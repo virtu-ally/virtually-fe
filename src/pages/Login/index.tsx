@@ -1,10 +1,7 @@
 import "./index.css";
 
-import {
-  login as apiLogin,
-  signup as apiSignup,
-} from "../../api/customer";
-import { useRef, useState } from "react";
+import { login as apiLogin, signup as apiSignup } from "../../api/customer";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "../../context/FirebaseAuthContext";
 import { useMutation } from "@tanstack/react-query";
@@ -65,9 +62,6 @@ const Login = () => {
   const toastTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const navigate = useNavigate();
-
-  //   const signupMutation = useMutation({ mutationFn: signup });
-  //   const loginMutation = useMutation({ mutationFn: login });
   const { login, signup, loginWithGoogle, loading } = useAuth();
 
   const showToast = (msg: string) => {
@@ -188,6 +182,10 @@ const Login = () => {
 
       try {
         const user = await signup(email, password);
+
+        // Add a small delay to ensure token is fully processed
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         await handleUserInDatabase(user.email || email, firstName, lastName);
         (e.target as HTMLFormElement).reset();
         setForm({
@@ -197,7 +195,7 @@ const Login = () => {
           password: "",
           confirmPassword: "",
         });
-        navigate("/dashboard");
+        navigate("/goal");
       } catch (err: any) {
         const code = err.code || err.message;
         const errorMessage = getFirebaseErrorMessage(code);
@@ -216,7 +214,7 @@ const Login = () => {
           password: "",
           confirmPassword: "",
         });
-        navigate("/dashboard");
+        navigate("/goal");
       } catch (err: any) {
         const code = err.code || err.message;
         const errorMessage = getFirebaseErrorMessage(code);
@@ -234,7 +232,7 @@ const Login = () => {
       const lastName = user.displayName?.split(" ")[1] || "";
       // After successful Google login, ensure user exists in database
       await handleUserInDatabase(user.email || "", firstName, lastName);
-      navigate("/dashboard");
+      navigate("/goal");
     } catch (err: any) {
       const code = err.code || err.message;
       const errorMessage = getFirebaseErrorMessage(code);
@@ -253,6 +251,15 @@ const Login = () => {
       confirmPassword: "",
     });
   };
+
+  useEffect(() => {
+    // Clear password fields on component mount for security
+    setForm((prev) => ({
+      ...prev,
+      password: "",
+      confirmPassword: "",
+    }));
+  }, []);
 
   return (
     <div className="login-container bg-[var(--bg-color)] text-[var(--text-color)] mt-8">
@@ -326,6 +333,10 @@ const Login = () => {
               onChange={handleChange}
               className="login-input"
               placeholder="Enter your password"
+              autoComplete="current-password"
+              spellCheck="false"
+              autoCorrect="off"
+              autoCapitalize="off"
             />
           </label>
           {tab === "signup" && (

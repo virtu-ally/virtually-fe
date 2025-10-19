@@ -1,35 +1,29 @@
 import "./index.css";
 
-import { CheckCircle2, LineChart, Smile, Target } from "lucide-react";
-
 import ThemedLogo from "../../components/ThemedLogo";
 import { useAuth } from "../../context/FirebaseAuthContext";
 import { useNavigate } from "react-router-dom";
 
 const features = [
   {
-    icon: <Target className="feature-icon " />,
     title: "Set Personal Goals",
     desc: "Define your own goals and habits to focus on what matters most to you.",
-    bg: "bg-white",
+    number: "01",
   },
   {
-    icon: <LineChart className="feature-icon " />,
     title: "Track Your Progress",
     desc: "Monitor your daily, weekly, or monthly progress with beautiful charts.",
-    bg: "bg-white",
+    number: "02",
   },
   {
-    icon: <CheckCircle2 className="feature-icon" />,
     title: "Visualize Achievements",
     desc: "See your accomplishments and stay motivated as you reach new milestones.",
-    bg: "bg-white",
+    number: "03",
   },
   {
-    icon: <Smile className="feature-icon " />,
     title: "Stay Accountable",
     desc: "Get reminders and encouragement to help you build lasting habits.",
-    bg: "bg-white",
+    number: "04",
   },
 ];
 
@@ -51,11 +45,8 @@ const Home = () => {
           <h2 className="text-3xl ">A Shared Journey to Your Goals.</h2>
 
           {user ? (
-            <button
-              className="start-button"
-              onClick={() => navigate("/dashboard")}
-            >
-              Go to Dashboard
+            <button className="start-button" onClick={() => navigate("/goal")}>
+              Set up your Goals
             </button>
           ) : (
             <button className="start-button" onClick={() => navigate("/login")}>
@@ -73,15 +64,12 @@ const Home = () => {
         </p>
       </div>
 
-      <div className="w-full text-[var(--secondary-text-color)] max-w-5xl flex flex-row flex-wrap justify-center gap-6 mb-8">
-        {features.map((f) => (
-          <div
-            key={f.title}
-            className={`feature-card ${f.bg} rounded-xl shadow-md flex flex-col items-center text-center gap-3 p-4 md:p-6 transition-transform hover:scale-[1.025] min-w-[220px] max-w-xs flex-1`}
-          >
-            <div className="mb-2 bg-white">{f.icon}</div>
-            <h2 className="font-semibold text-lg md:text-xl mb-1">{f.title}</h2>
-            <p className="text-sm md:text-base">{f.desc}</p>
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-4">
+        {features.map((feature, index) => (
+          <div key={feature.title} className="modern-feature-card">
+            {/* <div className="feature-number">{feature.number}</div> */}
+            <h3 className="feature-title">{feature.title}</h3>
+            <p className="feature-description">{feature.desc}</p>
           </div>
         ))}
       </div>

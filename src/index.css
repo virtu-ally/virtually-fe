@@ -32,6 +32,9 @@
     #ffbc80 90%
   );
   background-attachment: fixed;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(26, 26, 26, 0.1);
+  --card-shadow: rgba(0, 0, 0, 0.15);
 }
 /* Dark Theme */
 [data-theme="dark"] {
@@ -44,7 +47,10 @@
   --accent-color: #b396f7;
   --accent-color-light: #fdba74;
   --btn-color: #804cf5;
-  /* --btn-color: #077a5b; */
+  /* Add card variables */
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-shadow: rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="rainbow"] {
@@ -67,6 +73,9 @@
   animation: gradient 50s ease infinite;
   background-size: 400% 400%;
   background-attachment: fixed;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(255, 255, 255, 0.3);
+  --card-shadow: rgba(0, 0, 0, 0.2);
 }
 
 /* Light Theme */
@@ -80,6 +89,9 @@
   --accent-color: #fb923c;
   --accent-color-light: #fdba74;
   --btn-color: #16c395;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(26, 26, 26, 0.15);
+  --card-shadow: rgba(0, 0, 0, 0.1);
 }
 
 /* Blue Theme */
@@ -93,6 +105,10 @@
   --accent-color: #d1a71f;
   --accent-color-light: #ffffff;
   --btn-color: rgb(245, 158, 11);
+  /* Add card variables */
+  --card-bg: rgba(245, 158, 11, 0.1);
+  --card-border: rgba(245, 158, 11, 0.2);
+  --card-shadow: rgba(245, 158, 11, 0.2);
 }
 
 [data-theme="neon"] {
@@ -105,6 +121,10 @@
   --accent-color: #000018;
   --accent-color-light: #7dd3fc;
   --btn-color: #00fff7;
+  /* Add card variables */
+  --card-bg: rgba(0, 255, 247, 0.05);
+  --card-border: rgba(0, 255, 247, 0.2);
+  --card-shadow: rgba(0, 255, 247, 0.3);
 }
 
 #root {

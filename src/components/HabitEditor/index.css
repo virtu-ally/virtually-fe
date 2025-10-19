@@ -1,0 +1,72 @@
+.habit-editor .task-container {
+  display: flex;
+  gap: 10px;
+}
+
+[data-theme="blue"] .habit-editor .task {
+  color: var(--text-color);
+}
+
+[data-theme="neon"] .habit-editor .task {
+  color: var(--text-color);
+}
+
+[data-theme="rainbow"] .habit-editor .task,
+[data-theme="blue"] .habit-editor .task,
+[data-theme="neon"] .habit-editor .task {
+  color: var(--secondary-text-color);
+}
+
+[data-theme="modern"] .habit-editor .task,
+[data-theme="light"] .habit-editor .task,
+[data-theme="dark"] .habit-editor .task {
+  color: var(--text-color);
+}
+
+[data-theme="neon"] .habit-editor .plus {
+  color: var(--bg-color);
+}
+
+[data-theme="blue"] .habit-editor .plus {
+  color: var(--text-color);
+}
+
+[data-theme="rainbow"] .habit-editor .plus,
+[data-theme="blue"] .habit-editor .plus,
+[data-theme="neon"] .habit-editor .plus {
+  color: var(--secondary-text-color);
+}
+
+[data-theme="blue"] .habit-editor textarea {
+  color: var(--text-color);
+}
+
+[data-theme="neon"] .habit-editor textarea {
+  color: var(--text-color);
+}
+
+[data-theme="rainbow"] .habit-editor textarea {
+  color: var(--secondary-text-color);
+}
+
+[data-theme="neon"] .habit-editor button {
+  color: var(--secondary-text-color);
+}
+
+[data-theme="neon"] .habit-editor button:hover {
+  color: var(--text-color);
+}
+
+/* Plus button colors */
+[data-theme="neon"] .habit-editor .plus {
+  color: var(--secondary-text-color);
+}
+
+.habit-editor .plus:hover:not(:disabled),
+.habit-editor .minus:hover:not(:disabled),
+.habit-editor .plus:active:not(:disabled),
+.habit-editor .minus:active:not(:disabled),
+.habit-editor .plus:focus:not(:disabled),
+.habit-editor .minus:focus:not(:disabled) {
+  transform: perspective(500px) translate3d(0px, 0, 100px);
+}

@@ -74,30 +74,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
   }, []);
 
-  // Function to check token validity and session duration
+  // Function to check token validity (remove session duration check)
   const checkTokenValidity = useCallback(async () => {
     if (!auth.currentUser) return;
 
     try {
-      const idTokenResult: IdTokenResult =
-        await auth.currentUser.getIdTokenResult();
-      const authTimeSeconds = idTokenResult.claims
-        .auth_time as unknown as number;
-      if (!authTimeSeconds || typeof authTimeSeconds !== "number") {
-        await handleSessionExpiration(SessionExpirationReason.INVALID_TOKEN);
-        return;
-      }
-      const authTime = authTimeSeconds * 1000; // Convert to milliseconds
-      const currentTime = Date.now();
-      const sessionDuration = currentTime - authTime;
+      // Just check if the token is valid, don't check auth_time for max duration
+      await auth.currentUser.getIdTokenResult();
 
-      // Check if session has exceeded maximum duration
-      if (SessionUtils.isSessionExpired(authTime)) {
-        await handleSessionExpiration(SessionExpirationReason.MAX_DURATION);
-        return;
-      }
-
-      // Check for inactivity timeout
+      // Only check for inactivity timeout
       if (SessionUtils.isInactivityTimeout(lastActivityRef.current)) {
         await handleSessionExpiration(SessionExpirationReason.INACTIVITY);
         return;

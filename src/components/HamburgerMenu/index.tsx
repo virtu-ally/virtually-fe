@@ -43,8 +43,14 @@ const HamburgerMenu = () => {
           </button>
 
           <nav className="menu-content" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => handleNavigation("/dashboard")}>
-              Dashboard
+            <button onClick={() => handleNavigation("/goal/new")}>
+              New Goal
+            </button>
+            <button onClick={() => handleNavigation("/goal/goals")}>
+              Goals
+            </button>
+            <button onClick={() => handleNavigation("/goal/progress")}>
+              Progress
             </button>
             <button onClick={() => handleNavigation("/categories")}>
               Manage Categories

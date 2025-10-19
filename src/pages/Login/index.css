@@ -35,27 +35,34 @@
   min-width: 320px;
   height: auto;
   overflow: hidden;
-  transition: height 0.2s linear, opacity 0.5s linear;
-}
-
-.hide {
-  height: 0;
-  opacity: 0;
-  transition: height 0.2s linear, opacity 0.2s linear;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .signup-fields {
-  animation: fadeIn 0.5s linear;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.signup-fields.hide {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.signup-fields:not(.hide) {
+  max-height: 200px;
+  opacity: 1;
 }
 
 .login-form.signup {
   height: 725px;
-  opacity: 100%;
-  transition: height 0.2s linear, opacity 0.8s linear;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .login-form.login {
   height: 450px;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .login-form label {
@@ -77,6 +84,22 @@
 .login-input:focus {
   border-color: var(--accent-color);
   outline: none;
+}
+
+.login-input[type="password"] {
+  -webkit-text-security: disc !important;
+  text-security: disc !important;
+  font-family: text-security-disc !important;
+}
+
+.login-input[type="password"] {
+  -webkit-text-security: disc !important;
+  text-security: disc !important;
+  font-family: text-security-disc !important;
+}
+input[type="password"] {
+  -webkit-text-security: disc !important;
+  text-security: disc !important;
 }
 
 .login-button {

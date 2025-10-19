@@ -1,11 +1,24 @@
 import "./index.css";
 
-import { Loader, Minus, PencilLine, Plus, Sparkles } from "lucide-react";
+import {
+  ChevronRight,
+  FolderOpen,
+  GraduationCap,
+  Heart,
+  LifeBuoy,
+  Loader,
+  Sparkles,
+} from "lucide-react";
 import { createGoal, pollForResults, suggestHabits } from "../../api/habits";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
+import HabitEditor from "../../components/HabitEditor";
+import Quiz from "../Quiz";
+import React from "react";
+import { getCategories } from "../../api/categories";
 import { useCustomer } from "../../context/CustomerContext";
+import { useGetCustomerQuiz } from "../../api/hooks/useCustomerQuiz";
 import { useLocation } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
 const Template = ({
@@ -15,36 +28,62 @@ const Template = ({
 }) => {
   const [goalDescription, setGoalDescription] = useState("");
   const [timeDescription, setTimeDescription] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [showQuiz, setShowQuiz] = useState(false);
   const location = useLocation();
   const { profile, addGoal } = useCustomer();
   const [tasks, setTasks] = useState<string[]>(["", "", ""]);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const createGoalMutation = useMutation({ mutationFn: createGoal });
   const createHabitsMutation = useMutation({ mutationFn: suggestHabits });
   const [goalFilledIn, setGoalFilledIn] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
 
-  const handleTaskChange = (index: number, value: string) => {
-    const newTasks = [...tasks];
-    newTasks[index] = value;
-    setTasks(newTasks);
+  // Fetch categories
+  const categoriesQuery = useQuery({
+    queryKey: ["categories", profile?.customerId],
+    queryFn: () => getCategories(),
+    enabled: !!profile?.customerId,
+  });
+
+  const quizQuery = useGetCustomerQuiz();
+
+  // Map category names to icons
+  const getCategoryIcon = (categoryName: string) => {
+    const name = categoryName.toLowerCase();
+    if (name === "life")
+      return <LifeBuoy className="w-8 h-8 text-[var(--btn-color)]" />;
+    if (name === "health")
+      return <Heart className="w-8 h-8 text-[var(--btn-color)]" />;
+    if (name === "education")
+      return <GraduationCap className="w-8 h-8 text-[var(--btn-color)]" />;
+    return <FolderOpen className="w-8 h-8 text-[var(--btn-color)]" />;
   };
 
-  const handleTaskEdit = (index: number) => {
-    setEditingIndex(index);
+  // Initialize selected category from location state if available
+  React.useEffect(() => {
+    if (location.state?.categoryId && location.state?.categoryName) {
+      setSelectedCategory({
+        id: location.state.categoryId,
+        name: location.state.categoryName,
+      });
+    }
+  }, [location.state]);
+
+  const handleCategorySelect = (category: { id: string; name: string }) => {
+    setSelectedCategory(category);
   };
 
-  const handleTaskSave = (index: number) => {
-    setEditingIndex(null);
-  };
-
-  const handleRemoveTask = (index: number) => {
-    const newTasks = tasks.filter((_, i) => i !== index);
-    setTasks(newTasks);
-  };
-
-  const handleAddTask = () => {
-    setTasks([...tasks, ""]);
+  const handleQuizClick = () => {
+    if (quizQuery.data) {
+      alert(
+        "You've already completed the quiz! Check your progress in the Goals section."
+      );
+      return;
+    }
+    setShowQuiz(true);
   };
 
   const handleGoalSaveClick = async () => {
@@ -52,7 +91,6 @@ const Template = ({
 
     createHabitsMutation.mutate(
       {
-        customerId: profile.customerId,
         goal: goalDescription + " within the timeframe of " + timeDescription,
       },
       {
@@ -73,7 +111,6 @@ const Template = ({
           console.log(result.data, "process started");
           try {
             setIsPolling(true);
-            // Poll for results using suggestion_id
             const habits = await pollForResults(result.data.suggestion_id);
             console.log(habits, "received habits");
 
@@ -96,7 +133,6 @@ const Template = ({
             setGoalFilledIn(true);
           } catch (pollError) {
             console.error("Error polling for results:", pollError);
-            // Handle polling error - maybe show a fallback UI
           } finally {
             setIsPolling(false);
           }
@@ -114,10 +150,8 @@ const Template = ({
       return;
     }
 
-    const categoryId = location.state?.categoryId;
-    if (!categoryId) {
-      console.error("No category ID available");
-      alert("Error: No category selected. Please select a category from the dashboard.");
+    if (!selectedCategory) {
+      alert("Please select a category first.");
       return;
     }
 
@@ -125,12 +159,12 @@ const Template = ({
       {
         description: goalDescription,
         habits: tasks,
-        category_id: categoryId,
+        category_id: selectedCategory.id,
       },
       {
         onSuccess: (data) => {
           console.log(data, "response goal");
-          setActiveTab("progress");
+          setActiveTab("goals");
         },
         onError: (error) => {
           console.error("Error creating goal:", error);
@@ -139,10 +173,104 @@ const Template = ({
     );
   };
 
+  const shouldShowQuizOption = !quizQuery.data && !quizQuery.isLoading;
+  console.log(quizQuery.data, "quizQuery.data");
+  // If no category is selected, show category selection
+  if (!selectedCategory) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] p-6">
+        {!showQuiz ? (
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl font-bold text-center mb-8">
+              Create a New Goal
+            </h1>
+            <p className="text-center text-lg mb-8 opacity-80">
+              Choose a category to get started
+            </p>
+
+            {categoriesQuery.isLoading && (
+              <div className="text-center py-8">
+                <Loader className="animate-spin mx-auto mb-4" size={32} />
+                <p>Loading categories...</p>
+              </div>
+            )}
+
+            {categoriesQuery.isError && (
+              <div className="text-center py-8 text-red-600">
+                <p>Failed to load categories. Please try again.</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {categoriesQuery.data?.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() =>
+                    handleCategorySelect({
+                      id: category.id,
+                      name: category.name,
+                    })
+                  }
+                  className="category-card group"
+                >
+                  <div className="category-icon-container">
+                    {getCategoryIcon(category.name)}
+                  </div>
+                  <h3 className="category-title">{category.name}</h3>
+                  <div className="category-arrow">
+                    <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {shouldShowQuizOption && (
+              <div className="max-w-md mx-auto">
+                <button onClick={handleQuizClick} className="quiz-option-card">
+                  <div className="flex-1">
+                    <h3 className="font-semibold mb-1">Uniquely yours</h3>
+                    <p className="text-sm opacity-80">
+                      Take our quiz for personalized recommendations
+                    </p>
+                  </div>
+                  <ChevronRight className="w-6 h-6 min-w-6" />
+                </button>
+              </div>
+            )}
+
+            {quizQuery.data && (
+              <div className=" mx-auto">
+                <div className="quiz-completed-card">
+                  <span className="text-green-600 font-semibold">
+                    ✓ Quiz completed!
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Quiz setShowQuiz={setShowQuiz} />
+        )}
+      </div>
+    );
+  }
+
+  // Rest of the existing Template component for goal creation...
   return (
     <div
       className={`min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] fade-in flex flex-col items-center`}
     >
+      {/* Back button to category selection */}
+      <div className="w-full pt-4 px-4">
+        <button
+          onClick={() => setSelectedCategory(null)}
+          className="flex items-center gap-2 text-[var(--btn-color)] hover:text-[var(--accent-color)] transition-colors"
+        >
+          <ChevronRight className="w-4 h-4 rotate-180" />
+          Back to categories
+        </button>
+      </div>
+
       {/* Loading Overlay */}
       {isPolling && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -180,19 +308,21 @@ const Template = ({
         </div>
       )}
 
-      {/* Main Content - Disabled when polling */}
+      {/* Main Content */}
       <div
         className={
           isPolling ? "pointer-events-none opacity-75" : "goal-form-container"
         }
       >
-        <h1 className="title text-3xl mb-6 pt-8 px-4 w-full text-center capitalize ">
-          {location.state?.categoryName || location.state?.goal}
+        <h1 className="title text-3xl mb-6 pt-8 px-4 w-full text-center capitalize">
+          {selectedCategory.name}
         </h1>
+
+        {/* Rest of your existing goal creation form... */}
         <div className="flex flex-col gap-4 w-full md:p-16 p-4 items-center">
-          <div className="bg-white/80 rounded-lg p-6 text-[var(--secondary-text-color)] mb-4 md:w-[500px] flex-auto justify-center items-center">
+          <div className="bg-white/80 rounded-lg p-6 text-[var(--secondary-text-color)] mb-4 md:w-[500px] max-w-[500px] flex-auto justify-center items-center">
             <h2 className="text-lg mb-4 w-auto">
-              Describe your overall {location.state?.categoryName || location.state?.goal} goal
+              Describe your overall {selectedCategory.name} goal
             </h2>
             <input
               className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
@@ -227,7 +357,7 @@ const Template = ({
             </button>
           </div>
           {goalFilledIn && (
-            <div className="bg-white/80 rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 flex-auto w-[500px] bg-white-transparent">
+            <div className="bg-white/80 rounded-lg p-6 text-[var(--secondary-text-color)] mb-6 md:w-[500px] flex-auto max-w-[500px] bg-white-transparent">
               <h2 className="text-lg mb-4 w-auto">Your habits to track</h2>
               {createHabitsMutation.isPending ? (
                 <div className="flex items-center justify-center py-8">
@@ -236,77 +366,12 @@ const Template = ({
                 </div>
               ) : (
                 <>
-                  {tasks.map((task, index) => (
-                    <div key={index} className="mb-4 task-container">
-                      {editingIndex === index ? (
-                        <div className="flex gap-2 w-full">
-                          <textarea
-                            rows={2}
-                            className="w-full border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent md:min-h-[36px] min-h-[120px]"
-                            name={`habit-${index}`}
-                            placeholder="Enter your habit"
-                            value={task}
-                            onChange={(e) =>
-                              handleTaskChange(index, e.target.value)
-                            }
-                            onBlur={() => handleTaskSave(index)}
-                            autoFocus
-                          />
-                          <button
-                            onClick={() => handleTaskSave(index)}
-                            className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
-                          >
-                            Save
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2 w-full">
-                          <button
-                            onClick={() => {
-                              if (goalFilledIn) {
-                                handleTaskEdit(index);
-                              }
-                            }}
-                            className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
-                          >
-                            <PencilLine size={16} />
-                          </button>
-                          <p
-                            className="task w-full md:min-h-[36px] min-h-[100px] border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] pb-2 bg-transparent"
-                            onClick={() => {
-                              if (goalFilledIn) {
-                                handleTaskEdit(index);
-                              }
-                            }}
-                          >
-                            {task}
-                          </p>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                if (goalFilledIn) {
-                                  handleTaskEdit(index);
-                                }
-                              }}
-                              className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
-                            >
-                              <Minus
-                                className="minus cursor-pointer"
-                                onClick={() => handleRemoveTask(index)}
-                              />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    onClick={handleAddTask}
+                  <HabitEditor
+                    habits={tasks}
+                    onHabitsChange={setTasks}
                     disabled={!goalFilledIn}
-                    className="text-[var(--btn-color)] text-2xl font-bold cursor-pointer"
-                  >
-                    <Plus className="hover:stroke-[var(--accent-color)] plus" />
-                  </button>
+                    className="mb-6"
+                  />
                 </>
               )}
             </div>

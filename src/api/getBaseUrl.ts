@@ -23,14 +23,37 @@ export const getBaseUrlForGoals = () => {
   return "http://localhost:8081";
 };
 
-export const getAuthHeaders = async () => {
+export const getAuthHeaders = async (
+  retryCount = 0
+): Promise<Record<string, string>> => {
   const user = auth.currentUser;
   if (!user) {
     throw new Error("User not authenticated");
   }
-  const token = await user.getIdToken();
-  return {
-    "Authorization": `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
+
+  try {
+    // Force token refresh on first attempt or retries
+    const forceRefresh = retryCount > 0;
+    const token = await user.getIdToken(forceRefresh);
+
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+  } catch (error) {
+    console.error(
+      `Failed to get auth token (attempt ${retryCount + 1}):`,
+      error
+    );
+
+    // Retry up to 2 times with exponential backoff
+    if (retryCount < 2) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.pow(2, retryCount) * 1000)
+      );
+      return getAuthHeaders(retryCount + 1);
+    }
+
+    throw new Error("Failed to get authentication token after retries");
+  }
 };

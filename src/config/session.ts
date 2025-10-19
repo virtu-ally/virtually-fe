@@ -1,13 +1,10 @@
 // Session management configuration
 export const SESSION_CONFIG = {
-  // Maximum session duration in milliseconds (60 minutes)
-  MAX_SESSION_DURATION: 60 * 60 * 1000,
+  // Activity timeout in milliseconds (60 minutes of inactivity)
+  ACTIVITY_TIMEOUT: 60 * 60 * 1000,
 
-  // Activity timeout in milliseconds (30 minutes of inactivity)
-  ACTIVITY_TIMEOUT: 30 * 60 * 1000,
-
-  // Token validity check interval in milliseconds (1 minute)
-  TOKEN_CHECK_INTERVAL: 60 * 1000,
+  // Token validity check interval in milliseconds (5 minutes - less frequent)
+  TOKEN_CHECK_INTERVAL: 5 * 60 * 1000,
 
   // Auto-redirect delay after session expiration notification (5 seconds)
   AUTO_REDIRECT_DELAY: 5000,
@@ -25,7 +22,6 @@ export const SESSION_CONFIG = {
 
 // Session expiration reasons
 export enum SessionExpirationReason {
-  MAX_DURATION = "Maximum session duration exceeded",
   INACTIVITY = "Session timeout due to inactivity",
   INVALID_TOKEN = "Invalid or expired token",
   ACTIVITY_TIMEOUT = "Activity timeout",
@@ -33,14 +29,6 @@ export enum SessionExpirationReason {
 
 // Helper functions for session management
 export const SessionUtils = {
-  /**
-   * Check if a session duration exceeds the maximum allowed time
-   */
-  isSessionExpired: (authTime: number): boolean => {
-    const sessionDuration = Date.now() - authTime;
-    return sessionDuration > SESSION_CONFIG.MAX_SESSION_DURATION;
-  },
-
   /**
    * Check if user has been inactive for too long
    */
@@ -60,14 +48,5 @@ export const SessionUtils = {
       return `${hours}h ${minutes % 60}m`;
     }
     return `${minutes}m`;
-  },
-
-  /**
-   * Get time remaining until session expires
-   */
-  getTimeUntilExpiration: (authTime: number): number => {
-    const sessionDuration = Date.now() - authTime;
-    const timeRemaining = SESSION_CONFIG.MAX_SESSION_DURATION - sessionDuration;
-    return Math.max(0, timeRemaining);
   },
 } as const;

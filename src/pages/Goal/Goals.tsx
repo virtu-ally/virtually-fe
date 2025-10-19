@@ -1,31 +1,10 @@
-import {
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LineElement,
-  LinearScale,
-  PointElement,
-  Title,
-  Tooltip,
-} from "chart.js";
-
-import { useMemo, useState } from "react";
-import { Line } from "react-chartjs-2";
+import { useEffect, useMemo, useState } from "react";
 import { type Goal, moveGoal } from "../../api/goals";
 import { getCategories } from "../../api/categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FolderInput } from "lucide-react";
 import { useMonthlyHabitCompletions } from "../../api/hooks/useHabits";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import Chart from "../../components/Chart";
 
 const Goals = ({
   goals,
@@ -35,7 +14,7 @@ const Goals = ({
   customerId,
   initialCategoryId = null,
 }: {
-  goals: Goal[];
+  goals: Goal[] | null;
   isLoading: boolean;
   isError: boolean;
   error: Error;
@@ -48,7 +27,6 @@ const Goals = ({
   const [movingGoalId, setMovingGoalId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  // Get current month data
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -58,7 +36,6 @@ const Goals = ({
     currentMonth
   );
 
-  // Fetch categories
   const categoriesQuery = useQuery({
     queryKey: ["categories", customerId],
     queryFn: () => getCategories(),
@@ -67,7 +44,35 @@ const Goals = ({
 
   const categories = categoriesQuery.data || [];
 
-  // Move goal mutation
+  const categoriesWithHabits = useMemo(() => {
+    if (!goals || !categories) return [];
+
+    return categories
+      .map((category) => {
+        const categoryGoals = goals.filter(
+          (goal) =>
+            goal.category_id === category.id &&
+            goal.habits &&
+            goal.habits.length > 0
+        );
+        return {
+          ...category,
+          goalsCount: categoryGoals.length,
+          totalHabits: categoryGoals.reduce(
+            (sum, goal) => sum + (goal.habits?.length || 0),
+            0
+          ),
+        };
+      })
+      .filter((cat) => cat.goalsCount > 0);
+  }, [goals, categories]);
+
+  useEffect(() => {
+    if (!selectedCategoryId && categoriesWithHabits.length > 0) {
+      setSelectedCategoryId(categoriesWithHabits[0].id);
+    }
+  }, [categoriesWithHabits, selectedCategoryId]);
+
   const moveGoalMutation = useMutation({
     mutationFn: ({
       goalId,
@@ -88,107 +93,95 @@ const Goals = ({
     },
   });
 
-  // Filter goals by selected category
   const filteredGoals = useMemo(() => {
-    if (!selectedCategoryId) {
+    if (!selectedCategoryId || !goals) {
       return [];
     }
-    return goals.filter((goal) => goal.category_id === selectedCategoryId);
+    return goals.filter(
+      (goal) =>
+        goal.category_id === selectedCategoryId &&
+        goal.habits &&
+        goal.habits.length > 0
+    );
   }, [goals, selectedCategoryId]);
 
-  // Get category name by ID
   const getCategoryName = (categoryId: string): string => {
     const category = categories.find((cat) => cat.id === categoryId);
     return category?.name || "Unknown";
   };
 
-  // Handle moving goal to new category
   const handleMoveGoal = (goalId: string, newCategoryId: string) => {
     setMovingGoalId(goalId);
     moveGoalMutation.mutate({ goalId, categoryId: newCategoryId });
   };
 
-  // Calculate statistics for current month
   const currentMonthStats = useMemo(() => {
-    const completionCount = currentMonthCompletions.length;
-    const totalHabits = filteredGoals.reduce(
-      (acc, goal) => acc + (goal.habits?.length || 0),
-      0
-    );
-
-    const daysInMonth = new Date(
-      currentYear,
-      currentMonth + 1,
-      0
-    ).getDate();
-    const possibleCompletions = daysInMonth * totalHabits;
-    const completionRate =
-      possibleCompletions > 0
-        ? (completionCount / possibleCompletions) * 100
+    try {
+      const completionCount = Array.isArray(currentMonthCompletions)
+        ? currentMonthCompletions.length
         : 0;
+      const totalHabits = (filteredGoals || []).reduce(
+        (acc, goal) => acc + ((goal?.habits || []).length || 0),
+        0
+      );
 
-    return {
-      completionCount,
-      possibleCompletions,
-      completionRate,
-    };
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const possibleCompletions = daysInMonth * (totalHabits || 0);
+      const completionRate =
+        possibleCompletions > 0
+          ? (completionCount / possibleCompletions) * 100
+          : 0;
+
+      return {
+        completionCount: completionCount || 0,
+        possibleCompletions: possibleCompletions || 0,
+        completionRate: completionRate || 0,
+      };
+    } catch (error) {
+      console.error("Error calculating stats:", error);
+      return {
+        completionCount: 0,
+        possibleCompletions: 0,
+        completionRate: 0,
+      };
+    }
   }, [currentMonthCompletions, filteredGoals, currentYear, currentMonth]);
 
-  // Chart data for current month (daily completions)
   const chartData = useMemo(() => {
-    const daysInMonth = new Date(
-      currentYear,
-      currentMonth + 1,
-      0
-    ).getDate();
-    const labels = Array.from({ length: daysInMonth }, (_, i) => `${i + 1}`);
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    // Group completions by day
     const completionsByDay: Record<number, number> = {};
-    currentMonthCompletions.forEach((completion) => {
-      const date = new Date(completion.completion_date);
-      const day = date.getDate();
-      completionsByDay[day] = (completionsByDay[day] || 0) + 1;
+
+    if (
+      currentMonthCompletions &&
+      typeof currentMonthCompletions === "object"
+    ) {
+      Object.entries(currentMonthCompletions).forEach(
+        ([dayStr, habitsForDay]) => {
+          const day = parseInt(dayStr, 10);
+          completionsByDay[day] = Object.keys(habitsForDay || {}).length;
+        }
+      );
+    }
+
+    const data = Array.from({ length: daysInMonth }, (_, i) => {
+      const day = i + 1;
+      const completions = completionsByDay[day] || 0;
+      return {
+        day: day.toString(),
+        completions,
+        // Add color based on completion count
+        color:
+          completions === 0
+            ? "var(--secondary-color)"
+            : completions <= 2
+            ? "var(--accent-color-light)"
+            : "var(--accent-color)",
+      };
     });
 
-    const data = labels.map((label, i) => completionsByDay[i + 1] || 0);
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: "Daily Completions",
-          data,
-          borderColor: "rgb(75, 192, 192)",
-          backgroundColor: "rgba(75, 192, 192, 0.2)",
-          tension: 0.1,
-        },
-      ],
-    };
+    return data;
   }, [currentMonthCompletions, currentYear, currentMonth]);
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: "top" as const },
-      title: {
-        display: true,
-        text: `${new Date(currentYear, currentMonth).toLocaleString(
-          undefined,
-          {
-            month: "long",
-            year: "numeric",
-          }
-        )} - Daily Completions`,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { stepSize: 1 },
-      },
-    },
-  };
 
   return (
     <div className="progress-container px-4 py-6 text-[var(--text-color)]">
@@ -206,7 +199,12 @@ const Goals = ({
               Loading categories...
             </span>
           )}
-          {categories.map((category) => (
+          {categoriesWithHabits.length === 0 && !categoriesQuery.isLoading && (
+            <span className="px-4 py-2 text-sm opacity-70">
+              No categories with habits yet. Create some goals first!
+            </span>
+          )}
+          {categoriesWithHabits.map((category) => (
             <button
               key={category.id}
               onClick={() => setSelectedCategoryId(category.id)}
@@ -254,82 +252,95 @@ const Goals = ({
         {!isLoading && !selectedCategoryId && (
           <div>Please select a category to view goals.</div>
         )}
-        {!isLoading && selectedCategoryId && filteredGoals.length === 0 && (
-          <div>No goals in this category yet.</div>
-        )}
+        {!isLoading &&
+          selectedCategoryId &&
+          (!filteredGoals || filteredGoals.length === 0) && (
+            <div>No goals with habits in this category yet.</div>
+          )}
         <ul className="space-y-2">
-          {filteredGoals.map((g) => (
+          {(filteredGoals || []).map((g) => (
             <li
               key={g.id}
               className="bg-white/70 text-[var(--secondary-text-color)] rounded p-3"
             >
-              <div className="flex items-center justify-between mb-1">
-                <div className="font-semibold flex-1">{g.description}</div>
-                <div className="flex items-center gap-2">
-                  {g.category_id && (
-                    <span className="text-xs bg-[var(--btn-color)] text-white px-2 py-1 rounded">
-                      {getCategoryName(g.category_id)}
-                    </span>
-                  )}
-                  {/* Move Goal Dropdown */}
-                  <div className="relative group">
-                    <button
-                      className="text-blue-600 hover:text-blue-800 p-1"
-                      title="Move to another category"
-                      disabled={movingGoalId === g.id}
-                    >
-                      <FolderInput size={16} />
-                    </button>
-                    {/* Dropdown menu */}
-                    <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded border border-gray-200 z-10 min-w-[150px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                      <div className="py-1">
-                        <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b">
-                          Move to:
-                        </div>
-                        {categories
-                          .filter((cat) => cat.id !== g.category_id)
-                          .map((category) => (
-                            <button
-                              key={category.id}
-                              onClick={() => handleMoveGoal(g.id, category.id)}
-                              disabled={movingGoalId === g.id}
-                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {category.name}
-                            </button>
-                          ))}
-                        {categories.filter((cat) => cat.id !== g.category_id)
-                          .length === 0 && (
-                          <div className="px-3 py-2 text-sm text-gray-500">
-                            No other categories
+              <div className="flex items-center justify-between">
+                {g.habits?.length ? (
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {g.habits?.map((h) => (
+                      <span
+                        key={`${g.id}::${h.id}`}
+                        className="text-xs bg-[var(--accent-color-light)] text-[var(--secondary-text-color)] px-2 py-1 rounded"
+                      >
+                        {h.title}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-semibold flex-1">{g.description}</div>
+                  <div className="flex items-center gap-2">
+                    {g.category_id && (
+                      <span className="text-xs bg-[var(--btn-color)] text-white px-2 py-1 rounded">
+                        {getCategoryName(g.category_id)}
+                      </span>
+                    )}
+                    {/* Move Goal Dropdown */}
+                    <div className="relative group">
+                      <button
+                        className="text-blue-600 hover:text-blue-800 p-1"
+                        title="Move to another category"
+                        disabled={movingGoalId === g.id}
+                      >
+                        <FolderInput size={16} />
+                      </button>
+                      {/* Dropdown menu */}
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded border border-gray-200 z-10 min-w-[150px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                        <div className="py-1">
+                          <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b">
+                            Move to:
                           </div>
-                        )}
+                          {categories
+                            ?.filter((cat) => cat.id !== g.category_id)
+                            ?.map((category) => (
+                              <button
+                                key={category.id}
+                                onClick={() =>
+                                  handleMoveGoal(g.id, category.id)
+                                }
+                                disabled={movingGoalId === g.id}
+                                className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {category.name}
+                              </button>
+                            ))}
+                          {categories.filter((cat) => cat.id !== g.category_id)
+                            .length === 0 && (
+                            <div className="px-3 py-2 text-sm text-gray-500">
+                              No other categories
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              {g.habits?.length ? (
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {g.habits.map((h) => (
-                    <span
-                      key={`${g.id}::${h.id}`}
-                      className="text-xs bg-[var(--accent-color-light)] text-[var(--secondary-text-color)] px-2 py-1 rounded"
-                    >
-                      {h.title}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Chart */}
-      <div className="chart-container mt-6 bg-white/80 rounded p-4 text-[var(--secondary-text-color)]">
-        <Line data={chartData} options={chartOptions} />
-      </div>
+      <Chart
+        data={chartData}
+        title={`${new Date(currentYear, currentMonth).toLocaleString(
+          undefined,
+          {
+            month: "long",
+            year: "numeric",
+          }
+        )} - Daily Completions`}
+        height={300}
+      />
     </div>
   );
 };

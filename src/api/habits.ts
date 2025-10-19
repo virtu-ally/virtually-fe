@@ -1,4 +1,4 @@
-import { getBaseUrlForGoals, getAuthHeaders } from "./getBaseUrl";
+import { getAuthHeaders, getBaseUrlForGoals } from "./getBaseUrl";
 
 interface SuggestHabitsRequest {
   goal: string;
@@ -303,9 +303,7 @@ export const getHabitCompletions = async (
 
   if (res.status === 400) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(
-      errorData.message || "Invalid month format"
-    );
+    throw new Error(errorData.message || "Invalid month format");
   }
 
   if (!res.ok) {
@@ -347,7 +345,8 @@ export const recordHabitCompletion = async (
   if (res.status === 400) {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(
-      errorData.message || "Invalid input or habit already completed for this date"
+      errorData.message ||
+        "Invalid input or habit already completed for this date"
     );
   }
 

@@ -14,15 +14,15 @@
 }
 
 .session-expired-modal {
-  background: white;
-  color: black;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--inverse-text-color);
+  color: var(--text-color);
+  border: 1px solid var(--card-border);
   border-radius: 1rem;
   padding: 2rem;
   max-width: 400px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px var(--card-shadow);
   animation: slideIn 0.3s ease-out;
   position: relative;
 }
@@ -31,7 +31,7 @@
   display: flex;
   justify-content: center;
   margin-bottom: 1rem;
-  color: #f59e0b;
+  color: var(--text-color);
 }
 
 .session-expired-title {
@@ -69,7 +69,7 @@
 
 .session-expired-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--card-shadow);
 }
 
 .session-expired-button:active {

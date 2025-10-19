@@ -14,17 +14,16 @@
     "@auth0/auth0-react": "^2.3.0",
     "@tailwindcss/vite": "^4.1.3",
     "@tanstack/react-query": "^5.75.2",
-    "chart.js": "^4.4.9",
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^11.10.0",
     "lucide-react": "^0.487.0",
     "react": "^19.0.0",
-    "react-chartjs-2": "^5.3.0",
     "react-color": "^2.19.3",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.5.0"
+    "react-router-dom": "^7.5.0",
+    "recharts": "^3.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

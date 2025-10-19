@@ -1,14 +1,21 @@
 import {
   HabitCompletionRequest,
   HabitCompletionWithDetails,
+  createGoal,
+  deleteHabitCompletion,
   getHabitCompletions,
   recordHabitCompletion,
-  deleteHabitCompletion,
 } from "../habits";
+import { getAuthHeaders, getBaseUrl } from "../getBaseUrl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { Goal } from "../goals";
+
 // Type for the day-keyed cache structure for a month
-export type MonthCompletionsCache = Record<number, Record<string, HabitCompletionWithDetails>>;
+export type MonthCompletionsCache = Record<
+  number,
+  Record<string, HabitCompletionWithDetails>
+>;
 
 // Hook to fetch habit completions for an entire month
 export const useMonthlyHabitCompletions = (
@@ -16,32 +23,62 @@ export const useMonthlyHabitCompletions = (
   month: number // 0-based month (0 = January)
 ) => {
   // Convert to YYYY-MM format (month is 0-based, so add 1)
-  const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
 
   return useQuery<MonthCompletionsCache>({
     queryKey: ["habitCompletions", year, month],
     queryFn: async () => {
-      const completions = await getHabitCompletions(monthStr);
+      try {
+        const completions = await getHabitCompletions(monthStr);
 
-      // Transform flat array into day-keyed structure
-      const cache: MonthCompletionsCache = {};
-      for (const completion of completions) {
-        // Parse day directly from YYYY-MM-DD string to avoid timezone issues
-        const day = parseInt(completion.completion_date.split('-')[2], 10);
-
-        if (!cache[day]) {
-          cache[day] = {};
+        // Handle null/undefined response
+        if (!completions) {
+          return {};
         }
 
-        cache[day][completion.habit_id] = completion;
-      }
+        // Ensure we have an array
+        if (!Array.isArray(completions)) {
+          console.warn(
+            "Expected array but got:",
+            typeof completions,
+            completions
+          );
+          return {};
+        }
 
-      return cache;
+        // Transform flat array into day-keyed structure
+        const cache: MonthCompletionsCache = {};
+        for (const completion of completions) {
+          if (!completion || !completion.completion_date) {
+            continue; // Skip invalid completions
+          }
+
+          // Parse day directly from YYYY-MM-DD string to avoid timezone issues
+          const day = parseInt(completion.completion_date.split("-")[2], 10);
+
+          if (isNaN(day)) {
+            continue; // Skip invalid dates
+          }
+
+          if (!cache[day]) {
+            cache[day] = {};
+          }
+
+          cache[day][completion.habit_id] = completion;
+        }
+
+        return cache;
+      } catch (error) {
+        console.error("Error fetching habit completions:", error);
+        return {}; // Return empty cache on error
+      }
     },
     retry: (failureCount, error) => {
       // Don't retry if it's a 404 (no completions found) or 400 (invalid month)
-      if (error?.message?.includes("Customer not found") ||
-          error?.message?.includes("Invalid month")) {
+      if (
+        error?.message?.includes("Customer not found") ||
+        error?.message?.includes("Invalid month")
+      ) {
         return false;
       }
       return failureCount < 3;
@@ -66,7 +103,7 @@ export const useRecordHabitCompletion = () => {
     onSuccess: (data) => {
       // Optimistically update the cache for the specific month and day
       // Parse date components directly from YYYY-MM-DD string to avoid timezone issues
-      const dateParts = data.completion_date.split('-');
+      const dateParts = data.completion_date.split("-");
       const year = parseInt(dateParts[0], 10);
       const month = parseInt(dateParts[1], 10) - 1; // 0-based
       const day = parseInt(dateParts[2], 10);
@@ -129,10 +166,8 @@ export const useDeleteHabitCompletion = () => {
 // Hook to get completions grouped by date for easy UI consumption
 // This now simply returns the already-structured data, optionally simplifying to boolean flags
 export const useHabitCompletionsByDate = (year: number, month: number) => {
-  const { data: completionsCache = {}, ...queryResult } = useMonthlyHabitCompletions(
-    year,
-    month
-  );
+  const { data: completionsCache = {}, ...queryResult } =
+    useMonthlyHabitCompletions(year, month);
 
   // Transform to simpler boolean map if needed for UI
   const completionsByDate: Record<number, Record<string, boolean>> = {};
@@ -148,4 +183,43 @@ export const useHabitCompletionsByDate = (year: number, month: number) => {
     data: completionsCache, // Full completion details
     completionsByDate, // Simplified boolean map
   };
+};
+
+export interface CreateNewHabitsRequest {
+  goalId: string;
+  progressNotes: string;
+  newHabits: Array<{
+    title: string;
+    description: string;
+  }>;
+}
+
+// Update the API hook in src/api/hooks/useHabits.ts
+export const useCreateNewHabitsForGoal = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (request: {
+      originalGoal: Goal;
+      progressNotes: string;
+      newHabits: Array<{ title: string; description: string }>;
+    }) => {
+      // Create a new goal with the same description but new habits
+      // We'll append progress notes to the description to differentiate
+      const updatedDescription = `${request.originalGoal.description} (Updated)`;
+
+      const habitTitles = request.newHabits.map((h) =>
+        h.description ? `${h.title}: ${h.description}` : h.title
+      );
+
+      return await createGoal({
+        description: updatedDescription,
+        habits: habitTitles,
+        category_id: request.originalGoal.category_id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+      queryClient.invalidateQueries({ queryKey: ["habitCompletions"] });
+    },
+  });
 };

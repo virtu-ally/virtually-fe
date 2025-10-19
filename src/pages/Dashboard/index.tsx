@@ -1,18 +1,25 @@
 import "./index.css";
 
-import { ChevronRight, GraduationCap, Heart, LifeBuoy, FolderOpen } from "lucide-react";
+import {
+  ChevronRight,
+  FolderOpen,
+  GraduationCap,
+  Heart,
+  LifeBuoy,
+} from "lucide-react";
 import { login, signup } from "../../api/customer";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import Quiz from "../Quiz";
+import { getCategories } from "../../api/categories";
 import { useAuth } from "../../context/FirebaseAuthContext";
 import { useCustomer } from "../../context/CustomerContext";
 import { useGetCustomerQuiz } from "../../api/hooks/useCustomerQuiz";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../../context/QuizContext";
-import { getCategories } from "../../api/categories";
 
+// not used currently
 const NewDashboard = () => {
   const navigate = useNavigate();
   const [isExiting, setIsExiting] = useState(false);
@@ -41,9 +48,14 @@ const NewDashboard = () => {
   // Map category names to icons
   const getCategoryIcon = (categoryName: string) => {
     const name = categoryName.toLowerCase();
-    if (name === "life") return <LifeBuoy className="w-12 h-12 text-[var(--btn-color)] mb-4" />;
-    if (name === "health") return <Heart className="w-12 h-12 text-[var(--btn-color)] mb-4" />;
-    if (name === "education") return <GraduationCap className="w-12 h-12 text-[var(--btn-color)] mb-4" />;
+    if (name === "life")
+      return <LifeBuoy className="w-12 h-12 text-[var(--btn-color)] mb-4" />;
+    if (name === "health")
+      return <Heart className="w-12 h-12 text-[var(--btn-color)] mb-4" />;
+    if (name === "education")
+      return (
+        <GraduationCap className="w-12 h-12 text-[var(--btn-color)] mb-4" />
+      );
     return <FolderOpen className="w-12 h-12 text-[var(--btn-color)] mb-4" />;
   };
 
@@ -139,7 +151,9 @@ const NewDashboard = () => {
             <div
               onClick={handleQuizClick}
               className={`card quiz-card ${isExiting ? "slide-out" : ""}`}
-              style={{ animationDelay: `${(categoriesQuery.data?.length || 0) * 0.2}s` }}
+              style={{
+                animationDelay: `${(categoriesQuery.data?.length || 0) * 0.2}s`,
+              }}
             >
               <h2 className="text-sm font-semibold ">
                 Take our quiz for personalised recommendations
@@ -152,7 +166,9 @@ const NewDashboard = () => {
               className={`card quiz-completed-card ${
                 isExiting ? "slide-out" : ""
               }`}
-              style={{ animationDelay: `${(categoriesQuery.data?.length || 0) * 0.2}s` }}
+              style={{
+                animationDelay: `${(categoriesQuery.data?.length || 0) * 0.2}s`,
+              }}
             >
               <h2 className="text-sm font-semibold text-green-600 cursor-default">
                 ✓ Quiz completed!

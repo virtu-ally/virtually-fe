@@ -1,4 +1,4 @@
-import { getBaseUrlForGoals, getAuthHeaders } from "./getBaseUrl";
+import { getAuthHeaders, getBaseUrlForGoals } from "./getBaseUrl";
 
 export interface Habit {
   id: string;
@@ -23,24 +23,15 @@ export const getCustomerGoals = async (): Promise<Goal[]> => {
   });
 
   if (res.status === 404) {
-    // Customer not found → surface a clear error
-    throw new Error("Customer not found");
+    return []; // Return empty array instead of throwing error
   }
 
   if (!res.ok) {
     throw new Error(`Failed to fetch goals: ${res.statusText}`);
   }
 
-  // Normalize API shape to the app's Goal interface if backend uses different keys
   const data = await res.json();
-  return (data as any[]).map((g) => ({
-    id: g.id ?? g.goal_id ?? crypto.randomUUID(),
-    description: g.description ?? g.goal_description ?? "",
-    habits: g.habits ?? g.finalised_habits ?? [],
-    category_id: g.category_id ?? "",
-    timeframe: g.timeframe,
-    created_at: g.created_at,
-  }));
+  return data || []; // Handle null response
 };
 
 export const getCategorizedGoals = async (
