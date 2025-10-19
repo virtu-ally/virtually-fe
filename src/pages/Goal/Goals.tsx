@@ -193,8 +193,8 @@ const Goals = ({
       )}
 
       {/* Category Filter Tabs */}
-      <div className="mb-6 overflow-x-auto">
-        <div className="flex gap-2 min-w-max">
+      <div className="mb-6 overflow-x-auto -mx-4 px-4">
+        <div className="flex gap-2 pb-2">
           {categoriesQuery.isLoading && (
             <span className="px-4 py-2 text-sm opacity-70">
               Loading categories...
@@ -258,69 +258,70 @@ const Goals = ({
           (!filteredGoals || filteredGoals.length === 0) && (
             <div>No goals with habits in this category yet.</div>
           )}
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {(filteredGoals || []).map((g) => (
             <li
               key={g.id}
-              className="bg-white/70 text-[var(--secondary-text-color)] rounded p-3"
+              className="bg-white/70 text-[var(--secondary-text-color)] rounded-lg p-4"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3">
+                {/* Goal description */}
+                <div className="font-semibold text-base">{g.description}</div>
+
+                {/* Habits - wrap properly on mobile */}
                 {g.habits?.length ? (
-                  <div className="mt-1 flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {g.habits?.map((h) => (
                       <span
                         key={`${g.id}::${h.id}`}
-                        className="text-xs bg-[var(--accent-color-light)] text-[var(--secondary-text-color)] px-2 py-1 rounded"
+                        className="text-xs bg-[var(--accent-color-light)] text-[var(--secondary-text-color)] px-2 py-1 rounded whitespace-nowrap"
                       >
                         {h.title}
                       </span>
                     ))}
                   </div>
                 ) : null}
-                <div className="flex items-center justify-between mb-1">
-                  <div className="font-semibold flex-1">{g.description}</div>
-                  <div className="flex items-center gap-2">
-                    {g.category_id && (
-                      <span className="text-xs bg-[var(--btn-color)] text-white px-2 py-1 rounded">
-                        {getCategoryName(g.category_id)}
-                      </span>
-                    )}
-                    {/* Move Goal Dropdown */}
-                    <div className="relative group">
-                      <button
-                        className="text-blue-600 hover:text-blue-800 p-1"
-                        title="Move to another category"
-                        disabled={movingGoalId === g.id}
-                      >
-                        <FolderInput size={16} />
-                      </button>
-                      {/* Dropdown menu */}
-                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded border border-gray-200 z-10 min-w-[150px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                        <div className="py-1">
-                          <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b">
-                            Move to:
-                          </div>
-                          {categories
-                            ?.filter((cat) => cat.id !== g.category_id)
-                            ?.map((category) => (
-                              <button
-                                key={category.id}
-                                onClick={() =>
-                                  handleMoveGoal(g.id, category.id)
-                                }
-                                disabled={movingGoalId === g.id}
-                                className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {category.name}
-                              </button>
-                            ))}
-                          {categories.filter((cat) => cat.id !== g.category_id)
-                            .length === 0 && (
-                            <div className="px-3 py-2 text-sm text-gray-500">
-                              No other categories
-                            </div>
-                          )}
+
+                {/* Category and move button */}
+                <div className="flex items-center justify-between">
+                  {g.category_id && (
+                    <span className="text-xs bg-[var(--btn-color)] text-white px-2 py-1 rounded">
+                      {getCategoryName(g.category_id)}
+                    </span>
+                  )}
+                  {/* Move Goal Dropdown */}
+                  <div className="relative group">
+                    <button
+                      className="text-blue-600 hover:text-blue-800 p-1"
+                      title="Move to another category"
+                      disabled={movingGoalId === g.id}
+                    >
+                      <FolderInput size={16} />
+                    </button>
+                    {/* Dropdown menu */}
+                    <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded border border-gray-200 z-10 min-w-[150px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                      <div className="py-1">
+                        <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b">
+                          Move to:
                         </div>
+                        {categories
+                          ?.filter((cat) => cat.id !== g.category_id)
+                          ?.map((category) => (
+                            <button
+                              key={category.id}
+                              onClick={() => handleMoveGoal(g.id, category.id)}
+                              disabled={movingGoalId === g.id}
+                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {category.name}
+                            </button>
+                          ))}
+                        {categories.filter((cat) => cat.id !== g.category_id)
+                          .length === 0 && (
+                          <div className="px-3 py-2 text-sm text-gray-500">
+                            No other categories
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

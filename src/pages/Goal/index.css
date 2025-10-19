@@ -96,7 +96,8 @@
 
 .embla__slide {
   transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.5s ease;
 }
 
 .embla__slide:not(.is-selected) {
@@ -107,4 +108,33 @@
 .embla__slide.is-selected {
   opacity: 1;
   transform: scale(1) rotateY(0deg);
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+  .goal-container {
+    padding: 1rem;
+  }
+
+  .progress-container {
+    padding: 1rem;
+  }
+
+  .tabs {
+    gap: 0.3rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
 }

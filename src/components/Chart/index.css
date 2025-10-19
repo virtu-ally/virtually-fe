@@ -40,3 +40,16 @@
   --chart-accent-color: var(--accent-color);
   --chart-accent-light: var(--accent-color-light);
 }
+
+/* Mobile responsive chart */
+@media (max-width: 768px) {
+  .chart-container {
+    padding: 0.75rem;
+    margin: 0 -0.5rem;
+  }
+
+  .chart-container h3 {
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+  }
+}

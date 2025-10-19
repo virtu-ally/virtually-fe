@@ -465,3 +465,71 @@
     font-size: 1rem;
   }
 }
+
+/* Enhanced mobile responsive adjustments */
+@media (max-width: 768px) {
+  .goal-form-container {
+    width: 100%;
+    padding: 0;
+  }
+
+  .goal-form-container .flex {
+    padding: 1rem !important;
+  }
+
+  .goal-form-container .bg-white\/80 {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .category-card {
+    padding: 1rem;
+  }
+
+  .category-icon-container {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .category-title {
+    font-size: 1rem;
+  }
+
+  .quiz-option-card {
+    padding: 1rem;
+  }
+
+  /* Fix title spacing on mobile */
+  .title {
+    font-size: 1.75rem !important;
+    padding: 1rem !important;
+  }
+
+  /* Fix input containers on mobile */
+  .goal-form-container input {
+    font-size: 1rem;
+  }
+
+  .goal-save-button,
+  .save-button {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-card {
+    padding: 0.875rem;
+    gap: 0.75rem;
+  }
+
+  .category-title {
+    font-size: 0.9375rem;
+  }
+
+  .title {
+    font-size: 1.5rem !important;
+  }
+}
