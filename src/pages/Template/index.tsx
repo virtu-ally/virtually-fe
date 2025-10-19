@@ -41,11 +41,11 @@ const Template = ({
   const [goalFilledIn, setGoalFilledIn] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
 
-  // Fetch categories
   const categoriesQuery = useQuery({
-    queryKey: ["categories", profile?.customerId],
+    queryKey: ["categories"],
     queryFn: () => getCategories(),
-    enabled: !!profile?.customerId,
+    enabled: true,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   const quizQuery = useGetCustomerQuiz();

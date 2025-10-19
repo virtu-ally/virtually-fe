@@ -30,9 +30,10 @@ const EditGoals = ({
 
   // Fetch categories
   const categoriesQuery = useQuery({
-    queryKey: ["categories", customerId],
+    queryKey: ["categories"],
     queryFn: () => getCategories(),
-    enabled: !!customerId,
+    enabled: true,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   const categories = categoriesQuery.data || [];

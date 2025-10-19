@@ -24,11 +24,11 @@ const CategoryManagement = () => {
     null
   );
 
-  // Fetch categories
   const categoriesQuery = useQuery({
-    queryKey: ["categories", customerId],
+    queryKey: ["categories"],
     queryFn: () => getCategories(),
-    enabled: !!customerId,
+    enabled: true,
+    staleTime: 1000 * 60 * 5,
   });
 
   // Create category mutation
@@ -74,7 +74,10 @@ const CategoryManagement = () => {
 
   const handleSaveEdit = (categoryId: string) => {
     if (editingCategoryName.trim()) {
-      updateMutation.mutate({ id: categoryId, name: editingCategoryName.trim() });
+      updateMutation.mutate({
+        id: categoryId,
+        name: editingCategoryName.trim(),
+      });
     }
   };
 
@@ -84,7 +87,11 @@ const CategoryManagement = () => {
   };
 
   const handleDeleteCategory = (categoryId: string) => {
-    if (window.confirm("Are you sure? This will delete all goals in this category!")) {
+    if (
+      window.confirm(
+        "Are you sure? This will delete all goals in this category!"
+      )
+    ) {
       deleteMutation.mutate(categoryId);
     }
   };
@@ -208,11 +215,15 @@ const CategoryManagement = () => {
                     </button>
                     <button
                       onClick={() => handleDeleteCategory(category.id)}
-                      disabled={deleteMutation.isPending && deletingCategoryId === category.id}
+                      disabled={
+                        deleteMutation.isPending &&
+                        deletingCategoryId === category.id
+                      }
                       className="text-red-600 hover:text-red-800 disabled:opacity-50"
                       title="Delete (will delete all goals in this category)"
                     >
-                      {deleteMutation.isPending && deletingCategoryId === category.id ? (
+                      {deleteMutation.isPending &&
+                      deletingCategoryId === category.id ? (
                         <Loader className="animate-spin" size={16} />
                       ) : (
                         <Trash2 size={16} />

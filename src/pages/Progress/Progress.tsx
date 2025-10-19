@@ -68,9 +68,10 @@ const Progress = ({
   const startWeekday = firstDayOfMonth.getDay(); // 0=Sun
 
   const categoriesQuery = useQuery({
-    queryKey: ["categories", customerId],
+    queryKey: ["categories"],
     queryFn: () => getCategories(),
-    enabled: !!customerId,
+    enabled: true,
+    staleTime: 1000 * 60 * 5,
   });
 
   const categories = categoriesQuery.data || [];

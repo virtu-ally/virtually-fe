@@ -59,9 +59,9 @@ const GoalsCarousel = ({
     return d;
   });
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+  const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    align: 'center',
+    align: "center",
   });
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
 
@@ -109,7 +109,9 @@ const GoalsCarousel = ({
 
   const totalHabitCount = useMemo(() => {
     return filteredGoals.reduce((acc, goal) => {
-      const validHabits = goal.habits.filter((h) => h.title && h.title.trim() !== "");
+      const validHabits = goal.habits.filter(
+        (h) => h.title && h.title.trim() !== ""
+      );
       return acc + validHabits.length;
     }, 0);
   }, [filteredGoals]);
@@ -185,23 +187,25 @@ const GoalsCarousel = ({
       last7Days.push(date);
     }
 
-    const labels = last7Days.map(date =>
-      date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    const labels = last7Days.map((date) =>
+      date.toLocaleDateString(undefined, { month: "short", day: "numeric" })
     );
 
-    const data = last7Days.map(date => {
+    const data = last7Days.map((date) => {
       const day = date.getDate();
       const month = date.getMonth();
       const year = date.getFullYear();
 
       // Only use completionsByDate if it matches the date's month/year
-      if (year === currentMonth.getFullYear() && month === currentMonth.getMonth()) {
+      if (
+        year === currentMonth.getFullYear() &&
+        month === currentMonth.getMonth()
+      ) {
         const daily = completionsByDate[day] || {};
         if (!selectedGoal) return 0;
         const goalHabitIds = selectedGoal.habits.map((h) => h.id);
         return Object.entries(daily).filter(
-          ([habitId, completed]) =>
-            completed && goalHabitIds.includes(habitId)
+          ([habitId, completed]) => completed && goalHabitIds.includes(habitId)
         ).length;
       }
       return 0;
@@ -228,8 +232,14 @@ const GoalsCarousel = ({
 
   const chartOptions = useMemo(() => {
     const dateRange = selectedGoalChartData.dateRange;
-    const startStr = dateRange.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    const endStr = dateRange.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const startStr = dateRange.start.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+    const endStr = dateRange.end.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
 
     return {
       responsive: true,
@@ -247,7 +257,7 @@ const GoalsCarousel = ({
       scales: {
         y: {
           beginAtZero: true,
-          ticks: { stepSize: 1 }
+          ticks: { stepSize: 1 },
         },
         x: {
           ticks: {
@@ -335,7 +345,7 @@ const GoalsCarousel = ({
                 <ChevronLeft size={32} />
               </button>
             )}
-            
+
             <div className="flex-1" style={{ perspective: "1200px" }}>
               <div className="overflow-hidden" ref={emblaRef}>
                 <div className="flex">
@@ -343,7 +353,7 @@ const GoalsCarousel = ({
                     <div
                       key={goal.id}
                       className={`embla__slide flex-[0_0_100%] min-w-0 px-4 ${
-                        index === selectedGoalIndex ? 'is-selected' : ''
+                        index === selectedGoalIndex ? "is-selected" : ""
                       }`}
                     >
                       <GoalCard
