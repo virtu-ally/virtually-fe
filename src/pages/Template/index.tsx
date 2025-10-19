@@ -87,8 +87,6 @@ const Template = ({
   };
 
   const handleGoalSaveClick = async () => {
-    if (!profile?.customerId) return;
-
     createHabitsMutation.mutate(
       {
         goal: goalDescription + " within the timeframe of " + timeDescription,
@@ -174,7 +172,7 @@ const Template = ({
   };
 
   const shouldShowQuizOption = !quizQuery.data && !quizQuery.isLoading;
-  console.log(quizQuery.data, "quizQuery.data");
+
   // If no category is selected, show category selection
   if (!selectedCategory) {
     return (
