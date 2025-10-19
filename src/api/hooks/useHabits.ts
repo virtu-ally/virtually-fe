@@ -194,7 +194,6 @@ export interface CreateNewHabitsRequest {
   }>;
 }
 
-// Update the API hook in src/api/hooks/useHabits.ts
 export const useCreateNewHabitsForGoal = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -203,13 +202,25 @@ export const useCreateNewHabitsForGoal = () => {
       progressNotes: string;
       newHabits: Array<{ title: string; description: string }>;
     }) => {
-      // Create a new goal with the same description but new habits
-      // We'll append progress notes to the description to differentiate
-      const updatedDescription = `${request.originalGoal.description} (Updated)`;
+      // Use the correct property name and add date for versioning
+      const currentDate = new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      const updatedDescription = `${
+        request.originalGoal.description ||
+        request.originalGoal.goal_description ||
+        "Goal"
+      } (Updated ${currentDate})`;
 
-      const habitTitles = request.newHabits.map((h) =>
-        h.description ? `${h.title}: ${h.description}` : h.title
-      );
+      // Clean and format habit titles, removing any bullet points or markers
+      const habitTitles = request.newHabits
+        .filter((h) => h.title && h.title.trim()) // Only include non-empty habits
+        .map((h) => {
+          const cleanTitle = h.title.replace(/^[\s]*[•*\-\+]\s*/, "").trim();
+          return h.description ? `${cleanTitle}: ${h.description}` : cleanTitle;
+        });
 
       return await createGoal({
         description: updatedDescription,

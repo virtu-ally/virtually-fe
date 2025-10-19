@@ -5,7 +5,6 @@ import { type Goal } from "../../api/goals";
 import { ArrowRight } from "lucide-react";
 import { useCreateNewHabitsForGoal } from "../../api/hooks/useHabits";
 
-import "./index.css";
 import HabitEditor from "../../components/HabitEditor";
 
 interface EditGoalsProps {
@@ -68,9 +67,18 @@ const EditGoals = ({
     setSelectedGoal(goal);
     setProgressNotes("");
 
-    // Populate the HabitEditor with existing habits
-    const existingHabits = goal.habits?.map((habit) => habit.title) || [""];
-    setNewHabits(existingHabits.map((title) => ({ title, description: "" })));
+    // Populate the HabitEditor with existing habits, properly formatted
+    const existingHabits =
+      goal.habits && goal.habits.length > 0
+        ? goal.habits
+            .filter((habit) => habit.title && habit.title.trim()) // Filter out empty habits
+            .map((habit) => ({
+              title: habit.title.replace(/^[\s]*[•*\-\+]\s*/, "").trim(), // Clean bullet points
+              description: "",
+            }))
+        : [{ title: "", description: "" }];
+
+    setNewHabits(existingHabits);
   };
 
   const handleSubmit = async () => {
