@@ -143,11 +143,6 @@ const Template = ({
   };
 
   const handleSave = () => {
-    if (!profile?.customerId) {
-      console.error("No customer ID available");
-      return;
-    }
-
     if (!selectedCategory) {
       alert("Please select a category first.");
       return;
