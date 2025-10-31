@@ -20,7 +20,7 @@ export const getBaseUrlForGoals = () => {
     return API_BASE_URL;
   }
 
-  return "http://localhost:8081";
+  return "http://localhost:8080";
 };
 
 export const getAuthHeaders = async (
