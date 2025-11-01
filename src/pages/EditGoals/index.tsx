@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCategories } from "../../api/categories";
-import { type Goal } from "../../api/goals";
-import { ArrowRight } from "lucide-react";
+import { type Goal, deleteGoal } from "../../api/goals";
+import { ArrowRight, Trash2 } from "lucide-react";
 import { useCreateNewHabitsForGoal } from "../../api/hooks/useHabits";
 
 import HabitEditor from "../../components/HabitEditor";
@@ -25,6 +25,8 @@ const EditGoals = ({
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [progressNotes, setProgressNotes] = useState("");
   const [newHabits, setNewHabits] = useState([{ title: "", description: "" }]);
+  const [deletingGoalId, setDeletingGoalId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const createNewHabitsMutation = useCreateNewHabitsForGoal();
 
@@ -64,6 +66,26 @@ const EditGoals = ({
     return category?.name || "Unknown";
   };
 
+  const deleteGoalMutation = useMutation({
+    mutationFn: (goalId: string) => deleteGoal(goalId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["habitCompletions"] });
+      setDeletingGoalId(null);
+      if (selectedGoal) {
+        setSelectedGoal(null);
+        setProgressNotes("");
+        setNewHabits([{ title: "", description: "" }]);
+      }
+      alert("Goal deleted successfully!");
+    },
+    onError: (error) => {
+      console.error("Failed to delete goal:", error);
+      alert("Failed to delete goal. Please try again.");
+      setDeletingGoalId(null);
+    },
+  });
+
   const handleGoalSelect = (goal: Goal) => {
     setSelectedGoal(goal);
     setProgressNotes("");
@@ -80,6 +102,18 @@ const EditGoals = ({
         : [{ title: "", description: "" }];
 
     setNewHabits(existingHabits);
+  };
+
+  const handleDeleteGoal = (goalId: string, goalDescription: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the goal selection
+    if (
+      window.confirm(
+        `Are you sure you want to delete "${goalDescription}"? This will also delete all associated habits and habit completions. This action cannot be undone.`
+      )
+    ) {
+      setDeletingGoalId(goalId);
+      deleteGoalMutation.mutate(goalId);
+    }
   };
 
   const handleSubmit = async () => {
@@ -191,10 +225,20 @@ const EditGoals = ({
                               ))}
                             </div>
                           </div>
-                          <ArrowRight
-                            size={20}
-                            className="text-gray-400 group-hover:text-blue-500 transition-colors"
-                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => handleDeleteGoal(goal.id, goal.description, e)}
+                              disabled={deletingGoalId === goal.id}
+                              className="text-red-600 hover:text-red-800 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Delete goal"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                            <ArrowRight
+                              size={20}
+                              className="text-gray-400 group-hover:text-blue-500 transition-colors"
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}

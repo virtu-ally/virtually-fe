@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { type Goal, moveGoal } from "../../api/goals";
+import { type Goal, moveGoal, deleteGoal } from "../../api/goals";
 import { getCategories } from "../../api/categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FolderInput } from "lucide-react";
+import { FolderInput, Trash2 } from "lucide-react";
 import { useMonthlyHabitCompletions } from "../../api/hooks/useHabits";
 import Chart from "../../components/Chart";
 
@@ -25,6 +25,7 @@ const Goals = ({
     initialCategoryId
   );
   const [movingGoalId, setMovingGoalId] = useState<string | null>(null);
+  const [deletingGoalId, setDeletingGoalId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const currentDate = new Date();
@@ -94,6 +95,21 @@ const Goals = ({
     },
   });
 
+  const deleteGoalMutation = useMutation({
+    mutationFn: (goalId: string) => deleteGoal(goalId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["habitCompletions"] });
+      setDeletingGoalId(null);
+      alert("Goal deleted successfully!");
+    },
+    onError: (error) => {
+      console.error("Failed to delete goal:", error);
+      alert("Failed to delete goal. Please try again.");
+      setDeletingGoalId(null);
+    },
+  });
+
   const filteredGoals = useMemo(() => {
     if (!selectedCategoryId || !goals) {
       return [];
@@ -114,6 +130,17 @@ const Goals = ({
   const handleMoveGoal = (goalId: string, newCategoryId: string) => {
     setMovingGoalId(goalId);
     moveGoalMutation.mutate({ goalId, categoryId: newCategoryId });
+  };
+
+  const handleDeleteGoal = (goalId: string, goalDescription: string) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete "${goalDescription}"? This will also delete all associated habits and habit completions. This action cannot be undone.`
+      )
+    ) {
+      setDeletingGoalId(goalId);
+      deleteGoalMutation.mutate(goalId);
+    }
   };
 
   const currentMonthStats = useMemo(() => {
@@ -282,48 +309,59 @@ const Goals = ({
                   </div>
                 ) : null}
 
-                {/* Category and move button */}
+                {/* Category and action buttons */}
                 <div className="flex items-center justify-between">
                   {g.category_id && (
                     <span className="text-xs bg-[var(--btn-color)] text-white px-2 py-1 rounded">
                       {getCategoryName(g.category_id)}
                     </span>
                   )}
-                  {/* Move Goal Dropdown */}
-                  <div className="relative group">
-                    <button
-                      className="text-blue-600 hover:text-blue-800 p-1"
-                      title="Move to another category"
-                      disabled={movingGoalId === g.id}
-                    >
-                      <FolderInput size={16} />
-                    </button>
-                    {/* Dropdown menu */}
-                    <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded border border-gray-200 z-10 min-w-[150px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                      <div className="py-1">
-                        <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b">
-                          Move to:
-                        </div>
-                        {categories
-                          ?.filter((cat) => cat.id !== g.category_id)
-                          ?.map((category) => (
-                            <button
-                              key={category.id}
-                              onClick={() => handleMoveGoal(g.id, category.id)}
-                              disabled={movingGoalId === g.id}
-                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {category.name}
-                            </button>
-                          ))}
-                        {categories.filter((cat) => cat.id !== g.category_id)
-                          .length === 0 && (
-                          <div className="px-3 py-2 text-sm text-gray-500">
-                            No other categories
+                  <div className="flex items-center gap-2">
+                    {/* Move Goal Dropdown */}
+                    <div className="relative group">
+                      <button
+                        className="text-blue-600 hover:text-blue-800 p-1"
+                        title="Move to another category"
+                        disabled={movingGoalId === g.id || deletingGoalId === g.id}
+                      >
+                        <FolderInput size={16} />
+                      </button>
+                      {/* Dropdown menu */}
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded border border-gray-200 z-10 min-w-[150px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                        <div className="py-1">
+                          <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b">
+                            Move to:
                           </div>
-                        )}
+                          {categories
+                            ?.filter((cat) => cat.id !== g.category_id)
+                            ?.map((category) => (
+                              <button
+                                key={category.id}
+                                onClick={() => handleMoveGoal(g.id, category.id)}
+                                disabled={movingGoalId === g.id || deletingGoalId === g.id}
+                                className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {category.name}
+                              </button>
+                            ))}
+                          {categories.filter((cat) => cat.id !== g.category_id)
+                            .length === 0 && (
+                            <div className="px-3 py-2 text-sm text-gray-500">
+                              No other categories
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    {/* Delete button */}
+                    <button
+                      onClick={() => handleDeleteGoal(g.id, g.description)}
+                      disabled={deletingGoalId === g.id || movingGoalId === g.id}
+                      className="text-red-600 hover:text-red-800 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Delete goal"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
               </div>

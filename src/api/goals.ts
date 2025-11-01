@@ -84,3 +84,20 @@ export const moveGoal = async (
 
   return res.json();
 };
+
+export const deleteGoal = async (goalId: string): Promise<void> => {
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(`${getBaseUrlForGoals()}/me/goals/${goalId}`, {
+    method: "DELETE",
+    headers: authHeaders,
+    credentials: "include",
+  });
+
+  if (res.status === 404) {
+    throw new Error("Goal not found");
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to delete goal: ${res.statusText}`);
+  }
+};
