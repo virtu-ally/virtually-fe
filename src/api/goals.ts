@@ -31,7 +31,7 @@ export const getCustomerGoals = async (): Promise<Goal[]> => {
   }
 
   const data = await res.json();
-  return data || []; // Handle null response
+  return data || [];
 };
 
 export const getCategorizedGoals = async (
@@ -56,14 +56,7 @@ export const getCategorizedGoals = async (
   }
 
   const data = await res.json();
-  return (data as any[]).map((g) => ({
-    id: g.id ?? g.goal_id ?? crypto.randomUUID(),
-    description: g.description ?? g.goal_description ?? "",
-    habits: g.habits ?? g.finalised_habits ?? [],
-    category_id: g.category_id ?? "",
-    timeframe: g.timeframe,
-    created_at: g.created_at,
-  }));
+  return data || [];
 };
 
 export const moveGoal = async (
@@ -89,13 +82,5 @@ export const moveGoal = async (
     throw new Error(`Failed to move goal: ${res.statusText}`);
   }
 
-  const g = await res.json();
-  return {
-    id: g.id ?? g.goal_id ?? crypto.randomUUID(),
-    description: g.description ?? g.goal_description ?? "",
-    habits: g.habits ?? g.finalised_habits ?? [],
-    category_id: g.category_id ?? "",
-    timeframe: g.timeframe,
-    created_at: g.created_at,
-  };
+  return res.json();
 };

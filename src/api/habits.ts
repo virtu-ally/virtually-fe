@@ -19,7 +19,7 @@ interface AsyncProcessResponse {
 interface HabitSuggestions {
   suggestion_id: string;
   customer_id: string;
-  goal_description: string;
+  description: string;
   habits: string[];
   created_at: string;
 }
@@ -249,7 +249,7 @@ export const createGoal = async ({
     headers: authHeaders,
     credentials: "include",
     body: JSON.stringify({
-      goal_description: description,
+      description: description,
       finalised_habits: habits,
       category_id,
     }),
@@ -259,7 +259,7 @@ export const createGoal = async ({
   const data = await res.json();
   return {
     id: data.id,
-    description: data.goal_description,
+    description: data.description,
     habits: data.habits,
   };
 };

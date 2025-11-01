@@ -210,7 +210,6 @@ export const useCreateNewHabitsForGoal = () => {
       });
       const updatedDescription = `${
         request.originalGoal.description ||
-        request.originalGoal.goal_description ||
         "Goal"
       } (Updated ${currentDate})`;
 
