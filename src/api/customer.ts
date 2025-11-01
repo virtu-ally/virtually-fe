@@ -52,29 +52,31 @@ export const saveCustomerQuiz = async (
 };
 
 export const getCustomerQuiz = async (): Promise<CustomerQuiz | null> => {
-  const authHeaders = await getAuthHeaders();
-  const response = await fetch(`${getBaseUrl()}/me/quiz`, {
-    method: "GET",
-    headers: authHeaders,
-    credentials: "include",
-  });
+  try {
+    const authHeaders = await getAuthHeaders();
+    const response = await fetch(`${getBaseUrl()}/me/quiz`, {
+      method: "GET",
+      headers: authHeaders,
+      credentials: "include",
+    });
 
-  if (response.status === 404) {
-    // Quiz not found - customer hasn't completed it yet
+    if (response.status === 404) {
+      // Quiz not found - customer hasn't completed it yet
+      return null;
+    }
+
+    if (!response.ok) {
+      console.error(
+        "Failed to fetch quiz data, treating as missing",
+        response.status,
+        response.statusText
+      );
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Quiz data request failed, treating as missing", error);
     return null;
   }
-
-  if (response.status === 400) {
-    throw new Error("Invalid customer identifier");
-  }
-
-  if (response.status === 500) {
-    throw new Error("Internal server error");
-  }
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch quiz data: ${response.statusText}`);
-  }
-
-  return response.json();
 };
