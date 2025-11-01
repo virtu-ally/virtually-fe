@@ -68,21 +68,49 @@ const EditGoals = ({
 
   const deleteGoalMutation = useMutation({
     mutationFn: (goalId: string) => deleteGoal(goalId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", customerId] });
-      queryClient.invalidateQueries({ queryKey: ["habitCompletions"] });
-      setDeletingGoalId(null);
-      if (selectedGoal) {
+    onMutate: async (goalId: string) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: ["goals", customerId] });
+
+      // Snapshot the previous value
+      const previousGoals = queryClient.getQueryData<Goal[]>([
+        "goals",
+        customerId,
+      ]);
+
+      // Optimistically update to remove the goal
+      queryClient.setQueryData<Goal[]>(
+        ["goals", customerId],
+        (old) => old?.filter((goal) => goal.id !== goalId) ?? []
+      );
+
+      // Clear selected goal if it's the one being deleted
+      if (selectedGoal?.id === goalId) {
         setSelectedGoal(null);
         setProgressNotes("");
         setNewHabits([{ title: "", description: "" }]);
       }
-      alert("Goal deleted successfully!");
+
+      return { previousGoals };
     },
-    onError: (error) => {
+    onError: (error, goalId, context) => {
+      // Rollback on error
+      if (context?.previousGoals) {
+        queryClient.setQueryData(
+          ["goals", customerId],
+          context.previousGoals
+        );
+      }
       console.error("Failed to delete goal:", error);
       alert("Failed to delete goal. Please try again.");
       setDeletingGoalId(null);
+    },
+    onSuccess: () => {
+      // Refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ["goals", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["habitCompletions"] });
+      setDeletingGoalId(null);
+      alert("Goal deleted successfully!");
     },
   });
 
