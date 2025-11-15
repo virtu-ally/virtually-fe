@@ -38,11 +38,11 @@
 }
 
 [data-theme="blue"] .habit-editor textarea {
-  color: var(--text-color);
+  color: var(--secondary-text-color);
 }
 
 [data-theme="neon"] .habit-editor textarea {
-  color: var(--text-color);
+  color: var(--secondary-text-color);
 }
 
 [data-theme="rainbow"] .habit-editor textarea {
@@ -69,4 +69,12 @@
 .habit-editor .plus:focus:not(:disabled),
 .habit-editor .minus:focus:not(:disabled) {
   transform: perspective(500px) translate3d(0px, 0, 100px);
+}
+
+[data-theme="blue"] .edit-button {
+  color: var(--secondary-text-color);
+}
+
+[data-theme="neon"] .edit-button {
+  color: var(--secondary-text-color);
 }

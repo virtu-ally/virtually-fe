@@ -7,6 +7,7 @@ import {
   Heart,
   LifeBuoy,
   Loader,
+  Plus,
   Sparkles,
 } from "lucide-react";
 import { createGoal, pollForResults, suggestHabits } from "../../api/habits";
@@ -15,6 +16,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import HabitEditor from "../../components/HabitEditor";
 import Quiz from "../Quiz";
 import React from "react";
+import { createCategory } from "../../api/categories";
 import { getCategories } from "../../api/categories";
 import { useCustomer } from "../../context/CustomerContext";
 import { useGetCustomerQuiz } from "../../api/hooks/useCustomerQuiz";
@@ -38,8 +40,18 @@ const Template = ({
   const [tasks, setTasks] = useState<string[]>(["", "", ""]);
   const createGoalMutation = useMutation({ mutationFn: createGoal });
   const createHabitsMutation = useMutation({ mutationFn: suggestHabits });
+  const createCategoryMutation = useMutation({
+    mutationFn: createCategory,
+    onSuccess: () => {
+      categoriesQuery.refetch();
+      setShowCreateCategory(false);
+      setNewCategoryName("");
+    },
+  });
   const [goalFilledIn, setGoalFilledIn] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
+  const [showCreateCategory, setShowCreateCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -49,6 +61,14 @@ const Template = ({
   });
 
   const quizQuery = useGetCustomerQuiz();
+
+  const handleCreateCategory = () => {
+    if (!newCategoryName.trim()) {
+      alert("Please enter a category name");
+      return;
+    }
+    createCategoryMutation.mutate(newCategoryName.trim());
+  };
 
   // Map category names to icons
   const getCategoryIcon = (categoryName: string) => {
@@ -195,6 +215,7 @@ const Template = ({
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {/* Use categoriesQuery.data directly instead of allCategories */}
               {categoriesQuery.data?.map((category) => (
                 <button
                   key={category.id}
@@ -215,6 +236,52 @@ const Template = ({
                   </div>
                 </button>
               ))}
+
+              {/* Create New Category Button */}
+              {!showCreateCategory ? (
+                <button
+                  onClick={() => setShowCreateCategory(true)}
+                  className="category-card group border-dashed border-2 border-[var(--btn-color)] bg-transparent hover:bg-[var(--btn-color)]/10"
+                >
+                  <div className="category-icon-container">
+                    <Plus className="w-8 h-8 text-[var(--btn-color)]" />
+                  </div>
+                  <h3 className="category-title text-[var(--btn-color)]">
+                    Create Custom Category
+                  </h3>
+                </button>
+              ) : (
+                <div className="category-card border-2 border-[var(--accent-color)] bg-[var(--bg-color)]">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Category name..."
+                    className="w-full p-2 mb-3 border-b border-[var(--secondary-color)] focus:outline-none focus:border-[var(--accent-color)] bg-transparent"
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCreateCategory}
+                      disabled={createCategoryMutation.isPending}
+                      className="flex-1 px-3 py-2 bg-[var(--btn-color)] text-white rounded hover:opacity-90 disabled:opacity-50"
+                    >
+                      {createCategoryMutation.isPending
+                        ? "Creating..."
+                        : "Create"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowCreateCategory(false);
+                        setNewCategoryName("");
+                      }}
+                      className="flex-1 px-3 py-2 border border-[var(--btn-color)] text-[var(--btn-color)] rounded hover:bg-[var(--btn-color)]/10"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {shouldShowQuizOption && (
@@ -257,7 +324,7 @@ const Template = ({
       <div className="w-full pt-4 px-4">
         <button
           onClick={() => setSelectedCategory(null)}
-          className="flex items-center gap-2 text-[var(--btn-color)] hover:text-[var(--accent-color)] transition-colors"
+          className="flex items-center gap-2 text-[var(--btn-color)] hover:text-[var(--accent-color)] transition-colors cursor-pointer"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
           Back to categories

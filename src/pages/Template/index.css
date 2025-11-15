@@ -325,8 +325,8 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, var(--btn-color), var(--accent-color));
+  padding: 1rem;
+  background: linear-gradient(200deg, var(--btn-color), var(--accent-color));
   border-radius: 1rem;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -495,10 +495,6 @@
 
   .category-title {
     font-size: 1rem;
-  }
-
-  .quiz-option-card {
-    padding: 1rem;
   }
 
   /* Fix title spacing on mobile */

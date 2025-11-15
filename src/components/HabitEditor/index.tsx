@@ -63,7 +63,7 @@ const HabitEditor = ({
               />
               <button
                 onClick={() => handleTaskSave(index)}
-                className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
+                className="text-[var(--btn-color)] hover:text-[var(--accent-color)] edit-button"
               >
                 Save
               </button>
@@ -73,7 +73,7 @@ const HabitEditor = ({
               <button
                 aria-label="Edit habit"
                 onClick={() => handleTaskEdit(index)}
-                className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
+                className="text-[var(--btn-color)] hover:text-[var(--accent-color)] edit-button cursor-pointer"
                 disabled={disabled}
               >
                 <PencilLine size={16} />
@@ -88,7 +88,7 @@ const HabitEditor = ({
                 <button
                   aria-label="Remove habit"
                   onClick={() => handleRemoveTask(index)}
-                  className="text-[var(--btn-color)] hover:text-[var(--accent-color)]"
+                  className="text-[var(--btn-color)] hover:text-[var(--accent-color)] edit-button"
                   disabled={disabled}
                 >
                   <XIcon className="minus cursor-pointer" />

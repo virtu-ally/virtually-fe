@@ -4,6 +4,7 @@ import { getCategories } from "../../api/categories";
 import { type Goal, deleteGoal } from "../../api/goals";
 import { ArrowRight, Trash2 } from "lucide-react";
 import { useCreateNewHabitsForGoal } from "../../api/hooks/useHabits";
+import "./index.css";
 
 import HabitEditor from "../../components/HabitEditor";
 
@@ -61,11 +62,6 @@ const EditGoals = ({
       .filter((group) => group.goals.length > 0);
   }, [goals, categories]);
 
-  const getCategoryName = (categoryId: string): string => {
-    const category = categories.find((cat) => cat.id === categoryId);
-    return category?.name || "Unknown";
-  };
-
   const deleteGoalMutation = useMutation({
     mutationFn: (goalId: string) => deleteGoal(goalId),
     onMutate: async (goalId: string) => {
@@ -96,10 +92,7 @@ const EditGoals = ({
     onError: (error, goalId, context) => {
       // Rollback on error
       if (context?.previousGoals) {
-        queryClient.setQueryData(
-          ["goals", customerId],
-          context.previousGoals
-        );
+        queryClient.setQueryData(["goals", customerId], context.previousGoals);
       }
       console.error("Failed to delete goal:", error);
       alert("Failed to delete goal. Please try again.");
@@ -132,7 +125,11 @@ const EditGoals = ({
     setNewHabits(existingHabits);
   };
 
-  const handleDeleteGoal = (goalId: string, goalDescription: string, e: React.MouseEvent) => {
+  const handleDeleteGoal = (
+    goalId: string,
+    goalDescription: string,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation(); // Prevent triggering the goal selection
     if (
       window.confirm(
@@ -231,10 +228,7 @@ const EditGoals = ({
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <div
-                              className="font-medium mb-2"
-                              style={{ color: "var(--text-color)" }}
-                            >
+                            <div className="font-medium mb-2 text-[var(--text-color)] goal-description">
                               {goal.description}
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -255,16 +249,18 @@ const EditGoals = ({
                           </div>
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={(e) => handleDeleteGoal(goal.id, goal.description, e)}
+                              onClick={(e) =>
+                                handleDeleteGoal(goal.id, goal.description, e)
+                              }
                               disabled={deletingGoalId === goal.id}
-                              className="text-red-600 hover:text-red-800 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="text-red-600 hover:text-red-800 p-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                               title="Delete goal"
                             >
                               <Trash2 size={18} />
                             </button>
                             <ArrowRight
                               size={20}
-                              className="text-gray-400 group-hover:text-blue-500 transition-colors"
+                              className="group-hover:text-blue-500 transition-colors cursor-pointer"
                             />
                           </div>
                         </div>
@@ -281,8 +277,7 @@ const EditGoals = ({
           <div className="mb-6">
             <button
               onClick={handleBack}
-              className="flex items-center gap-2 text-sm mb-4 hover:underline"
-              style={{ color: "var(--accent-color)" }}
+              className="flex items-center gap-2 text-sm mb-4 hover:underline cursor-pointer"
             >
               ← Back to goals
             </button>
@@ -297,7 +292,9 @@ const EditGoals = ({
             className="mb-6 p-4 rounded-lg"
             style={{ backgroundColor: "white", opacity: 0.8 }}
           >
-            <h3 className="font-medium mb-3">Current Habits</h3>
+            <h3 className="font-medium mb-3 text-[var(--secondary-text-color)]">
+              Current Habits
+            </h3>
             <div className="flex flex-wrap gap-2">
               {selectedGoal.habits?.map((habit) => (
                 <span
@@ -356,7 +353,7 @@ const EditGoals = ({
           <div className="flex justify-between">
             <button
               onClick={handleBack}
-              className="px-4 py-2 border rounded hover:bg-gray-50"
+              className="px-4 py-2 border rounded hover:bg-gray-50 cancel-button"
               style={{ borderColor: "var(--card-border)" }}
             >
               Cancel
@@ -364,8 +361,9 @@ const EditGoals = ({
             <button
               onClick={handleSubmit}
               disabled={createNewHabitsMutation.isPending}
-              className="px-6 py-2 rounded text-white"
-              style={{ backgroundColor: "var(--accent-color)" }}
+              className="px-6 py-2 rounded text-white cursor-pointer 
+              hover:shadow-md hover:translate-y-[-2px] transition-all 
+              submit-button"
             >
               {createNewHabitsMutation.isPending
                 ? "Creating..."

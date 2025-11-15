@@ -118,10 +118,7 @@ const Goals = ({
     onError: (error, goalId, context) => {
       // Rollback on error
       if (context?.previousGoals) {
-        queryClient.setQueryData(
-          ["goals", customerId],
-          context.previousGoals
-        );
+        queryClient.setQueryData(["goals", customerId], context.previousGoals);
       }
       console.error("Failed to delete goal:", error);
       alert("Failed to delete goal. Please try again.");
@@ -241,10 +238,6 @@ const Goals = ({
     <div className="progress-container px-4 py-6 text-[var(--text-color)]">
       <h2 className="mb-4">Goal Overview</h2>
 
-      {!customerId && (
-        <div className="mb-4 text-sm opacity-80">No customer selected.</div>
-      )}
-
       {/* Category Filter Tabs */}
       <div className="mb-6 overflow-x-auto -mx-4 px-4">
         <div className="flex gap-2 pb-2">
@@ -262,9 +255,9 @@ const Goals = ({
             <button
               key={category.id}
               onClick={() => setSelectedCategoryId(category.id)}
-              className={`px-4 py-2 rounded whitespace-nowrap ${
+              className={`px-4 py-2 rounded whitespace-nowrap goal-category-btn ${
                 selectedCategoryId === category.id
-                  ? "bg-[var(--btn-color)] text-white"
+                  ? "selected bg-[var(--btn-color)] text-white"
                   : "bg-white/70 text-[var(--secondary-text-color)] hover:bg-white/90"
               }`}
             >
@@ -336,19 +329,16 @@ const Goals = ({
                 ) : null}
 
                 {/* Category and action buttons */}
-                <div className="flex items-center justify-between">
-                  {g.category_id && (
-                    <span className="text-xs bg-[var(--btn-color)] text-white px-2 py-1 rounded">
-                      {getCategoryName(g.category_id)}
-                    </span>
-                  )}
+                <div className="flex items-right justify-end">
                   <div className="flex items-center gap-2">
                     {/* Move Goal Dropdown */}
                     <div className="relative group">
                       <button
-                        className="text-blue-600 hover:text-blue-800 p-1"
+                        className="text-blue-600 hover:text-blue-800 p-1 cursor-pointer"
                         title="Move to another category"
-                        disabled={movingGoalId === g.id || deletingGoalId === g.id}
+                        disabled={
+                          movingGoalId === g.id || deletingGoalId === g.id
+                        }
                       >
                         <FolderInput size={16} />
                       </button>
@@ -363,8 +353,13 @@ const Goals = ({
                             ?.map((category) => (
                               <button
                                 key={category.id}
-                                onClick={() => handleMoveGoal(g.id, category.id)}
-                                disabled={movingGoalId === g.id || deletingGoalId === g.id}
+                                onClick={() =>
+                                  handleMoveGoal(g.id, category.id)
+                                }
+                                disabled={
+                                  movingGoalId === g.id ||
+                                  deletingGoalId === g.id
+                                }
                                 className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 {category.name}
@@ -382,8 +377,10 @@ const Goals = ({
                     {/* Delete button */}
                     <button
                       onClick={() => handleDeleteGoal(g.id, g.description)}
-                      disabled={deletingGoalId === g.id || movingGoalId === g.id}
-                      className="text-red-600 hover:text-red-800 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={
+                        deletingGoalId === g.id || movingGoalId === g.id
+                      }
+                      className="text-red-600 hover:text-red-800 p-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       title="Delete goal"
                     >
                       <Trash2 size={16} />

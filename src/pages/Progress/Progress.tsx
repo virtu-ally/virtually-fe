@@ -191,10 +191,6 @@ const Progress = ({
     <div className="progress-container px-4 py-6 text-[var(--text-color)]">
       <h2 className="mb-4">Progress Tracker</h2>
 
-      {!customerId && (
-        <div className="mb-4 text-sm opacity-80">No customer selected.</div>
-      )}
-
       <div className="mb-6">
         {goalsLoading && <div>Loading goals...</div>}
         {completionsLoading && <div>Loading habit completions...</div>}
@@ -228,7 +224,7 @@ const Progress = ({
         <div className="bg-white/80 text-[var(--secondary-text-color)] rounded p-4">
           <div className="flex items-center justify-between mb-3">
             <button
-              className="px-2 py-1 border rounded"
+              className="px-2 py-1 border rounded cursor-pointer"
               onClick={() =>
                 setCurrentMonth(
                   (d) => new Date(d.getFullYear(), d.getMonth() - 1, 1)
@@ -244,7 +240,7 @@ const Progress = ({
               })}
             </div>
             <button
-              className="px-2 py-1 border rounded"
+              className="px-2 py-1 border rounded cursor-pointer"
               onClick={() =>
                 setCurrentMonth(
                   (d) => new Date(d.getFullYear(), d.getMonth() + 1, 1)
