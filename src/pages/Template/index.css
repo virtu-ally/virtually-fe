@@ -393,7 +393,6 @@
 }
 
 [data-theme="rainbow"] .category-card:hover {
-  background: var(--inverse-text-color);
   border-color: var(--accent-color);
   box-shadow: 0 8px 25px var(--card-shadow);
 }

@@ -63,6 +63,9 @@
 .menu-content button:hover {
   background-color: var(--secondary-color);
 }
+[data-theme="rainbow"] .menu-content button:hover {
+  background-color: var(--primary-color);
+}
 
 @keyframes slideInFromRight {
   from {
