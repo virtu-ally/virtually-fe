@@ -329,7 +329,6 @@ const EditGoals = ({
               style={{
                 backgroundColor: "var(--card-bg)",
                 borderColor: "var(--card-border)",
-                color: "var(--text-color)",
               }}
             />
           </div>
