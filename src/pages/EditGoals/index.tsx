@@ -312,13 +312,18 @@ const EditGoals = ({
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="progress-notes"
+              className="block text-sm font-medium mb-2"
+            >
               Progress Notes *
             </label>
             <textarea
+              id="progress-notes"
+              name="progress-notes"
               value={progressNotes}
               onChange={(e) => setProgressNotes(e.target.value)}
-              className="w-full p-3 border rounded-lg resize-none"
+              className="w-full p-3 border rounded-lg resize-none text-black"
               rows={4}
               placeholder="How have your current habits been working? What have you learned? What would you like to improve or change?"
               style={{
