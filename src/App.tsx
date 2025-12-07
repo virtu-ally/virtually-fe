@@ -5,7 +5,6 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/FirebaseAuthContext";
 import CategoryManagement from "./pages/CategoryManagement";
 import { CustomerProvider } from "./context/CustomerContext";
-import EditGoals from "./pages/EditGoals";
 import Goal from "./pages/Goal";
 import Header from "./components/Header";
 import Home from "./pages/Home";
@@ -113,6 +112,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
         </ThemeProvider>
